@@ -1,0 +1,5 @@
+CXX    = gcc
+CFLAGS = -g -Wall -pedantic
+
+: foreach *.c |> $(CXX) $(CFLAGS) -c %f -o %o |> %B.o
+: *.o |> $(CXX) %f -o %o |> nebula
