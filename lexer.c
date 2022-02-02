@@ -66,20 +66,36 @@ void lex_source(TokenArray* token_array, const char* source) {
     s = source;
 
     // While it is not the end
-    // while (!is_end()) {
-    //     if (is_whitespace()) {
-    //         start++;
-    //         current++;
-    //     }
-    // }
+    while (!is_end()) {
+        if (is_whitespace()) { // Will also handle incrementing new lines
+            start++;
+            current++;
+        }
 
-    if (is_digit()) {
-        printf("IS_DIGIT\n");
-    }
-    if (is_alpha()) {
-        printf("IS_ALPHA\n");
+        if (is_digit()) {
+            current = start;
+            while (is_digit()) {
+                current++;
+            }
+            Token token_digit = make_token(TOKEN_NUMBER);
+            push_token_array(token_array, token_digit);
+            start = current;
+        }
+
+        if (s[current] == '+') {
+            start++; current++;
+            Token token_plus = make_token(TOKEN_PLUS);
+            push_token_array(token_array, token_plus);
+        }
+
+        if (s[current] == ';') {
+            start++; current++;
+            Token token_semicolon = make_token(TOKEN_SEMICOLON);
+            push_token_array(token_array, token_semicolon);
+        }
     }
 
+    // Test purposes
     // Token token_a = make_token(TOKEN_NUMBER);
     // Token token_b = make_token(TOKEN_EQUAL_EQUAL);
     // Token token_c = make_token(TOKEN_NUMBER);
@@ -163,10 +179,16 @@ void disassemble_token_array(TokenArray* token_array) {
                 printf("[%-20s]: %s\n", "TOKEN_ERROR", "ERROR"); break;
             case TOKEN_EOF:
                 printf("[%-20s]: %s\n", "TOKEN_EOF", "EOF"); break;
-            case TOKEN_NUMBER:
+            case TOKEN_NUMBER: {
                 // TODO : use strtod to conver to double
                 // printf("[%-20s]: %f\n", "TOKEN_NUMBER", strtod();
-                printf("[%-20s]: %f\n", "TOKEN_NUMBER", 1.0); break;
+                const char* start = token_array->tokens[i].start;
+                // Cast to char*, otherwise it will be regarded as a const char*
+                // strtod expects a char* for it's second parameter.
+                char* end = (char*)token_array->tokens[i].start + token_array->tokens[i].length;
+                double number = strtod(start, &end);
+                printf("[%-20s]: %f\n", "TOKEN_NUMBER", number); break;
+            }
             case TOKEN_EQUAL:
                 printf("[%-20s]: %s\n", "TOKEN_EQUAL", "="); break;
         }
