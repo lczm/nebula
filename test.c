@@ -36,9 +36,7 @@ static void test_single_character_lexer() {
 
     TokenArray token_array;
     init_token_array(&token_array);
-
     char source[] = "(){},.-+;/*";
-    lex_source(&token_array, source);
     int types[] = {
         TOKEN_LEFT_PAREN, TOKEN_RIGHT_PAREN,
         TOKEN_LEFT_BRACE, TOKEN_RIGHT_BRACE,
@@ -46,6 +44,7 @@ static void test_single_character_lexer() {
         TOKEN_PLUS, TOKEN_SEMICOLON, TOKEN_SLASH,
         TOKEN_STAR 
     };
+    lex_source(&token_array, source);
 
     // assertions
     for (int i = 0; i < token_array.count; i++) {

@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <stdbool.h>
 
 #include "lexer.h"
@@ -80,6 +81,14 @@ void lex_source(TokenArray* token_array, const char* source) {
             Token token_digit = make_token(TOKEN_NUMBER);
             push_token_array(token_array, token_digit);
             start = current;
+        } else if (is_alpha()) {
+            current = start;
+            while (is_alpha()) {
+                current++;
+            }
+            Token token_identifier = make_token(TOKEN_IDENTIFIER);
+            push_token_array(token_array, token_identifier);
+            start = current;
         }
 
         // Lex all the single character tokens first
@@ -140,15 +149,6 @@ void lex_source(TokenArray* token_array, const char* source) {
             start = current;
         }
     }
-
-    // Test purposes
-    // Token token_a = make_token(TOKEN_NUMBER);
-    // Token token_b = make_token(TOKEN_EQUAL_EQUAL);
-    // Token token_c = make_token(TOKEN_NUMBER);
-
-    // push_token_array(token_array, token_a);
-    // push_token_array(token_array, token_b);
-    // push_token_array(token_array, token_c);
 }
 
 void disassemble_token_array(TokenArray* token_array) {
@@ -191,8 +191,11 @@ void disassemble_token_array(TokenArray* token_array) {
                 printf("[%-20s]: %s\n", "TOKEN_LESS", "<"); break;
             case TOKEN_LESS_EQUAL:
                 printf("[%-20s]: %s\n", "TOKEN_LESS_EQUAL", "<="); break;
-            case TOKEN_IDENTIFIER:
-                printf("[%-20s]: %s\n", "TOKEN_IDENTIFIER", "IDENTIFIER-PLACEHOLDER"); break;
+            case TOKEN_IDENTIFIER: {
+                char s[token_array->tokens[i].length];
+                strncpy(s, token_array->tokens[i].start, token_array->tokens[i].length);
+                printf("[%-20s]: %s\n", "TOKEN_IDENTIFIER", s); break;
+            }
             case TOKEN_STRING:
                 printf("[%-20s]: %s\n", "TOKEN_STRING", "STRING-PLACEHOLDER"); break;
             case TOKEN_AND:
