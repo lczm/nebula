@@ -21,15 +21,39 @@ static void reset_count() {
     fail_count = 0;
 }
 
-static void test_1() {
-    printf("Test-pass\n");
-    pass();
+#define PASS() do { \
+    pass();         \
+    return;         \
+} while (0);        \
+
+#define FAIL() do { \
+    fail();         \
+    return;         \
+} while (0);        \
+
+static void test_single_character_lexer() {
+    printf("test-single_character_lexer()\n");
+
+    TokenArray token_array;
+    init_token_array(&token_array);
+
+    char source[] = ".;";
+    lex_source(&token_array, source);
+
+    // assertions
+    for (int i = 0; i < token_array.count; i++)
+        if (token_array.tokens[i].length != 1) FAIL();
+
+    if (token_array.tokens[0].type != TOKEN_DOT) FAIL();
+    if (token_array.tokens[1].type != TOKEN_SEMICOLON) FAIL();
+
+    PASS();
 }
 
 int main(int argc, const char* argv[]) {
     printf("[---Starting tests---]\n");
 
-    test_1();
+    test_single_character_lexer();
 
     printf("[---Tests results---]\n");
     printf("Pass : %d\n", pass_count);

@@ -82,16 +82,62 @@ void lex_source(TokenArray* token_array, const char* source) {
             start = current;
         }
 
-        if (s[current] == '+') {
-            start++; current++;
+        // Lex all the single character tokens first
+        if (s[current] == '(') {
+            current++;
+            Token token_left_paren = make_token(TOKEN_LEFT_PAREN);
+            push_token_array(token_array, token_left_paren);
+            start = current;
+        } else if (s[current] == ')') {
+            current++;
+            Token token_right_paren = make_token(TOKEN_RIGHT_PAREN);
+            push_token_array(token_array, token_right_paren);
+            start = current;
+        } else if (s[current] == '{') {
+            current++;
+            Token token_left_paren = make_token(TOKEN_LEFT_BRACE);
+            push_token_array(token_array, token_left_paren);
+            start = current;
+        } else if (s[current] == '}') {
+            current++;
+            Token token_right_paren = make_token(TOKEN_RIGHT_BRACE);
+            push_token_array(token_array, token_right_paren);
+            start = current;
+        } else if (s[current] == ',') {
+            current++;
+            Token token_comma = make_token(TOKEN_COMMA);
+            push_token_array(token_array, token_comma);
+            start = current;
+        } else if (s[current] == '.') {
+            current++;
+            Token token_dot = make_token(TOKEN_DOT);
+            push_token_array(token_array, token_dot);
+            start = current;
+        } else if (s[current] == '-') {
+            current++;
+            Token token_minus = make_token(TOKEN_MINUS);
+            push_token_array(token_array, token_minus);
+            start = current;
+        } else if (s[current] == '+') {
+            current++;
             Token token_plus = make_token(TOKEN_PLUS);
             push_token_array(token_array, token_plus);
-        }
-
-        if (s[current] == ';') {
-            start++; current++;
+            start = current;
+        } else if (s[current] == ';') {
+            current++;
             Token token_semicolon = make_token(TOKEN_SEMICOLON);
             push_token_array(token_array, token_semicolon);
+            start = current;
+        } else if (s[current] == '/') {
+            current++;
+            Token token_slash = make_token(TOKEN_SLASH);
+            push_token_array(token_array, token_slash);
+            start = current;
+        } else if (s[current] == '*') {
+            current++;
+            Token token_star = make_token(TOKEN_STAR);
+            push_token_array(token_array, token_star);
+            start = current;
         }
     }
 
