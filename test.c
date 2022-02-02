@@ -37,15 +37,21 @@ static void test_single_character_lexer() {
     TokenArray token_array;
     init_token_array(&token_array);
 
-    char source[] = ".;";
+    char source[] = "(){},.-+;/*";
     lex_source(&token_array, source);
+    int types[] = {
+        TOKEN_LEFT_PAREN, TOKEN_RIGHT_PAREN,
+        TOKEN_LEFT_BRACE, TOKEN_RIGHT_BRACE,
+        TOKEN_COMMA, TOKEN_DOT, TOKEN_MINUS,
+        TOKEN_PLUS, TOKEN_SEMICOLON, TOKEN_SLASH,
+        TOKEN_STAR 
+    };
 
     // assertions
-    for (int i = 0; i < token_array.count; i++)
+    for (int i = 0; i < token_array.count; i++) {
         if (token_array.tokens[i].length != 1) FAIL();
-
-    if (token_array.tokens[0].type != TOKEN_DOT) FAIL();
-    if (token_array.tokens[1].type != TOKEN_SEMICOLON) FAIL();
+        if (token_array.tokens[i].type != types[i]) FAIL();
+    }
 
     PASS();
 }
