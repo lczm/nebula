@@ -60,7 +60,7 @@ void disassemble_individual_ast(Ast* ast) {
         }
         case AST_BINARY: {
             BinaryExpr* binary_expr = (BinaryExpr*)ast->as;
-            printf("BINARY_EXPR\n");
+            printf("[%-20s]\n", "BINARY_EXPR");
             printf("[%-10s]: ", "Left:");
             disassemble_individual_ast(binary_expr->left_expr);
             printf("[%-10s]: ", "Right:");
@@ -76,6 +76,6 @@ void disassemble_individual_ast(Ast* ast) {
 }
 
 void disassemble_ast(Ast* ast) {
-    printf("---%s---\n", "Ast Disassembly");
+    printf("-----%s-----\n", "Ast Disassembly");
     disassemble_individual_ast(ast);
 }

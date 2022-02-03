@@ -31,3 +31,49 @@ void free_token_array(TokenArray* arr) {
     arr->capacity = 0;
     free(arr->tokens);
 }
+
+void init_op_array(OpArray* arr) {
+    arr->count = 0;
+    arr->capacity = 1;
+    arr->ops = ALLOCATE(OpCode, 1);
+}
+
+void push_op_array(OpArray* arr, OpCode op) {
+    if (arr->capacity < arr->count + 1) {
+        int new_capacity = arr->capacity * 2;
+        arr->ops = (OpCode*)realloc(
+                arr->ops, sizeof(OpCode) * new_capacity);
+        arr->capacity = new_capacity;
+    }
+    arr->ops[arr->count] = op;
+    arr->count++;
+}
+
+void free_op_array(OpArray* arr) {
+    arr->count = 0;
+    arr->capacity = 0;
+    free(arr->ops);
+}
+
+void init_value_array(ValueArray* arr) {
+    arr->count = 0;
+    arr->capacity = 1;
+    arr->values = ALLOCATE(Value, 1);
+}
+
+void push_value_array(ValueArray* arr, Value value) {
+    if (arr->capacity < arr->count + 1) {
+        int new_capacity = arr->capacity * 2;
+        arr->values = (Value*)realloc(
+                arr->values, sizeof(Value) * new_capacity);
+        arr->capacity = new_capacity;
+    }
+    arr->values[arr->count] = value;
+    arr->count++;
+}
+
+void free_value_array(ValueArray* arr) {
+    arr->count = 0;
+    arr->capacity = 0;
+    free(arr->values);
+}

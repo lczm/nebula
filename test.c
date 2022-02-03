@@ -56,11 +56,11 @@ static void test_single_character_lexer() {
 }
 
 int main(int argc, const char* argv[]) {
-    printf("[---Starting tests---]\n");
+    printf("[-----Starting tests-----]\n");
 
     test_single_character_lexer();
 
-    printf("[---Tests results---]\n");
+    printf("[-----Tests results-----]\n");
     printf("Pass : %d\n", pass_count);
     printf("Fail : %d\n", fail_count);
     return 0;

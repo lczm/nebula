@@ -5,6 +5,7 @@
 #include "array.h"
 #include "lexer.h"
 #include "parser.h"
+#include "codegen.h"
 
 static void start_repl() {
     printf("Nebula\n");
@@ -57,15 +58,21 @@ static void run_file(const char* path) {
     char* source = read_file(path);
     TokenArray token_array;
     init_token_array(&token_array);
-
     lex_source(&token_array, source);
     // TODO: Hide this behind a debug flag
     disassemble_token_array(&token_array);
 
     Ast* ast = parse_tokens(&token_array);
+    // TODO: Hide this behind a debug flag
     disassemble_ast(ast);
 
+    OpArray op_array; ValueArray value_array;
+    init_op_array(&op_array); init_value_array(&value_array);
+    codegen(&op_array, &value_array, ast);
+    disassemble_opcode_values(&op_array, &value_array);
+
     free(source);
+    free_op_array(&op_array);
     free_token_array(&token_array);
 }
 

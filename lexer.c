@@ -152,7 +152,7 @@ void lex_source(TokenArray* token_array, const char* source) {
 }
 
 void disassemble_token_array(TokenArray* token_array) {
-    printf("---%s---\n", "Token Disassembly");
+    printf("-----%s-----\n", "Token Disassembly");
     for (int i = 0; i < token_array->count; i++) {
         switch (token_array->tokens[i].type) {
             case TOKEN_LEFT_PAREN: 
