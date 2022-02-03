@@ -1,8 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "ast.h"
 #include "array.h"
 #include "lexer.h"
+#include "parser.h"
 
 static void start_repl() {
     printf("Nebula\n");
@@ -57,7 +59,11 @@ static void run_file(const char* path) {
     init_token_array(&token_array);
 
     lex_source(&token_array, source);
+    // TODO: Hide this behind a debug flag
     disassemble_token_array(&token_array);
+
+    Ast* ast = parse_tokens(&token_array);
+    disassemble_ast(ast);
 
     free(source);
     free_token_array(&token_array);

@@ -1,4 +1,4 @@
 all:
 	tup
 clean:
-	rm *.o && rm nebula
+	rm *.o && rm nebula test

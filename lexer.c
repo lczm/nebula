@@ -192,8 +192,10 @@ void disassemble_token_array(TokenArray* token_array) {
             case TOKEN_LESS_EQUAL:
                 printf("[%-20s]: %s\n", "TOKEN_LESS_EQUAL", "<="); break;
             case TOKEN_IDENTIFIER: {
-                char s[token_array->tokens[i].length];
+                char s[token_array->tokens[i].length + 1];
                 strncpy(s, token_array->tokens[i].start, token_array->tokens[i].length);
+                // Delimit it with c_str end char
+                s[token_array->tokens[i].length] = '\0';
                 printf("[%-20s]: %s\n", "TOKEN_IDENTIFIER", s); break;
             }
             case TOKEN_STRING:
