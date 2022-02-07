@@ -6,6 +6,7 @@
 #include "lexer.h"
 #include "parser.h"
 #include "codegen.h"
+#include "vm.h"
 
 static void start_repl() {
     printf("Nebula\n");
@@ -71,9 +72,14 @@ static void run_file(const char* path) {
     codegen(&op_array, &value_array, ast);
     disassemble_opcode_values(&op_array, &value_array);
 
-    free(source);
+    Vm vm;
+    init_vm(&vm);
+    run(&vm, &op_array, &value_array);
+
+    free_vm(&vm);
     free_op_array(&op_array);
     free_token_array(&token_array);
+    free(source);
 }
 
 int main(int argc, const char* argv[]) {
