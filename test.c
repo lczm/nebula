@@ -213,28 +213,56 @@ static void test_single_character_lexer() {
 
     TokenArray token_array;
     init_token_array(&token_array);
-    char source[] = "(){},.-+;/*";
+    // space out the ones that can have double character tokens
+    char source[] = "(){},.-+;/* ! = < >";
     int types[] = {
         TOKEN_LEFT_PAREN, TOKEN_RIGHT_PAREN,
         TOKEN_LEFT_BRACE, TOKEN_RIGHT_BRACE,
         TOKEN_COMMA, TOKEN_DOT, TOKEN_MINUS,
         TOKEN_PLUS, TOKEN_SEMICOLON, TOKEN_SLASH,
-        TOKEN_STAR 
+        TOKEN_STAR, TOKEN_BANG, TOKEN_EQUAL,
+        TOKEN_LESS, TOKEN_GREATER,
     };
     lex_source(&token_array, source);
 
     // assertions
     for (int i = 0; i < token_array.count; i++) {
-        if (token_array.tokens[i].length != 1) FAIL();
-        if (token_array.tokens[i].type != types[i]) FAIL();
+        if (token_array.tokens[i].length != 1) 
+            FAIL();
+        if (token_array.tokens[i].type != types[i]) 
+            FAIL();
     }
 
     free_token_array(&token_array);
     PASS();
 }
 
-static void test_multiple_character_lexer() {
-    printf("test_multiple_character_lexer()\n");
+static void test_double_character_lexer() {
+    printf("test_double_character_lexer()\n");
+
+    TokenArray token_array_length_two;
+    init_token_array(&token_array_length_two);
+
+    char source[] = "!= == >= <=";
+    int length_two_types[] = {
+        TOKEN_BANG_EQUAL, TOKEN_EQUAL_EQUAL,
+        TOKEN_GREATER_EQUAL, TOKEN_LESS_EQUAL,
+    };
+    lex_source(&token_array_length_two, source);
+
+    for (int i = 0; i < token_array_length_two.count; i++) {
+        if (token_array_length_two.tokens[i].length != 2) 
+            FAIL();
+        if (token_array_length_two.tokens[i].type != length_two_types[i])
+            FAIL();
+    }
+
+    free_token_array(&token_array_length_two);
+    PASS();
+}
+
+static void test_keyword_character_lexer() {
+    printf("test_keyword_character_lexer()\n");
     PASS();
 }
 
@@ -278,7 +306,8 @@ int main(int argc, const char* argv[]) {
     test_value_array();
     // lexer
     test_single_character_lexer();
-    test_multiple_character_lexer();
+    test_double_character_lexer();
+    test_keyword_character_lexer();
     // parser, currently only can test for binary expressions
     // add more in the future
     test_parse_binary_expressions();

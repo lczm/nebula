@@ -148,6 +148,58 @@ void lex_source(TokenArray* token_array, const char* source) {
             push_token_array(token_array, token_star);
             start = current;
         }
+
+        // Lex the double character tokens
+        if (s[current] == '!') {
+            // Can have a function to check if current + 1 is out of bounds
+            if (s[current + 1] == '=') {
+                current += 2;
+                Token token_bang_equal = make_token(TOKEN_BANG_EQUAL);
+                push_token_array(token_array, token_bang_equal);
+                start = current;
+            } else {
+                current++;
+                Token token_bang = make_token(TOKEN_BANG);
+                push_token_array(token_array, token_bang);
+                start = current;
+            }
+        } else if (s[current] == '=') {
+            if (s[current + 1] == '=') {
+                current += 2;
+                Token token_equal_equal = make_token(TOKEN_EQUAL_EQUAL);
+                push_token_array(token_array, token_equal_equal);
+                start = current;
+            } else {
+                current++;
+                Token token_equal = make_token(TOKEN_EQUAL);
+                push_token_array(token_array, token_equal);
+                start = current;
+            }
+        } else if (s[current] == '>') {
+            if (s[current + 1] == '=') {
+                current += 2;
+                Token token_greater_equal = make_token(TOKEN_GREATER_EQUAL);
+                push_token_array(token_array, token_greater_equal);
+                start = current;
+            } else {
+                current++;
+                Token token_greater = make_token(TOKEN_GREATER);
+                push_token_array(token_array, token_greater);
+                start = current;
+            }
+        } else if (s[current] == '<') {
+            if (s[current + 1] == '=') {
+                current += 2;
+                Token token_less_equal = make_token(TOKEN_LESS_EQUAL);
+                push_token_array(token_array, token_less_equal);
+                start = current;
+            } else {
+                current++;
+                Token token_less = make_token(TOKEN_LESS);
+                push_token_array(token_array, token_less);
+                start = current;
+            }
+        }
     }
 }
 
