@@ -36,11 +36,6 @@ static Token get_current() {
     return token_array->tokens[index];
 }
 
-static Token get_current_and_move() {
-    index++; // increment and return the decreased one
-    return token_array->tokens[index--];
-}
-
 static Token get_previous() {
     return token_array->tokens[index--];
 }
@@ -112,6 +107,16 @@ static Ast* addition() {
 
     if (match(TOKEN_PLUS)) {
         Token operator = get_current(); // operator
+        move();
+        Ast* right = primary(); // number_expr
+        BinaryExpr* binary_expr = make_binary_expr(ast, right, operator);
+        // Create ast wrapper
+        Ast* binary_ast = make_ast();
+        binary_ast->type = AST_BINARY;
+        binary_ast->as = binary_expr;
+        return binary_ast;
+    } else if (match(TOKEN_MINUS)) {
+        Token operator = get_current();
         move();
         Ast* right = primary(); // number_expr
         BinaryExpr* binary_expr = make_binary_expr(ast, right, operator);

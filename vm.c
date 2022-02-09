@@ -69,18 +69,29 @@ void run(Vm* vm, OpArray* op_arr, ValueArray* value_arr) {
         vm->ip++;
         switch (instruction) {
             case OP_ADD: {
-                // pop them in the reverse order, as it got 
-                // pushed onto the stack in reverse order as well
+                // TODO : This can be optimized, does not need so many local variables
                 Value value1 = pop();
                 Value value2 = pop();
                 double number1 = AS_NUMBER(value1);
                 double number2 = AS_NUMBER(value2);
-                double number3 = number1 + number2;
+                // Note that it is 2 + 1, not 1 + 2 as it is poped in
+                // the reverse order from when it is pushed in
+                double number3 = number2 + number1;
                 push(NUMBER_VAL(number3));
                 break;
             }
-            case OP_SUBTRACT:
+            case OP_SUBTRACT: {
+                // TODO : This can be optimized, does not need so many local variables
+                Value value1 = pop();
+                Value value2 = pop();
+                double number1 = AS_NUMBER(value1);
+                double number2 = AS_NUMBER(value2);
+                // Note that it is 2 + 1, not 1 + 2 as it is poped in
+                // the reverse order from when it is pushed in
+                double number3 = number2 - number1;
+                push(NUMBER_VAL(number3));
                 break;
+            }
             case OP_CONSTANT: {
                 OpCode constant_index = op_array->ops[vm->ip];
                 vm->ip++;
