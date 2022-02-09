@@ -233,8 +233,37 @@ static void test_single_character_lexer() {
     PASS();
 }
 
+static void test_multiple_character_lexer() {
+    printf("test_multiple_character_lexer()\n");
+    PASS();
+}
+
+static void test_parse_binary_expressions() {
+    printf("test_parse_binary_expressions()\n");
+    PASS();
+}
+
+static void test_codegen_numbers() {
+    printf("test_codegen_numbers()\n");
+    PASS();
+}
+
+static void test_codegen_binary_numbers() {
+    printf("test_codegen_binary_numbers()\n");
+    PASS();
+}
+
+static void test_vm_stack() {
+    printf("test_vm_stack()\n");
+    PASS();
+}
+
+static void test_vm_eval_binary() {
+    printf("test_vm_eval_binary()\n");
+    PASS();
+}
+
 int main(int argc, const char* argv[]) {
-    // Time start
     clock_t start = clock();
 
     printf("[-----Starting tests-----]\n");
@@ -249,11 +278,22 @@ int main(int argc, const char* argv[]) {
     test_value_array();
     // lexer
     test_single_character_lexer();
+    test_multiple_character_lexer();
+    // parser, currently only can test for binary expressions
+    // add more in the future
+    test_parse_binary_expressions();
+    // codegen to ast tests
+    test_codegen_numbers();
+    test_codegen_binary_numbers();
+    // vm tests
+    test_vm_stack();
+    test_vm_eval_binary();
 
     printf("[-----Tests results-----]\n");
     printf("Pass : %d\n", pass_count);
     printf("Fail : %d\n", fail_count);
 
+    // Time taken
     clock_t end = clock();
     double time_taken = ((double)end - start) / CLOCKS_PER_SEC;
     printf("Time taken : %f seconds\n", time_taken);
