@@ -83,27 +83,37 @@ static Ast* expression_statement() {
 }
 
 static Ast* expression() {
-    Ast* ast = addition();
+    Ast* ast = assignment();
     return ast;
 }
 
-// static Ast* assignment() {
-// }
+static Ast* assignment() {
+    Ast* ast = and_();
+    return ast;
+}
  
-// static Ast* and_() {
-// }
+static Ast* and_() {
+    Ast* ast = or_();
+    return ast;
+}
  
-// static Ast* or_() {
-// }
+static Ast* or_() {
+    Ast* ast = equality();
+    return ast;
+}
  
-// static Ast* equality() {
-// }
+static Ast* equality() {
+    Ast* ast = comparison();
+    return ast;
+}
  
-// static Ast* comparison() {
-// }
+static Ast* comparison() {
+    Ast* ast = addition();
+    return ast;
+}
  
 static Ast* addition() {
-    Ast* ast = primary(); // number_expr
+    Ast* ast = multiplication(); // number_expr
 
     if (match(TOKEN_PLUS)) {
         Token operator = get_current(); // operator
@@ -130,14 +140,20 @@ static Ast* addition() {
     return ast;
 }
  
-// static Ast* multiplication() {
-// }
+static Ast* multiplication() {
+    Ast* ast = unary();
+    return ast;
+}
  
-// static Ast* unary() {
-// }
+static Ast* unary() {
+    Ast* ast = call();
+    return ast;
+}
  
-// static Ast* call() {
-// }
+static Ast* call() {
+    Ast* ast = primary();
+    return ast;
+}
  
 static Ast* primary() {
     Ast* ast = make_ast();
