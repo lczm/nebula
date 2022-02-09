@@ -4,6 +4,7 @@
 
 typedef struct {
     int ip;
+    int stack_top;
     ValueArray vm_stack;
 } Vm;
 

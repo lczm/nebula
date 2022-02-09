@@ -8,26 +8,54 @@ static ValueArray* value_array;
 void init_vm(Vm* v) {
     vm = v;
     v->ip = 0;
+    v->stack_top = 0;
     init_value_array(&v->vm_stack);
 }
 
 void free_vm(Vm* v) {
     v->ip = 0;
+    v->stack_top = 0;
     free_value_array(&v->vm_stack);
 }
 
 static void push(Value value) {
-    push_value_array(&vm->vm_stack, value);
+    // If there is still space
+    if (vm->vm_stack.capacity == 1) {
+        push_value_array(&vm->vm_stack, value);
+    } else if (vm->stack_top < vm->vm_stack.capacity) {
+        vm->vm_stack.values[vm->stack_top] = value;
+    } else {
+        printf("push_value_array\n");
+        push_value_array(&vm->vm_stack, value);
+    }
+    vm->stack_top++;
 }
 
 static Value pop() {
+    // Decrement stack_top 
+    vm->stack_top--;
     // TODO: Debug flag for this to check if its in range
-    return vm->vm_stack.values[vm->vm_stack.count - 1];
+    Value value = vm->vm_stack.values[vm->stack_top];
+    return value;
 }
 
-static Value pop_peek(int index) {
-    // TODO: Debug flag for this to check if its in range
-    return vm->vm_stack.values[vm->vm_stack.count - 1 - index];
+static Value peek(int index) {
+    Value value = vm->vm_stack.values[vm->vm_stack.count - 1 - index];
+    return value;
+}
+
+static void debug_vm_stack_top() {
+    printf("vm->stack_top: %d\n", vm->stack_top);
+    for (int i = 0; i < vm->stack_top + 1; i++) {
+        printf("%f\n", AS_NUMBER(vm->vm_stack.values[i]));
+    }
+}
+
+static void debug_vm_stack() {
+    printf("vm->vm_stack.count: %d\n", vm->vm_stack.count);
+    for (int i = 0; i < vm->vm_stack.count; i++) {
+        printf("%f\n", AS_NUMBER(vm->vm_stack.values[i]));
+    }
 }
 
 void run(Vm* vm, OpArray* op_arr, ValueArray* value_arr) {
@@ -43,8 +71,8 @@ void run(Vm* vm, OpArray* op_arr, ValueArray* value_arr) {
             case OP_ADD: {
                 // pop them in the reverse order, as it got 
                 // pushed onto the stack in reverse order as well
-                Value value1 = pop_peek(1);
-                Value value2 = pop_peek(0);
+                Value value1 = pop();
+                Value value2 = pop();
                 double number1 = AS_NUMBER(value1);
                 double number2 = AS_NUMBER(value2);
                 double number3 = number1 + number2;
@@ -62,9 +90,6 @@ void run(Vm* vm, OpArray* op_arr, ValueArray* value_arr) {
             }
             case OP_RETURN: {
                 printf("op_return %f\n", AS_NUMBER(pop()));
-                for (int i = 0; i < vm->vm_stack.count; i++) {
-                    printf("%f\n", AS_NUMBER(vm->vm_stack.values[i]));
-                }
                 return;
             }
         }
