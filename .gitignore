@@ -4,3 +4,5 @@ nebula
 *.o
 tags*
 test
+.vscode/
+valgrind*

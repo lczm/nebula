@@ -2,7 +2,7 @@
 #include "codegen.h"
 
 static OpArray* op_array;
-static ValueArray* value_array;
+static ValueArray* constants_array;
 
 static void emit_byte(OpCode op) {
     push_op_array(op_array, op);
@@ -11,9 +11,9 @@ static void emit_byte(OpCode op) {
 static void emit_constant(Value value) {
     emit_byte(OP_CONSTANT);
     // Add to value_array
-    push_value_array(value_array, value);
+    push_value_array(constants_array, value);
     // Minus 1 of the current count as it is 0-indexed
-    emit_byte(value_array->count - 1);
+    emit_byte(constants_array->count - 1);
 }
 
 static void gen(Ast* ast) {
@@ -43,9 +43,9 @@ static void gen(Ast* ast) {
     }
 }
 
-void codegen(OpArray* op_arr, ValueArray* value_arr, Ast* ast) {
+void codegen(OpArray* op_arr, ValueArray* constants_arr, Ast* ast) {
     op_array = op_arr;
-    value_array = value_arr;
+    constants_array = constants_arr;
     gen(ast);
 }
 
@@ -61,6 +61,8 @@ void disassemble_opcode_values(OpArray* op_arr, ValueArray* value_arr) {
                 i++;
                 printf("[%-20s] at %d: %f\n", "OP_CONSTANT", i,
                         AS_NUMBER(value_arr->values[op_arr->ops[i]])); break;
+            case OP_RETURN:
+                printf("[%-20s]\n", "OP_RETURN"); break;
         }
     }
 }
