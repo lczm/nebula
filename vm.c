@@ -92,6 +92,24 @@ void run(Vm* vm, OpArray* op_arr, ValueArray* value_arr) {
                 push(NUMBER_VAL(number3));
                 break;
             }
+            case OP_MULTIPLY: {
+                Value value1 = pop(); 
+                Value value2 = pop();
+                double number1 = AS_NUMBER(value1);
+                double number2 = AS_NUMBER(value2);
+                double number3 = number2 * number1;
+                push(NUMBER_VAL(number3));
+                break;
+            }
+            case OP_DIVIDE: {
+                Value value1 = pop(); 
+                Value value2 = pop();
+                double number1 = AS_NUMBER(value1);
+                double number2 = AS_NUMBER(value2);
+                double number3 = number2 / number1;
+                push(NUMBER_VAL(number3));
+                break;
+            }
             case OP_CONSTANT: {
                 OpCode constant_index = op_array->ops[vm->ip];
                 vm->ip++;
