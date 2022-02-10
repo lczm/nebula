@@ -43,8 +43,24 @@ static void gen(Ast* ast) {
                 case TOKEN_SLASH:
                     emit_byte(OP_DIVIDE);
                     break;
+                default:
+                    break;
             }
             break;
+        }
+        case AST_UNARY: {
+            UnaryExpr* unary_expr = (UnaryExpr*)ast->as;
+            gen(unary_expr->right_expr);
+            switch (unary_expr->op.type) {
+                case TOKEN_BANG:
+                    emit_byte(OP_NOT);
+                    break;
+                case TOKEN_MINUS:
+                    emit_byte(OP_NEGATE);
+                    break;
+                default:
+                    break;
+            }
         }
     }
 }
@@ -67,6 +83,15 @@ void disassemble_opcode_values(OpArray* op_arr, ValueArray* value_arr) {
                 printf("[%-20s]\n", "OP_MULTIPLY"); break;
             case OP_DIVIDE:
                 printf("[%-20s]\n", "OP_DIVIDE"); break;
+            case OP_NEGATE:
+                printf("[%-20s]\n", "OP_NEGATE"); break;
+                break;
+            case OP_NOT:
+                printf("[%-20s]\n", "OP_NOT"); break;
+                break;
+            case OP_EQUAL:
+                printf("[%-20s]\n", "OP_EQUAL"); break;
+                break;
             case OP_CONSTANT:
                 i++;
                 printf("[%-20s] at %d: %f\n", "OP_CONSTANT", i,

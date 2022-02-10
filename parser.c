@@ -32,6 +32,17 @@ static bool match_and_move(TokenType type) {
     return false;
 }
 
+static Token peek(int offset) {
+    return token_array->tokens[index + offset];
+}
+
+static bool peek_match(int offset, TokenType type) {
+    Token token = token_array->tokens[index + offset];
+    if (token.type == type)
+        return true;
+    return false;
+}
+
 static Token get_current() {
     return token_array->tokens[index];
 }
@@ -104,6 +115,19 @@ static Ast* or_() {
  
 static Ast* equality() {
     Ast* ast = comparison();
+
+    // This will return a binary expression as well
+    if (match_either(TOKEN_EQUAL_EQUAL, TOKEN_BANG_EQUAL)) {
+        Token operator = get_current();
+        move();
+        Ast* right = comparison();
+        BinaryExpr* binary_expr = make_binary_expr(ast, right, operator);
+        Ast* binary_ast = make_ast();
+        binary_ast->type = AST_BINARY;
+        binary_ast->as = binary_expr;
+        return binary_ast;
+    }
+
     return ast;
 }
  
@@ -119,7 +143,7 @@ static Ast* addition() {
     if (match_either(TOKEN_PLUS, TOKEN_MINUS)) {
         Token operator = get_current();
         move();
-        Ast* right = primary(); // number_expr
+        Ast* right = multiplication(); // number_expr
         BinaryExpr* binary_expr = make_binary_expr(ast, right, operator);
         // Create ast wrapper
         Ast* binary_ast = make_ast();
@@ -138,7 +162,7 @@ static Ast* multiplication() {
     if (match_either(TOKEN_STAR, TOKEN_SLASH)) {
         Token operator = get_current();
         move();
-        Ast* right = primary();
+        Ast* right = unary();
         BinaryExpr* binary_expr = make_binary_expr(ast, right, operator);
         // Create ast wrapper
         Ast* binary_ast = make_ast();
