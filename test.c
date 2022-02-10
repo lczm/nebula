@@ -5,6 +5,7 @@
 
 #include "array.h"
 #include "lexer.h"
+#include "parser.h"
 
 static int pass_count = 0;
 static int fail_count = 0;
@@ -268,6 +269,97 @@ static void test_keyword_character_lexer() {
 
 static void test_parse_binary_expressions() {
     printf("test_parse_binary_expressions()\n");
+
+    TokenArray token_array;
+    init_token_array(&token_array);
+    Token token_number = make_token(TOKEN_NUMBER);
+    token_number.start = "15";
+    token_number.length = 2;
+    push_token_array(&token_array, token_number);
+    Token token_plus = make_token(TOKEN_PLUS);
+    token_plus.start = "+";
+    token_plus.length = 1;
+    push_token_array(&token_array, token_plus);
+    Token token_number2 = make_token(TOKEN_NUMBER);
+    token_number2.start = "2";
+    token_number2.length = 2;
+    push_token_array(&token_array, token_number2);
+
+    // For test debugging purposes
+    Ast* ast = parse_tokens(&token_array);
+    // Make sure its a binary
+    if (ast->type != AST_BINARY)
+        FAIL();
+    BinaryExpr* binary_expr = (BinaryExpr*)ast->as;
+    if (binary_expr->left_expr->type != AST_NUMBER) 
+        FAIL();
+    if (binary_expr->right_expr->type != AST_NUMBER) 
+        FAIL();
+    if (binary_expr->op.type != TOKEN_PLUS) 
+        FAIL();
+    if (((NumberExpr*)binary_expr->left_expr->as)->value != 15.0)
+        FAIL();
+    if (((NumberExpr*)binary_expr->right_expr->as)->value != 2.0)
+        FAIL();
+
+    // Change from plus to minus
+    token_array.tokens[1].type = TOKEN_MINUS;
+    token_array.tokens[1].start = "-";
+    ast = parse_tokens(&token_array);
+    // Make sure its a binary
+    if (ast->type != AST_BINARY)
+        FAIL();
+    binary_expr = (BinaryExpr*)ast->as;
+    if (binary_expr->left_expr->type != AST_NUMBER) 
+        FAIL();
+    if (binary_expr->right_expr->type != AST_NUMBER) 
+        FAIL();
+    if (binary_expr->op.type != TOKEN_MINUS) 
+        FAIL();
+    if (((NumberExpr*)binary_expr->left_expr->as)->value != 15.0)
+        FAIL();
+    if (((NumberExpr*)binary_expr->right_expr->as)->value != 2.0)
+        FAIL();
+
+    // Change from minus to star
+    token_array.tokens[1].type = TOKEN_STAR;
+    token_array.tokens[1].start = "*";
+    ast = parse_tokens(&token_array);
+    // Make sure its a binary
+    if (ast->type != AST_BINARY)
+        FAIL();
+    binary_expr = (BinaryExpr*)ast->as;
+    if (binary_expr->left_expr->type != AST_NUMBER) 
+        FAIL();
+    if (binary_expr->right_expr->type != AST_NUMBER) 
+        FAIL();
+    if (binary_expr->op.type != TOKEN_STAR) 
+        FAIL();
+    if (((NumberExpr*)binary_expr->left_expr->as)->value != 15.0)
+        FAIL();
+    if (((NumberExpr*)binary_expr->right_expr->as)->value != 2.0)
+        FAIL();
+
+    // Change from star to slash
+    token_array.tokens[1].type = TOKEN_SLASH;
+    token_array.tokens[1].start = "/";
+    ast = parse_tokens(&token_array);
+    // Make sure its a binary
+    if (ast->type != AST_BINARY)
+        FAIL();
+    binary_expr = (BinaryExpr*)ast->as;
+    if (binary_expr->left_expr->type != AST_NUMBER) 
+        FAIL();
+    if (binary_expr->right_expr->type != AST_NUMBER) 
+        FAIL();
+    if (binary_expr->op.type != TOKEN_SLASH) 
+        FAIL();
+    if (((NumberExpr*)binary_expr->left_expr->as)->value != 15.0)
+        FAIL();
+    if (((NumberExpr*)binary_expr->right_expr->as)->value != 2.0)
+        FAIL();
+
+    free_token_array(&token_array);
     PASS();
 }
 

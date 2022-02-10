@@ -11,7 +11,7 @@ static int start = 0;
 static int current = 0;
 static const char* s = 0;
 
-static Token make_token(TokenType type) {
+Token make_token(TokenType type) {
     Token token;
     token.type = type;
     token.start = s + start;

@@ -168,7 +168,7 @@ static Ast* primary() {
         char* end = (char*)token_array->tokens[index].start +
             token_array->tokens[index].length;
         double value = strtod(start, &end);
-        printf("Parsing number: %f\n", value);
+        // printf("Parsing number: %f\n", value);
         // Print out debug information before moving
         move();
         NumberExpr* number_expr = make_number_expr(value);
