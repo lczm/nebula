@@ -115,17 +115,7 @@ static Ast* comparison() {
 static Ast* addition() {
     Ast* ast = multiplication(); // number_expr
 
-    if (match(TOKEN_PLUS)) {
-        Token operator = get_current(); // operator
-        move();
-        Ast* right = primary(); // number_expr
-        BinaryExpr* binary_expr = make_binary_expr(ast, right, operator);
-        // Create ast wrapper
-        Ast* binary_ast = make_ast();
-        binary_ast->type = AST_BINARY;
-        binary_ast->as = binary_expr;
-        return binary_ast;
-    } else if (match(TOKEN_MINUS)) {
+    if (match_either(TOKEN_PLUS, TOKEN_MINUS)) {
         Token operator = get_current();
         move();
         Ast* right = primary(); // number_expr
