@@ -49,6 +49,14 @@ BinaryExpr* make_binary_expr(Ast* left_expr, Ast* right_expr, Token op) {
     return binary_expr;
 }
 
+UnaryExpr* make_unary_expr(Ast* right_expr, Token op) {
+    UnaryExpr* unary_expr = (
+            UnaryExpr*)malloc(sizeof(UnaryExpr) * 1);
+    unary_expr->right_expr = right_expr;
+    unary_expr->op = op;
+    return unary_expr;
+}
+
 void disassemble_individual_ast(Ast* ast) {
     switch (ast->type) {
         case AST_NONE:
@@ -70,6 +78,18 @@ void disassemble_individual_ast(Ast* ast) {
             strncpy(s, binary_expr->op.start, binary_expr->op.length);
             s[binary_expr->op.length] = '\0';
             printf("[%-10s]: %s\n", "Token: ", s);
+            break;
+        }
+        case AST_UNARY: {
+            UnaryExpr* unary_expr = (UnaryExpr*)ast->as;
+            printf("[%-20s]\n", "UNARY_EXPR");
+            // Delimit it with c_str end char
+            char s[unary_expr->op.length + 1]; 
+            strncpy(s, unary_expr->op.start, unary_expr->op.length);
+            s[unary_expr->op.length] = '\0';
+            printf("[%-10s]: %s\n", "Token: ", s);
+            printf("[%-10s]: ", "Right:");
+            disassemble_individual_ast(unary_expr->right_expr);
             break;
         }
     }

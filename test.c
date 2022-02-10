@@ -28,10 +28,11 @@ static void reset_count() {
     return;         \
 } while (0);        \
 
-#define FAIL() do { \
-    fail();         \
-    return;         \
-} while (0);        \
+#define FAIL() do {     \
+    printf("FAILED\n"); \
+    fail();             \
+    return;             \
+} while (0);            \
 
 static void test_token_array() {
     printf("test_token_array()\n");
@@ -363,6 +364,52 @@ static void test_parse_binary_expressions() {
     PASS();
 }
 
+static void test_parse_unary_expressions() {
+    printf("test_parse_unary_expressions()\n");
+
+    TokenArray token_array;
+    init_token_array(&token_array);
+    Token token_minus = make_token(TOKEN_MINUS);
+    token_minus.start = "-";
+    token_minus.length = 1;
+    push_token_array(&token_array, token_minus);
+    Token token_number = make_token(TOKEN_NUMBER);
+    token_number.start = "15";
+    token_number.length = 2;
+    push_token_array(&token_array, token_number);
+
+    // disassemble_token_array(&token_array);
+    Ast* ast = parse_tokens(&token_array);
+    disassemble_ast(ast);
+    if (ast->type != AST_UNARY)
+        FAIL();
+    UnaryExpr* unary_expr = (UnaryExpr*)ast->as;
+    if (unary_expr->op.type != TOKEN_MINUS)
+        FAIL();
+    if (unary_expr->right_expr->type != AST_NUMBER)
+        FAIL();
+    if (((NumberExpr*)unary_expr->right_expr->as)->value != 15.0)
+        FAIL();
+
+    // change from minus to bang
+    token_array.tokens[0].type = TOKEN_BANG;
+    token_array.tokens[0].start = "!";
+
+    ast = parse_tokens(&token_array);
+    if (ast->type != AST_UNARY)
+        FAIL();
+    unary_expr = (UnaryExpr*)ast->as;
+    if (unary_expr->op.type != TOKEN_BANG)
+        FAIL();
+    if (unary_expr->right_expr->type != AST_NUMBER)
+        FAIL();
+    if (((NumberExpr*)unary_expr->right_expr->as)->value != 15.0)
+        FAIL();
+
+    free_token_array(&token_array);
+    PASS();
+}
+
 static void test_codegen_numbers() {
     printf("test_codegen_numbers()\n");
     PASS();
@@ -400,9 +447,9 @@ int main(int argc, const char* argv[]) {
     test_single_character_lexer();
     test_double_character_lexer();
     test_keyword_character_lexer();
-    // parser, currently only can test for binary expressions
-    // add more in the future
+    // parser tests
     test_parse_binary_expressions();
+    test_parse_unary_expressions();
     // codegen to ast tests
     test_codegen_numbers();
     test_codegen_binary_numbers();

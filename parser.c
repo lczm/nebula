@@ -151,6 +151,17 @@ static Ast* multiplication() {
 }
  
 static Ast* unary() {
+    if (match_either(TOKEN_BANG, TOKEN_MINUS)) {
+        Token operator = get_current();
+        move();
+        UnaryExpr* unary_expr = make_unary_expr(unary(), operator);
+        // Create ast wrapper
+        Ast* unary_ast = make_ast();
+        unary_ast->type = AST_UNARY;
+        unary_ast->as = unary_expr;
+        return unary_ast;
+    }
+
     Ast* ast = call();
     return ast;
 }
