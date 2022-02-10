@@ -77,6 +77,10 @@ void disassemble_opcode_values(OpArray* op_arr, ValueArray* value_arr) {
         switch (op_arr->ops[i]) {
             case OP_ADD:
                 printf("[%-20s]\n", "OP_ADD"); break;
+            case OP_TRUE:
+                printf("[%-20s]\n", "OP_TRUE"); break;
+            case OP_FALSE:
+                printf("[%-20s]\n", "OP_FALSE"); break;
             case OP_SUBTRACT:
                 printf("[%-20s]\n", "OP_SUBTRACT"); break;
             case OP_MULTIPLY:
