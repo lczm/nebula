@@ -380,7 +380,7 @@ static void test_parse_unary_expressions() {
 
     // disassemble_token_array(&token_array);
     Ast* ast = parse_tokens(&token_array);
-    disassemble_ast(ast);
+    // disassemble_ast(ast);
     if (ast->type != AST_UNARY)
         FAIL();
     UnaryExpr* unary_expr = (UnaryExpr*)ast->as;
