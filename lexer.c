@@ -62,6 +62,10 @@ static bool is_alpha() {
     return false;
 }
 
+static bool check_keyword(const char* keyword, int length) {
+    return false;
+}
+
 void lex_source(TokenArray* token_array, const char* source) {
     reset_local_varables();
     s = source;
@@ -82,12 +86,21 @@ void lex_source(TokenArray* token_array, const char* source) {
             push_token_array(token_array, token_digit);
             start = current;
         } else if (is_alpha()) {
+            // Parse the alpha
             current = start;
             while (is_alpha()) {
                 current++;
             }
-            Token token_identifier = make_token(TOKEN_IDENTIFIER);
-            push_token_array(token_array, token_identifier);
+
+            // Check for the keywords
+            // if (check_keyword("let", 3));
+            if (check_keyword("for", 3)) {
+                Token token_for = make_token(TOKEN_FOR);
+                push_token_array(token_array, token_for);
+            } else { // not keywords, can only be identifier
+                Token token_identifier = make_token(TOKEN_IDENTIFIER);
+                push_token_array(token_array, token_identifier);
+            }
             start = current;
         }
 
@@ -270,8 +283,8 @@ void disassemble_token_array(TokenArray* token_array) {
                 printf("[%-20s]: %s\n", "TOKEN_PRINT", "PRINT"); break;
             case TOKEN_RETURN:
                 printf("[%-20s]: %s\n", "TOKEN_RETURN", "RETURN"); break;
-            case TOKEN_VAR:
-                printf("[%-20s]: %s\n", "TOKEN_VAR", "VAR"); break;
+            case TOKEN_LET:
+                printf("[%-20s]: %s\n", "TOKEN_LET", "LET"); break;
             case TOKEN_WHILE:
                 printf("[%-20s]: %s\n", "TOKEN_WHILE", "WHILE"); break;
             case TOKEN_TRUE:

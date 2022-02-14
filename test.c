@@ -63,7 +63,7 @@ static void test_token_array() {
     int loop_count = 1000;
     for (int i = 0; i < loop_count; i++) {
         Token token_temp = {
-            .type = TOKEN_VAR,
+            .type = TOKEN_LET,
             .start = NULL,
             .length = 0,
             .line = 1,
@@ -90,7 +90,7 @@ static void test_token_array() {
                 FAIL();
             }
         } else {
-            if (token_array.tokens[i].type != TOKEN_VAR) {
+            if (token_array.tokens[i].type != TOKEN_LET) {
                 FAIL();
             }
         }
