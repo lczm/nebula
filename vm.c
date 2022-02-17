@@ -58,6 +58,18 @@ static void print_value(Value value) {
     }
 }
 
+static bool values_equal(Value value1, Value value2) {
+    if (value1.type == VAL_NUMBER && 
+        value2.type == VAL_NUMBER) {
+        return AS_NUMBER(value1) == AS_NUMBER(value2);
+    } else if (value1.type == VAL_BOOLEAN &&
+               value2.type == VAL_BOOLEAN) {
+        return AS_BOOLEAN(value1) == AS_BOOLEAN(value2);
+    } else { // TODO : This should have a proper return
+        return false;
+    }
+}
+
 static void debug_vm_stack_top() {
     printf("vm->stack_top: %d\n", vm->stack_top);
     for (int i = 0; i < vm->stack_top + 1; i++) {
@@ -135,6 +147,12 @@ void run(Vm* vm, OpArray* op_arr, ValueArray* value_arr) {
                 double number2 = AS_NUMBER(value2);
                 double number3 = number2 / number1;
                 push(NUMBER_VAL(number3));
+                break;
+            }
+            case OP_EQUAL: {
+                Value value1 = pop();
+                Value value2 = pop();
+                push(BOOLEAN_VAL(values_equal(value2, value1)));
                 break;
             }
             case OP_RETURN: {

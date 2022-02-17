@@ -50,6 +50,9 @@ static void gen(Ast* ast) {
                 case TOKEN_SLASH:
                     emit_byte(OP_DIVIDE);
                     break;
+                case TOKEN_EQUAL_EQUAL:
+                    emit_byte(OP_EQUAL);
+                    break;
                 default:
                     break;
             }
