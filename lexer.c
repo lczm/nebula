@@ -63,6 +63,11 @@ static bool is_alpha() {
 }
 
 static bool check_keyword(const char* keyword, int length) {
+    // same length and same characters
+    if (current - start == length &&
+            memcmp(s+start, keyword, length) == 0) {
+        return true;
+    }
     return false;
 }
 
@@ -91,12 +96,37 @@ void lex_source(TokenArray* token_array, const char* source) {
             while (is_alpha()) {
                 current++;
             }
-
             // Check for the keywords
-            // if (check_keyword("let", 3));
-            if (check_keyword("for", 3)) {
+            if (check_keyword("let", 3)) {
+                Token token_let = make_token(TOKEN_LET);
+                push_token_array(token_array, token_let);
+            } else if (check_keyword("for", 3)) {
                 Token token_for = make_token(TOKEN_FOR);
                 push_token_array(token_array, token_for);
+            } else if (check_keyword("while", 5)) {
+                Token token_while = make_token(TOKEN_WHILE);
+                push_token_array(token_array, token_while);
+            } else if (check_keyword("true", 4)) {
+                Token token_true = make_token(TOKEN_TRUE);
+                push_token_array(token_array, token_true);
+            } else if (check_keyword("false", 5)) {
+                Token token_false = make_token(TOKEN_FALSE);
+                push_token_array(token_array, token_false);
+            } else if (check_keyword("func", 4)) {
+                Token token_func = make_token(TOKEN_FUNC);
+                push_token_array(token_array, token_func);
+            } else if (check_keyword("if", 2)) {
+                Token token_if = make_token(TOKEN_IF);
+                push_token_array(token_array, token_if);
+            } else if (check_keyword("else", 4)) {
+                Token token_else = make_token(TOKEN_ELSE);
+                push_token_array(token_array, token_else);
+            } else if (check_keyword("nil", 3)) {
+                Token token_nil = make_token(TOKEN_NIL);
+                push_token_array(token_array, token_nil);
+            } else if (check_keyword("return", 6)) {
+                Token token_return = make_token(TOKEN_RETURN);
+                push_token_array(token_array, token_return);
             } else { // not keywords, can only be identifier
                 Token token_identifier = make_token(TOKEN_IDENTIFIER);
                 push_token_array(token_array, token_identifier);
