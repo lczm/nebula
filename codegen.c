@@ -20,6 +20,13 @@ static void gen(Ast* ast) {
     switch (ast->type) {
         case AST_NONE: 
             break;
+        case AST_PRINT: {
+            PrintStmt* print_stmt = (PrintStmt*)ast->as;
+            // Emit nested statement, then emit print
+            gen(print_stmt->expr);
+            emit_byte(OP_PRINT);
+            break;
+        }
         case AST_NUMBER: { // emit a constant
             NumberExpr* number_expr = (NumberExpr*)ast->as;
             emit_constant(NUMBER_VAL(number_expr->value));
@@ -112,6 +119,8 @@ void disassemble_opcode_values(OpArray* op_arr, ValueArray* value_arr) {
                         AS_NUMBER(value_arr->values[op_arr->ops[i]])); break;
             case OP_RETURN:
                 printf("[%-20s]\n", "OP_RETURN"); break;
+            case OP_PRINT:
+                printf("[%-20s]\n", "OP_PRINT"); break;
         }
     }
 }

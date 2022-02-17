@@ -89,8 +89,18 @@ static Ast* statement() {
 }
 
 static Ast* expression_statement() {
-    Ast* ast = expression();
-    return ast;
+    if (match(TOKEN_PRINT)) {
+        move();
+        Ast* ast = expression();
+        PrintStmt* print_stmt = make_print_stmt(ast);
+        Ast* ast_stmt = make_ast();
+        ast_stmt->as = print_stmt;
+        ast_stmt->type = AST_PRINT;
+        return ast_stmt;
+    }
+
+    return expression();
+
 }
 
 static Ast* expression() {

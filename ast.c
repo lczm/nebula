@@ -8,6 +8,8 @@ bool is_stmt(Ast* ast) {
         case AST_NONE:
         case AST_NUMBER:
         case AST_BINARY:
+        case AST_UNARY:
+        case AST_BOOL:
             return false;
     }
     return false;
@@ -19,6 +21,8 @@ bool is_expr(Ast* ast) {
             return false;
         case AST_NUMBER:
         case AST_BINARY:
+        case AST_UNARY:
+        case AST_BOOL:
             return true;
     }
     return false;
@@ -31,6 +35,13 @@ Ast* make_ast() {
     ast->type = AST_NONE;
     ast->as = NULL;
     return ast;
+}
+
+PrintStmt* make_print_stmt(Ast* expr) {
+    PrintStmt* print_stmt = (
+            PrintStmt*)malloc(sizeof(PrintStmt) * 1);
+    print_stmt->expr = expr;
+    return print_stmt;
 }
 
 NumberExpr* make_number_expr(double value) {
@@ -68,6 +79,12 @@ void disassemble_individual_ast(Ast* ast) {
     switch (ast->type) {
         case AST_NONE:
             return;
+        case AST_PRINT: {
+            PrintStmt* print_stmt = (PrintStmt*)ast->as;
+            printf("[%-20s]\n", "PRINT_STMT");
+            disassemble_individual_ast(print_stmt->expr);
+            break;
+        }
         case AST_NUMBER: {
             NumberExpr* number_expr = (NumberExpr*)ast->as;
             printf("[%-20s]: %f\n", "AST_NUMBER", number_expr->value);

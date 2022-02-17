@@ -46,17 +46,29 @@ static Value peek(int index) {
     return value;
 }
 
+static void print_value(Value value) {
+    if (value.type == VAL_NUMBER) {
+        printf("%f\n", AS_NUMBER(value));
+    } else if (value.type == VAL_BOOLEAN) {
+        if (AS_BOOLEAN(value)) {
+            printf("true\n");
+        } else {
+            printf("false\n");
+        }
+    }
+}
+
 static void debug_vm_stack_top() {
     printf("vm->stack_top: %d\n", vm->stack_top);
     for (int i = 0; i < vm->stack_top + 1; i++) {
-        printf("%f\n", AS_NUMBER(vm->vm_stack.values[i]));
+        print_value(vm->vm_stack.values[i]);
     }
 }
 
 static void debug_vm_stack() {
     printf("vm->vm_stack.count: %d\n", vm->vm_stack.count);
     for (int i = 0; i < vm->vm_stack.count; i++) {
-        printf("%f\n", AS_NUMBER(vm->vm_stack.values[i]));
+        print_value(vm->vm_stack.values[i]);
     }
 }
 
@@ -127,6 +139,10 @@ void run(Vm* vm, OpArray* op_arr, ValueArray* value_arr) {
             }
             case OP_RETURN: {
                 printf("op_return %f\n", AS_NUMBER(pop()));
+                return;
+            }
+            case OP_PRINT: {
+                print_value(pop());
                 return;
             }
             default: // Just break out of those that are not handled yet

@@ -127,6 +127,9 @@ void lex_source(TokenArray* token_array, const char* source) {
             } else if (check_keyword("return", 6)) {
                 Token token_return = make_token(TOKEN_RETURN);
                 push_token_array(token_array, token_return);
+            } else if (check_keyword("print", 5)) {
+                Token token_print = make_token(TOKEN_PRINT);
+                push_token_array(token_array, token_print);
             } else { // not keywords, can only be identifier
                 Token token_identifier = make_token(TOKEN_IDENTIFIER);
                 push_token_array(token_array, token_identifier);

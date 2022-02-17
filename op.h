@@ -12,4 +12,5 @@ typedef enum {
     OP_NOT,
     OP_EQUAL,
     OP_RETURN,
+    OP_PRINT,
 } OpCode;
