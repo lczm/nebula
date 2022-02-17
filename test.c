@@ -269,12 +269,10 @@ static void test_keyword_character_lexer() {
     TokenArray token_array_keywords;
     init_token_array(&token_array_keywords);
 
-    // char source[] = "else for func if nil return let while true false";
-    // int keyword_types[] = { TOKEN_ELSE, TOKEN_FOR, TOKEN_FUNC, TOKEN_IF,
-    //     TOKEN_NIL, TOKEN_RETURN, TOKEN_LET, TOKEN_WHILE, TOKEN_TRUE,
-    //     TOKEN_FALSE };
-    char source[] = "else for";
-    int keyword_types[] = { TOKEN_ELSE, TOKEN_FOR };
+    char source[] = "else for func if nil return let while true false";
+    int keyword_types[] = { TOKEN_ELSE, TOKEN_FOR, TOKEN_FUNC, TOKEN_IF,
+        TOKEN_NIL, TOKEN_RETURN, TOKEN_LET, TOKEN_WHILE, TOKEN_TRUE,
+        TOKEN_FALSE };
     lex_source(&token_array_keywords, source);
 
     for (int i = 0; i < token_array_keywords.count; i++) {
