@@ -57,6 +57,13 @@ UnaryExpr* make_unary_expr(Ast* right_expr, Token op) {
     return unary_expr;
 }
 
+BoolExpr* make_bool_expr(bool value) {
+    BoolExpr* bool_expr = (
+            BoolExpr*)malloc(sizeof(BoolExpr) * 1);
+    bool_expr->value = value;
+    return bool_expr;
+}
+
 void disassemble_individual_ast(Ast* ast) {
     switch (ast->type) {
         case AST_NONE:
@@ -90,6 +97,15 @@ void disassemble_individual_ast(Ast* ast) {
             printf("[%-10s]: %s\n", "Token: ", s);
             printf("[%-10s]: ", "Right:");
             disassemble_individual_ast(unary_expr->right_expr);
+            break;
+        }
+        case AST_BOOL: {
+            BoolExpr* bool_expr = (BoolExpr*)ast->as;
+            if (bool_expr->value) { // Check explicitly
+                printf("[%-20s]: %s\n", "AST_BOOL", "true");
+            } else {
+                printf("[%-20s]: %s\n", "AST_BOOL", "false");
+            }
             break;
         }
     }

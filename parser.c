@@ -209,6 +209,16 @@ static Ast* primary() {
         NumberExpr* number_expr = make_number_expr(value);
         ast->as = number_expr;
         ast->type = AST_NUMBER;
+    } else if (match(TOKEN_TRUE)) {
+        move();
+        BoolExpr* bool_expr = make_bool_expr(true);
+        ast->as = bool_expr;
+        ast->type = AST_BOOL;
+    } else if (match(TOKEN_FALSE)) {
+        move();
+        BoolExpr* bool_expr = make_bool_expr(false);
+        ast->as = bool_expr;
+        ast->type = AST_BOOL;
     }
 
     return ast;
