@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <stdbool.h>
+
 #include "vm.h"
 
 static Vm* vm;
@@ -68,6 +70,19 @@ void run(Vm* vm, OpArray* op_arr, ValueArray* value_arr) {
         instruction = op_array->ops[vm->ip];
         vm->ip++;
         switch (instruction) {
+            case OP_CONSTANT: {
+                OpCode constant_index = op_array->ops[vm->ip];
+                vm->ip++;
+                double number = AS_NUMBER(value_arr->values[constant_index]);
+                push(NUMBER_VAL(number));
+                break;
+            }
+            case OP_TRUE:
+                push(BOOLEAN_VAL(true));
+                break;
+            case OP_FALSE:
+                push(BOOLEAN_VAL(false));
+                break;
             case OP_ADD: {
                 // TODO : This can be optimized, does not need so many local variables
                 Value value1 = pop();
@@ -110,17 +125,12 @@ void run(Vm* vm, OpArray* op_arr, ValueArray* value_arr) {
                 push(NUMBER_VAL(number3));
                 break;
             }
-            case OP_CONSTANT: {
-                OpCode constant_index = op_array->ops[vm->ip];
-                vm->ip++;
-                double number = AS_NUMBER(value_arr->values[constant_index]);
-                push(NUMBER_VAL(number));
-                break;
-            }
             case OP_RETURN: {
                 printf("op_return %f\n", AS_NUMBER(pop()));
                 return;
             }
+            default: // Just break out of those that are not handled yet
+                return;
         }
     }
 }
