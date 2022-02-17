@@ -62,6 +62,16 @@ static void gen(Ast* ast) {
                     break;
             }
         }
+        case AST_BOOL: {
+            BoolExpr* bool_expr = (BoolExpr*)ast->as;
+            if (bool_expr->value) {
+                emit_byte(OP_TRUE);
+                break;
+            } else {
+                emit_byte(OP_FALSE);
+                break;
+            }
+        }
     }
 }
 
