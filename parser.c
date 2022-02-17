@@ -51,6 +51,20 @@ static Token get_previous() {
     return token_array->tokens[index--];
 }
 
+static bool eat(TokenType type) {
+    if (get_current().type == type) {
+        move();
+        return true;
+    }
+    return false;
+}
+
+static void eat_or_error(TokenType type, const char* error) {
+    if (!eat(type)) {
+        printf("%s\n", error);
+    }
+}
+
 // Statements
 static Ast* declaration();
 static Ast* statement();
@@ -96,6 +110,8 @@ static Ast* expression_statement() {
         Ast* ast_stmt = make_ast();
         ast_stmt->as = print_stmt;
         ast_stmt->type = AST_PRINT;
+
+        eat_or_error(TOKEN_SEMICOLON, "Must have ';' after statement");
         return ast_stmt;
     }
 
