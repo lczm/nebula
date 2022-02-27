@@ -6,6 +6,7 @@
 #include "array.h"
 #include "lexer.h"
 #include "parser.h"
+#include "object.h"
 
 static int pass_count = 0;
 static int fail_count = 0;
@@ -436,6 +437,22 @@ static void test_codegen_binary_numbers() {
     PASS();
 }
 
+static void test_obj_string() {
+    printf("test_obj_string()\n");
+
+    char test_string[] = "test string";
+    ObjString* obj_string = make_obj_string(&test_string, strlen(test_string));
+
+    // Can only check length and hash
+    if (obj_string->length != 11)
+        FAIL();
+    // The hash value for "test string"
+    if (obj_string->hash != 2533107786)
+        FAIL();
+
+    PASS();
+}
+
 static void test_vm_stack() {
     printf("test_vm_stack()\n");
     PASS();
@@ -469,6 +486,8 @@ int main(int argc, const char* argv[]) {
     // codegen to ast tests
     test_codegen_numbers();
     test_codegen_binary_numbers();
+    // obj tests
+    test_obj_string();
     // vm tests
     test_vm_stack();
     test_vm_eval_binary();
