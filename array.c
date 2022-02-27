@@ -1,9 +1,7 @@
 #include <stdlib.h>
 
 #include "array.h"
-
-#define ALLOCATE(type, count) \
-    (type*)malloc(sizeof(type) * count)
+#include "macros.h"
 
 void init_token_array(TokenArray* arr) {
     arr->count = 0;
