@@ -1,3 +1,5 @@
+#include <stdint.h>
+
 #include "hashmap.h"
 #include "macros.h"
 
@@ -55,8 +57,28 @@ void init_hashmap(HashMap* hashmap) {
 }
 
 void push_hashmap(HashMap* hashmap, ObjString* key, Value value) {
+    // TODO : Check if the hashmap has enough capacity to push a new
+    // value in
+
+    int hash_bucket = key->hash % hashmap->capacity;
+
+    // Set the key and value in that hash_bucket
+    hashmap->entries[hash_bucket].key = key;
+    hashmap->entries[hash_bucket].value = value;
+
+    // TODO : After checking if it has enough capacity,
+    // Check if there is a need to adjust_capacity based off
+    // the load factor
 }
 
 void free_hashmap(HashMap* hashmap) {
+}
 
+Value get_hashmap(HashMap* hashmap, ObjString* key) {
+    if (hashmap->count == 0)
+        return NIL_VAL;
+
+    int hash_bucket = key->hash % hashmap->capacity;
+    Entry* entry = &hashmap->entries[hash_bucket];
+    return entry->value;
 }

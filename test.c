@@ -1,12 +1,14 @@
 #include <time.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <stdbool.h>
 
 #include "array.h"
 #include "lexer.h"
 #include "parser.h"
 #include "object.h"
+#include "hashmap.h"
 
 static int pass_count = 0;
 static int fail_count = 0;
@@ -208,6 +210,21 @@ static void test_value_array() {
     }
 
     free_value_array(&value_array);
+    PASS();
+}
+
+static void test_hashmap() {
+    printf("test_hashmap\n");
+
+    HashMap hashmap;
+    init_hashmap(&hashmap);
+
+    if (hashmap.count != 0)
+        FAIL();
+    if (hashmap.capacity != 0)
+        FAIL();
+
+    free_hashmap(&hashmap);
     PASS();
 }
 
@@ -476,6 +493,8 @@ int main(int argc, const char* argv[]) {
     test_token_array();
     test_op_array();
     test_value_array();
+    // hashmaps
+    test_hashmap();
     // lexer
     test_single_character_lexer();
     test_double_character_lexer();
