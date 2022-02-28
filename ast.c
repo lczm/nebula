@@ -11,6 +11,9 @@ bool is_stmt(Ast* ast) {
         case AST_UNARY:
         case AST_BOOL:
             return false;
+        case AST_PRINT:
+        case AST_VARIABLE:
+            return true;
     }
     return false;
 }
@@ -18,6 +21,8 @@ bool is_stmt(Ast* ast) {
 bool is_expr(Ast* ast) {
     switch (ast->type) {
         case AST_NONE:
+        case AST_PRINT:
+        case AST_VARIABLE:
             return false;
         case AST_NUMBER:
         case AST_BINARY:
@@ -42,6 +47,14 @@ PrintStmt* make_print_stmt(Ast* expr) {
             PrintStmt*)malloc(sizeof(PrintStmt) * 1);
     print_stmt->expr = expr;
     return print_stmt;
+}
+
+VariableStmt* make_variable_stmt(Token name, Ast* initializer_expr) {
+    VariableStmt* variable_stmt = (
+        VariableStmt*)malloc(sizeof(VariableStmt) * 1);
+    variable_stmt->name = name;
+    variable_stmt->initializer_expr = initializer_expr;
+    return variable_stmt;
 }
 
 NumberExpr* make_number_expr(double value) {
@@ -83,6 +96,19 @@ void disassemble_individual_ast(Ast* ast) {
             PrintStmt* print_stmt = (PrintStmt*)ast->as;
             printf("[%-20s]\n", "PRINT_STMT");
             disassemble_individual_ast(print_stmt->expr);
+            break;
+        }
+        case AST_VARIABLE: {
+            VariableStmt* variable_stmt = (VariableStmt*)ast->as;
+            printf("[%-20s]\n", "VARIABLE_STMT");
+            char s[variable_stmt->name.length + 1];
+            strncpy(s, variable_stmt->name.start, variable_stmt->name.length);
+            s[variable_stmt->name.length] = '\0';
+            printf("[%-10s]: %s\n", "IDENTIFIER", s);
+            if (variable_stmt->initializer_expr->type != AST_NONE) {
+                printf("[%-20s]", "INITIALIZER_EXPR");
+                disassemble_individual_ast(variable_stmt->initializer_expr);
+            }
             break;
         }
         case AST_NUMBER: {

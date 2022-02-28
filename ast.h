@@ -6,6 +6,7 @@
 typedef enum {
     AST_NONE,
     AST_PRINT,
+    AST_VARIABLE,
     AST_NUMBER,
     AST_BINARY,
     AST_UNARY,
@@ -22,6 +23,11 @@ typedef struct {
 typedef struct {
     Ast* expr;
 } PrintStmt;
+
+typedef struct {
+    Token name;
+    Ast* initializer_expr;
+} VariableStmt;
 
 typedef struct {
     double value;
@@ -49,6 +55,8 @@ Ast* make_ast();
 
 // Statements
 PrintStmt* make_print_stmt(Ast* expr);
+VariableStmt* make_variable_stmt(Token name, Ast* initializer_expr);
+
 // Expressions
 NumberExpr* make_number_expr(double value);
 BinaryExpr* make_binary_expr(Ast* left_expr, Ast* right_expr, Token op);

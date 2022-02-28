@@ -67,6 +67,7 @@ static void eat_or_error(TokenType type, const char* error) {
 
 // Statements
 static Ast* declaration();
+static Ast* var_declaration();
 static Ast* statement();
 static Ast* expression_statement();
 
@@ -88,13 +89,44 @@ Ast* parse_tokens(TokenArray* token_arr) {
     index = 0; // Reset to 0 just in case
     token_array = token_arr;
 
-    Ast* ast = declaration();
-    return ast;
+    return declaration();
 }
 
 static Ast* declaration() {
-    Ast* ast = statement();
-    return ast;
+    if (match(TOKEN_LET)) {
+        return var_declaration();
+    }
+
+    return statement();
+}
+
+static Ast* var_declaration() {
+    move();
+    if (!match(TOKEN_IDENTIFIER)) {
+        printf("var_declaration could not find an identifier after 'let'\n");
+    }
+
+    Token identifier_name = get_current();
+    move();
+
+    // initialization assignment
+    // example: let a =
+    if (match(TOKEN_EQUAL)) {
+        move();
+        Ast* initializer_expr = expression();
+        if (!match_and_move(TOKEN_SEMICOLON)) {
+            printf("Did not have semicolon after variable declaration initialization\n");
+        }
+        VariableStmt* variable_stmt = make_variable_stmt(identifier_name, initializer_expr);
+
+        Ast* ast = make_ast();
+        ast->type = AST_VARIABLE;
+        ast->as = variable_stmt;
+        return ast;
+    } else { // variable declaration without initialization, let a;
+        Ast* ast_none = make_ast();
+        return make_variable_stmt(identifier_name, ast_none);
+    }
 }
 
 static Ast* statement() {
