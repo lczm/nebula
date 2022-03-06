@@ -1,10 +1,12 @@
 #pragma once
 
 #include "array.h"
+#include "hashmap.h"
 
 typedef struct {
     int ip;
     int stack_top;
+    HashMap    variables;
     ValueArray vm_stack;
 } Vm;
 

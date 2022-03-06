@@ -19,15 +19,13 @@ static int resize_capacity(int capacity) {
 static void adjust_capacity(HashMap* hashmap) {
     int resized_capacity = resize_capacity(hashmap->capacity);
     Entry* entries = ALLOCATE(Entry, resized_capacity);
-    // Set all entries to null
+    // Set all new entries to null
     for (int i = 0; i < resized_capacity; i++) {
         entries[i].key = NULL;
         entries[i].value = NIL_VAL;
     }
 
     hashmap->count = 0;
-    hashmap->capacity = resized_capacity;
-
     for (int i = 0; i < hashmap->capacity; i++) {
         // Get the entry
         Entry* entry = &hashmap->entries[i];
@@ -43,6 +41,7 @@ static void adjust_capacity(HashMap* hashmap) {
         // Increment count
         hashmap->count++;
     }
+    hashmap->capacity = resized_capacity;
 
     // Free the old hashmap array
     free(hashmap->entries);
@@ -57,18 +56,18 @@ void init_hashmap(HashMap* hashmap) {
 }
 
 void push_hashmap(HashMap* hashmap, ObjString* key, Value value) {
-    // TODO : Check if the hashmap has enough capacity to push a new
-    // value in
+    // Check if there is a need to adjust_capacity based off
+    // the load factor
+    if (hashmap->count >= hashmap->capacity * LOAD_FACTOR) {
+        adjust_capacity(hashmap);
+    }
 
     int hash_bucket = key->hash % hashmap->capacity;
 
     // Set the key and value in that hash_bucket
     hashmap->entries[hash_bucket].key = key;
     hashmap->entries[hash_bucket].value = value;
-
-    // TODO : After checking if it has enough capacity,
-    // Check if there is a need to adjust_capacity based off
-    // the load factor
+    hashmap->count++;
 }
 
 void free_hashmap(HashMap* hashmap) {

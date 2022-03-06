@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 
+#include "op.h"
 #include "vm.h"
 
 static Vm* vm;
@@ -11,12 +12,14 @@ void init_vm(Vm* v) {
     vm = v;
     v->ip = 0;
     v->stack_top = 0;
+    init_hashmap(&v->variables);
     init_value_array(&v->vm_stack);
 }
 
 void free_vm(Vm* v) {
     v->ip = 0;
     v->stack_top = 0;
+    free_hashmap(&v->variables);
     free_value_array(&v->vm_stack);
 }
 
@@ -161,7 +164,13 @@ void run(Vm* vm, OpArray* op_arr, ValueArray* value_arr) {
             }
             case OP_PRINT: {
                 print_value(pop());
-                return;
+                break;
+            }
+            case OP_SET_GLOBAL: {
+                break;
+            }
+            case OP_GET_GLOBAL: {
+                break;
             }
             default: // Just break out of those that are not handled yet
                 return;

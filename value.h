@@ -26,4 +26,4 @@ typedef struct {
 #define BOOLEAN_VAL(value) ((Value){VAL_BOOLEAN, {.b = value}})
 #define NUMBER_VAL(value)  ((Value){VAL_NUMBER, {.number = value}})
 // Set nil values to be false booleans
-#define NIL_VAL            ((Value){VAL_NIL, {.b = false}});
+#define NIL_VAL            ((Value){VAL_NIL, {.b = false}})

@@ -2,6 +2,7 @@
 
 #include <stdbool.h>
 #include "token.h"
+#include "value.h"
 
 typedef enum {
     AST_NONE,
@@ -62,6 +63,9 @@ NumberExpr* make_number_expr(double value);
 BinaryExpr* make_binary_expr(Ast* left_expr, Ast* right_expr, Token op);
 UnaryExpr* make_unary_expr(Ast* right_expr, Token op);
 BoolExpr* make_bool_expr(bool value);
+
+// Convert expressions into values
+Value ast_to_value(Ast* ast);
 
 // Debugging
 void disassemble_ast(Ast* ast);

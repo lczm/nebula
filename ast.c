@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "ast.h"
+#include "value.h"
 
 bool is_stmt(Ast* ast) {
     switch (ast->type) {
@@ -150,6 +151,22 @@ void disassemble_individual_ast(Ast* ast) {
                 printf("[%-20s]: %s\n", "AST_BOOL", "false");
             }
             break;
+        }
+    }
+}
+
+Value ast_to_value(Ast* ast) {
+    switch (ast->type) {
+        case AST_NUMBER: {
+            NumberExpr* number_expr = (NumberExpr*)ast->as;
+            return NUMBER_VAL(number_expr->value);
+        }
+        case AST_BOOL: {
+            BoolExpr* bool_expr = (BoolExpr*)ast->as;
+            return BOOLEAN_VAL(bool_expr->value);
+        }
+        default: {
+            return NIL_VAL;
         }
     }
 }

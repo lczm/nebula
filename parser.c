@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include "ast.h"
 #include "parser.h"
 
 // Parser state
@@ -111,6 +112,7 @@ static Ast* var_declaration() {
 
     // initialization assignment
     // example: let a =
+    Ast* ast = make_ast();
     if (match(TOKEN_EQUAL)) {
         move();
         Ast* initializer_expr = expression();
@@ -118,14 +120,15 @@ static Ast* var_declaration() {
             printf("Did not have semicolon after variable declaration initialization\n");
         }
         VariableStmt* variable_stmt = make_variable_stmt(identifier_name, initializer_expr);
-
-        Ast* ast = make_ast();
         ast->type = AST_VARIABLE;
         ast->as = variable_stmt;
         return ast;
     } else { // variable declaration without initialization, let a;
         Ast* ast_none = make_ast();
-        return make_variable_stmt(identifier_name, ast_none);
+        VariableStmt* variable_stmt = make_variable_stmt(identifier_name, ast_none);
+        ast->type = AST_VARIABLE;
+        ast->as = variable_stmt;
+        return ast;
     }
 }
 

@@ -13,4 +13,7 @@ typedef enum {
     OP_EQUAL,
     OP_RETURN,
     OP_PRINT,
+    // Variable setters and getters
+    OP_SET_GLOBAL,
+    OP_GET_GLOBAL,
 } OpCode;

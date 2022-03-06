@@ -9,6 +9,7 @@
 #include "parser.h"
 #include "object.h"
 #include "hashmap.h"
+#include "value.h"
 
 static int pass_count = 0;
 static int fail_count = 0;
@@ -222,6 +223,36 @@ static void test_hashmap() {
     if (hashmap.count != 0)
         FAIL();
     if (hashmap.capacity != 0)
+        FAIL();
+
+    Value set_number_value = NUMBER_VAL(10);
+    ObjString* number_key = make_obj_string("test_number", strlen("test_number"));
+    push_hashmap(&hashmap, number_key, set_number_value);
+
+    if (hashmap.count != 1)
+        FAIL();
+    if (hashmap.capacity != 4)
+        FAIL();
+
+    Value get_number_value = get_hashmap(&hashmap, number_key);
+    if (!IS_NUMBER(get_number_value))
+        FAIL();
+    if (AS_NUMBER(get_number_value) != 10)
+        FAIL();
+
+    Value set_boolean_value = BOOLEAN_VAL(true);
+    ObjString* boolean_key = make_obj_string("test_boolean", strlen("test_boolean"));
+    push_hashmap(&hashmap, boolean_key, set_boolean_value);
+
+    if (hashmap.count != 2)
+        FAIL();
+    if (hashmap.capacity != 4)
+        FAIL();
+
+    Value get_boolean_value = get_hashmap(&hashmap, boolean_key);
+    if (!IS_BOOLEAN(get_boolean_value))
+        FAIL();
+    if (AS_BOOLEAN(get_boolean_value) != true)
         FAIL();
 
     free_hashmap(&hashmap);
@@ -458,7 +489,7 @@ static void test_obj_string() {
     printf("test_obj_string()\n");
 
     char test_string[] = "test string";
-    ObjString* obj_string = make_obj_string(&test_string, strlen(test_string));
+    ObjString* obj_string = make_obj_string(test_string, strlen(test_string));
 
     // Can only check length and hash
     if (obj_string->length != 11)

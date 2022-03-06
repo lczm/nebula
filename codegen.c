@@ -1,5 +1,7 @@
 #include <stdio.h>
+#include "ast.h"
 #include "codegen.h"
+#include "op.h"
 
 static OpArray* op_array;
 static ValueArray* constants_array;
@@ -25,6 +27,17 @@ static void gen(Ast* ast) {
             // Emit nested statement, then emit print
             gen(print_stmt->expr);
             emit_byte(OP_PRINT);
+            break;
+        }
+        case AST_VARIABLE: {
+            VariableStmt* variable_stmt = (VariableStmt*)ast->as;
+            emit_byte(OP_SET_GLOBAL);
+            // Does not have a initializer
+            if (variable_stmt->initializer_expr->type == AST_NONE) {
+                emit_constant(NIL_VAL);
+            } else { // has an initializer
+                emit_constant(ast_to_value(variable_stmt->initializer_expr));
+            }
             break;
         }
         case AST_NUMBER: { // emit a constant
@@ -124,6 +137,12 @@ void disassemble_opcode_values(OpArray* op_arr, ValueArray* value_arr) {
                 printf("[%-20s]\n", "OP_RETURN"); break;
             case OP_PRINT:
                 printf("[%-20s]\n", "OP_PRINT"); break;
+            case OP_SET_GLOBAL:
+                printf("[%-20s]\n", "OP_SET_GLOBAL"); break;
+            case OP_GET_GLOBAL:
+                i++;
+                printf("[%-20s] at %d: %s\n", "OP_GET_GLOBAL", i,
+                    "temporary_variable_placeholder"); break;
         }
     }
 }
