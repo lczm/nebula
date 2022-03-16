@@ -2,6 +2,7 @@
 #include "ast.h"
 #include "codegen.h"
 #include "op.h"
+#include "object.h"
 
 static OpArray* op_array;
 static ValueArray* constants_array;
@@ -18,6 +19,13 @@ static void emit_constant(Value value) {
     emit_byte(constants_array->count - 1);
 }
 
+static int make_constant(Value value) {
+    push_value_array(constants_array, value);
+    int constant_index = constants_array->count - 1;
+    emit_byte(constant_index);
+    return constant_index;
+}
+
 static void gen(Ast* ast) {
     switch (ast->type) {
         case AST_NONE: 
@@ -32,11 +40,17 @@ static void gen(Ast* ast) {
         case AST_VARIABLE: {
             VariableStmt* variable_stmt = (VariableStmt*)ast->as;
             emit_byte(OP_SET_GLOBAL);
+
+            ObjString* variable_name = 
+                make_obj_string(variable_stmt->name.start, variable_stmt->name.length);
+            Value variable_name_value = OBJ_VAL(variable_name);
+            make_constant(variable_name_value);
+
             // Does not have a initializer
             if (variable_stmt->initializer_expr->type == AST_NONE) {
-                emit_constant(NIL_VAL);
+                make_constant(NIL_VAL);
             } else { // has an initializer
-                emit_constant(ast_to_value(variable_stmt->initializer_expr));
+                make_constant(ast_to_value(variable_stmt->initializer_expr));
             }
             break;
         }
@@ -138,7 +152,10 @@ void disassemble_opcode_values(OpArray* op_arr, ValueArray* value_arr) {
             case OP_PRINT:
                 printf("[%-20s]\n", "OP_PRINT"); break;
             case OP_SET_GLOBAL:
-                printf("[%-20s]\n", "OP_SET_GLOBAL"); break;
+                printf("[%-20s]\n", "OP_SET_GLOBAL"); 
+                i++; // name index
+                i++; // value index
+                break;
             case OP_GET_GLOBAL:
                 i++;
                 printf("[%-20s] at %d: %s\n", "OP_GET_GLOBAL", i,

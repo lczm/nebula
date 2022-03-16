@@ -1,5 +1,6 @@
 #include "object.h"
 
+#include <stdio.h>
 #include <string.h>
 #include "macros.h"
 #include "hash.h"
@@ -18,4 +19,8 @@ ObjString* make_obj_string(const char* chars, int length) {
     obj_string->hash = fnv_hash32(new_string, length);
 
     return obj_string;
+}
+
+void print_obj_string(ObjString* obj_string) {
+    printf("%s\n", obj_string->chars);
 }

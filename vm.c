@@ -93,6 +93,10 @@ void run(Vm* vm, OpArray* op_arr, ValueArray* value_arr) {
     value_array = value_arr;
     // Temporary ip pointer
     OpCode instruction;
+
+    // Mostly for debugging purposes
+    printf("--- VM Output --- \n");
+
     for (;;) {
         instruction = op_array->ops[vm->ip];
         vm->ip++;
@@ -167,9 +171,25 @@ void run(Vm* vm, OpArray* op_arr, ValueArray* value_arr) {
                 break;
             }
             case OP_SET_GLOBAL: {
+                printf("@@@ OP_SET_GLOBAL\n");
+                OpCode name_constant_index = op_array->ops[vm->ip];
+                vm->ip++;
+                Obj* obj = AS_OBJ(value_arr->values[name_constant_index]);
+                ObjString* obj_string = (ObjString*)obj;
+                print_obj_string(obj_string);
+
+                OpCode value_constant_index = op_array->ops[vm->ip];
+                vm->ip++;
+                Value value = value_arr->values[value_constant_index];
+                double number = AS_NUMBER(value);
+                printf("number: %f\n", number);
+
+                // Add to the variables hashmap
+                push_hashmap(&vm->variables, obj_string, value);
                 break;
             }
             case OP_GET_GLOBAL: {
+                printf("@@@ OP_GET_GLOBAL\n");
                 break;
             }
             default: // Just break out of those that are not handled yet
