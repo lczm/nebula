@@ -6,6 +6,7 @@
 
 static OpArray* op_array;
 static ValueArray* constants_array;
+static AstArray* ast_array;
 
 static void emit_byte(OpCode op) {
     push_op_array(op_array, op);
@@ -112,10 +113,14 @@ static void gen(Ast* ast) {
     }
 }
 
-void codegen(OpArray* op_arr, ValueArray* constants_arr, Ast* ast) {
+void codegen(OpArray* op_arr, ValueArray* constants_arr, AstArray* ast_arr) {
     op_array = op_arr;
     constants_array = constants_arr;
-    gen(ast);
+    ast_array = ast_arr;
+
+    for (int i = 0; i < ast_array->count; i++) {
+        gen(ast_array->ast[i]);
+    }
 }
 
 void disassemble_opcode_values(OpArray* op_arr, ValueArray* value_arr) {

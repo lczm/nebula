@@ -3,4 +3,4 @@
 #include "ast.h"
 #include "array.h"
 
-Ast* parse_tokens(TokenArray* token_arr);
+void parse_tokens(TokenArray* token_arr, AstArray* ast_arr);

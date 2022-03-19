@@ -5,7 +5,9 @@
 
 // Parser state
 static int index = 0;
+static int token_array_len = 0;
 static TokenArray* token_array;
+static AstArray* ast_array;
 
 static void move() {
     index++;
@@ -85,12 +87,17 @@ static Ast* unary();
 static Ast* call();
 static Ast* primary();
 
-Ast* parse_tokens(TokenArray* token_arr) {
+void parse_tokens(TokenArray* token_arr, AstArray* ast_arr) {
     // Initialize the static variables for convenience
     index = 0; // Reset to 0 just in case
     token_array = token_arr;
+    token_array_len = token_arr->count;
+    ast_array = ast_arr;
 
-    return declaration();
+    while (index != token_arr->count) {
+        push_ast_array(ast_array, declaration());
+    }
+    // return declaration();
 }
 
 static Ast* declaration() {

@@ -3,6 +3,7 @@
 #include "op.h"
 #include "token.h"
 #include "value.h"
+#include "ast.h"
 
 // This file will contain all the arrays used internally in this program
 typedef struct {
@@ -34,3 +35,13 @@ typedef struct {
 void init_value_array(ValueArray* arr);
 void push_value_array(ValueArray* arr, Value value);
 void free_value_array(ValueArray* arr);
+
+typedef struct {
+    int count;
+    int capacity;
+    Ast** ast;
+} AstArray;
+
+void init_ast_array(AstArray* arr);
+void push_ast_array(AstArray* arr, Ast* ast);
+void free_ast_array(AstArray* arr);

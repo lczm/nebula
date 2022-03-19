@@ -7,6 +7,7 @@
 #include "parser.h"
 #include "codegen.h"
 #include "vm.h"
+#include "debugging.h"
 
 static void start_repl() {
     printf("Nebula\n");
@@ -63,13 +64,15 @@ static void run_file(const char* path) {
     // TODO: Hide this behind a debug flag
     disassemble_token_array(&token_array);
 
-    Ast* ast = parse_tokens(&token_array);
+    AstArray ast_array;
+    init_ast_array(&ast_array);
+    parse_tokens(&token_array, &ast_array);
     // TODO: Hide this behind a debug flag
-    disassemble_ast(ast);
+    disassemble_ast(&ast_array);
 
     OpArray op_array; ValueArray constants_array;
     init_op_array(&op_array); init_value_array(&constants_array);
-    codegen(&op_array, &constants_array, ast);
+    codegen(&op_array, &constants_array, &ast_array);
 
     // Temporary, to get out of the VM loop
     push_op_array(&op_array, OP_RETURN);

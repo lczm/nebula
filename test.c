@@ -10,6 +10,7 @@
 #include "object.h"
 #include "hashmap.h"
 #include "value.h"
+#include "macros.h"
 
 static int pass_count = 0;
 static int fail_count = 0;
@@ -37,6 +38,36 @@ static void reset_count() {
     fail();             \
     return;             \
 } while (0);            \
+
+static void test_ast_wrap() {
+    printf("test_ast_wrap()\n");
+
+    Ast* number_ast = wrap_ast(make_number_expr(5), AST_NUMBER);
+    if (number_ast->type != AST_NUMBER)
+        FAIL();
+    if (((NumberExpr*)number_ast->as)->value != 5)
+        FAIL();
+
+    NumberExpr* number_1 = make_number_expr(6);
+    NumberExpr* number_2 = make_number_expr(10);
+    Ast* binary_ast = wrap_ast(make_binary_expr(
+                wrap_ast(number_1, AST_NUMBER),
+                wrap_ast(number_2, AST_NUMBER), make_token(TOKEN_PLUS)),
+            AST_BINARY);
+    if (binary_ast->type != AST_BINARY)
+        FAIL();
+    BinaryExpr* binary_expr = (BinaryExpr*)binary_ast->as;
+    if (binary_expr->left_expr->type != AST_NUMBER)
+        FAIL();
+    if (binary_expr->right_expr->type != AST_NUMBER)
+        FAIL();
+    if ((((NumberExpr*)binary_expr->left_expr->as)->value) != 6)
+        FAIL();
+    if ((((NumberExpr*)binary_expr->right_expr->as)->value) != 10)
+        FAIL();
+
+    PASS();
+}
 
 static void test_token_array() {
     printf("test_token_array()\n");
@@ -214,8 +245,20 @@ static void test_value_array() {
     PASS();
 }
 
+static void test_ast_array() {
+    printf("test_ast_array()\n");
+
+    AstArray ast_array;
+    init_ast_array(&ast_array);
+
+    NumberExpr* number_expr = make_number_expr(5);
+    Ast* ast_number = wrap_ast(make_number_expr(5), AST_NUMBER);
+
+    PASS();
+}
+
 static void test_hashmap() {
-    printf("test_hashmap\n");
+    printf("test_hashmap()\n");
 
     HashMap hashmap;
     init_hashmap(&hashmap);
@@ -352,7 +395,14 @@ static void test_parse_binary_expressions() {
     push_token_array(&token_array, token_number2);
 
     // For test debugging purposes
-    Ast* ast = parse_tokens(&token_array);
+    AstArray ast_array;
+    init_ast_array(&ast_array);
+    parse_tokens(&token_array, &ast_array);
+
+    if (ast_array.count != 1)
+        FAIL();
+
+    Ast* ast = ast_array.ast[0];
     // Make sure its a binary
     if (ast->type != AST_BINARY)
         FAIL();
@@ -371,7 +421,15 @@ static void test_parse_binary_expressions() {
     // Change from plus to minus
     token_array.tokens[1].type = TOKEN_MINUS;
     token_array.tokens[1].start = "-";
-    ast = parse_tokens(&token_array);
+
+    AstArray ast_array2;
+    init_ast_array(&ast_array2);
+    parse_tokens(&token_array, &ast_array2);
+    
+    if (ast_array2.count != 1)
+        FAIL();
+    ast = ast_array2.ast[0];
+
     // Make sure its a binary
     if (ast->type != AST_BINARY)
         FAIL();
@@ -390,7 +448,15 @@ static void test_parse_binary_expressions() {
     // Change from minus to star
     token_array.tokens[1].type = TOKEN_STAR;
     token_array.tokens[1].start = "*";
-    ast = parse_tokens(&token_array);
+
+    AstArray ast_array3;
+    init_ast_array(&ast_array3);
+    parse_tokens(&token_array, &ast_array3);
+
+    if (ast_array3.count != 1)
+        FAIL();
+    ast = ast_array3.ast[0];
+
     // Make sure its a binary
     if (ast->type != AST_BINARY)
         FAIL();
@@ -409,7 +475,15 @@ static void test_parse_binary_expressions() {
     // Change from star to slash
     token_array.tokens[1].type = TOKEN_SLASH;
     token_array.tokens[1].start = "/";
-    ast = parse_tokens(&token_array);
+
+    AstArray ast_array4;
+    init_ast_array(&ast_array4);
+    parse_tokens(&token_array, &ast_array4);
+
+    if (ast_array4.count != 1)
+        FAIL();
+    ast = ast_array4.ast[0];
+
     // Make sure its a binary
     if (ast->type != AST_BINARY)
         FAIL();
@@ -444,7 +518,14 @@ static void test_parse_unary_expressions() {
     push_token_array(&token_array, token_number);
 
     // disassemble_token_array(&token_array);
-    Ast* ast = parse_tokens(&token_array);
+    AstArray ast_array;
+    init_ast_array(&ast_array);
+    parse_tokens(&token_array, &ast_array);
+
+    if (ast_array.count != 1)
+        FAIL();
+    Ast* ast = ast_array.ast[0];
+
     // disassemble_ast(ast);
     if (ast->type != AST_UNARY)
         FAIL();
@@ -460,7 +541,13 @@ static void test_parse_unary_expressions() {
     token_array.tokens[0].type = TOKEN_BANG;
     token_array.tokens[0].start = "!";
 
-    ast = parse_tokens(&token_array);
+    AstArray ast_array2;
+    init_ast_array(&ast_array2);
+    parse_tokens(&token_array, &ast_array2);
+    if (ast_array2.count != 1)
+        FAIL();
+    ast = ast_array2.ast[0];
+
     if (ast->type != AST_UNARY)
         FAIL();
     unary_expr = (UnaryExpr*)ast->as;
@@ -520,10 +607,13 @@ int main(int argc, const char* argv[]) {
     // to the bigger parts of the program that composes
     // the basic "parts" of the program
 
+    // ast wrapping
+    test_ast_wrap();
     // arrays
     test_token_array();
     test_op_array();
     test_value_array();
+    test_ast_array();
     // hashmaps
     test_hashmap();
     // lexer

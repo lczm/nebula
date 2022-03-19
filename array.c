@@ -75,3 +75,27 @@ void free_value_array(ValueArray* arr) {
     arr->capacity = 0;
     free(arr->values);
 }
+
+void init_ast_array(AstArray* arr) {
+    arr->count = 0;
+    arr->capacity = 1;
+    arr->ast = ALLOCATE(Ast*, 1);
+}
+
+void push_ast_array(AstArray* arr, Ast* ast) {
+    if (arr->capacity < arr->count + 1) {
+        int new_capacity = arr->capacity * 2;
+        arr->ast = (Ast**)realloc(
+                arr->ast, sizeof(Value) * new_capacity);
+        arr->capacity = new_capacity;
+    }
+    arr->ast[arr->count] = ast;
+    arr->count++;
+}
+
+void free_ast_array(AstArray* arr) {
+    arr->count = 0;
+    arr->capacity = 0;
+    // Free the ast array, not the underlying ast values
+    free(arr->ast);
+}

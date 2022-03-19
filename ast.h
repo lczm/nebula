@@ -67,5 +67,5 @@ BoolExpr* make_bool_expr(bool value);
 // Convert expressions into values
 Value ast_to_value(Ast* ast);
 
-// Debugging
-void disassemble_ast(Ast* ast);
+// Useful function
+Ast* wrap_ast(void* raw_ast, AstType raw_type);
