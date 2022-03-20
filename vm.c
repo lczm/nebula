@@ -171,7 +171,7 @@ void run(Vm* vm, OpArray* op_arr, ValueArray* value_arr) {
                 break;
             }
             case OP_SET_GLOBAL: {
-                printf("@@@ OP_SET_GLOBAL\n");
+                // printf("@@@ OP_SET_GLOBAL\n");
                 OpCode name_constant_index = op_array->ops[vm->ip];
                 vm->ip++;
                 Obj* obj = AS_OBJ(value_arr->values[name_constant_index]);
@@ -189,7 +189,7 @@ void run(Vm* vm, OpArray* op_arr, ValueArray* value_arr) {
                 break;
             }
             case OP_GET_GLOBAL: {
-                printf("@@@ OP_GET_GLOBAL\n");
+                // printf("@@@ OP_GET_GLOBAL\n");
                 break;
             }
             default: // Just break out of those that are not handled yet
