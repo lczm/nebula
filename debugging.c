@@ -67,6 +67,13 @@ void disassemble_individual_ast(Ast* ast) {
             }
             break;
         }
+        case AST_VARIABLE_EXPR: {
+            VariableExpr* variable_expr = (VariableExpr*)ast->as;
+            char s[variable_expr->name.length + 1]; 
+            strncpy(s, variable_expr->name.start, variable_expr->name.length);
+            s[variable_expr->name.length] = '\0';
+            printf("[%-20s]: %s\n", "AST_VARIABLE_EXPR", s);
+        }
     }
 }
 
