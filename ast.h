@@ -7,11 +7,12 @@
 typedef enum {
     AST_NONE,
     AST_PRINT,
-    AST_VARIABLE,
+    AST_VARIABLE_STMT,
     AST_NUMBER,
     AST_BINARY,
     AST_UNARY,
     AST_BOOL,
+    AST_VARIABLE_EXPR,
 } AstType;
 
 typedef struct {
@@ -49,6 +50,15 @@ typedef struct {
     bool value;
 } BoolExpr;
 
+// The difference between a VariableStmt and a VariableExpr
+// is that a VariableStmt refers to `let x = 10;` for example
+// and a VariableExpr refers to the `a` in `print a;`
+// i.e. this is meant for the codegen backend to produce a 
+// OP_GET_{} opcode
+typedef struct {
+    Token name;
+} VariableExpr;
+
 bool is_stmt(Ast* ast);
 bool is_expr(Ast* ast);
 
@@ -63,6 +73,7 @@ NumberExpr* make_number_expr(double value);
 BinaryExpr* make_binary_expr(Ast* left_expr, Ast* right_expr, Token op);
 UnaryExpr* make_unary_expr(Ast* right_expr, Token op);
 BoolExpr* make_bool_expr(bool value);
+VariableExpr* make_variable_expr(Token name);
 
 // Convert expressions into values
 Value ast_to_value(Ast* ast);

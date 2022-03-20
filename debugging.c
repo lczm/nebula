@@ -14,7 +14,7 @@ void disassemble_individual_ast(Ast* ast) {
             disassemble_individual_ast(print_stmt->expr);
             break;
         }
-        case AST_VARIABLE: {
+        case AST_VARIABLE_STMT: {
             VariableStmt* variable_stmt = (VariableStmt*)ast->as;
             printf("[%-20s]\n", "VARIABLE_STMT");
             char s[variable_stmt->name.length + 1];

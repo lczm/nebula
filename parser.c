@@ -96,12 +96,14 @@ void parse_tokens(TokenArray* token_arr, AstArray* ast_arr) {
 
     while (index != token_arr->count) {
         push_ast_array(ast_array, declaration());
+        printf("index : %d, token_arr->count: %d\n", index, token_arr->count);
     }
     // return declaration();
 }
 
 static Ast* declaration() {
     if (match(TOKEN_LET)) {
+        move();
         return var_declaration();
     }
 
@@ -109,11 +111,11 @@ static Ast* declaration() {
 }
 
 static Ast* var_declaration() {
-    move();
     if (!match(TOKEN_IDENTIFIER)) {
         printf("var_declaration could not find an identifier after 'let'\n");
     }
 
+    // Already previously matched the identifier token
     Token identifier_name = get_current();
     move();
 
@@ -122,18 +124,19 @@ static Ast* var_declaration() {
     Ast* ast = make_ast();
     if (match(TOKEN_EQUAL)) {
         move();
+
         Ast* initializer_expr = expression();
         if (!match_and_move(TOKEN_SEMICOLON)) {
             printf("Did not have semicolon after variable declaration initialization\n");
         }
         VariableStmt* variable_stmt = make_variable_stmt(identifier_name, initializer_expr);
-        ast->type = AST_VARIABLE;
+        ast->type = AST_VARIABLE_STMT;
         ast->as = variable_stmt;
         return ast;
     } else { // variable declaration without initialization, let a;
         Ast* ast_none = make_ast();
         VariableStmt* variable_stmt = make_variable_stmt(identifier_name, ast_none);
-        ast->type = AST_VARIABLE;
+        ast->type = AST_VARIABLE_STMT;
         ast->as = variable_stmt;
         return ast;
     }
@@ -287,6 +290,12 @@ static Ast* primary() {
         BoolExpr* bool_expr = make_bool_expr(false);
         ast->as = bool_expr;
         ast->type = AST_BOOL;
+    } else if (match(TOKEN_IDENTIFIER)) {
+        Token identifier_name = get_current();
+        move();
+        VariableExpr* variable_expr = make_variable_expr(identifier_name);
+        ast->as = variable_expr;
+        ast->type = AST_VARIABLE_EXPR;
     }
 
     return ast;

@@ -10,9 +10,10 @@ bool is_stmt(Ast* ast) {
         case AST_BINARY:
         case AST_UNARY:
         case AST_BOOL:
+        case AST_VARIABLE_EXPR:
             return false;
         case AST_PRINT:
-        case AST_VARIABLE:
+        case AST_VARIABLE_STMT:
             return true;
     }
     return false;
@@ -22,12 +23,13 @@ bool is_expr(Ast* ast) {
     switch (ast->type) {
         case AST_NONE:
         case AST_PRINT:
-        case AST_VARIABLE:
+        case AST_VARIABLE_STMT:
             return false;
         case AST_NUMBER:
         case AST_BINARY:
         case AST_UNARY:
         case AST_BOOL:
+        case AST_VARIABLE_EXPR:
             return true;
     }
     return false;
@@ -88,6 +90,12 @@ BoolExpr* make_bool_expr(bool value) {
     return bool_expr;
 }
 
+VariableExpr* make_variable_expr(Token name) {
+    VariableExpr* variable_expr = (
+            VariableExpr*)malloc(sizeof(VariableExpr) * 1);
+    variable_expr->name = name;
+    return variable_expr;
+}
 
 Value ast_to_value(Ast* ast) {
     switch (ast->type) {

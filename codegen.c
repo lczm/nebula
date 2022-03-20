@@ -38,7 +38,7 @@ static void gen(Ast* ast) {
             emit_byte(OP_PRINT);
             break;
         }
-        case AST_VARIABLE: {
+        case AST_VARIABLE_STMT: {
             VariableStmt* variable_stmt = (VariableStmt*)ast->as;
             emit_byte(OP_SET_GLOBAL);
 
