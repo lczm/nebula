@@ -58,6 +58,8 @@ static void print_value(Value value) {
         } else {
             printf("false\n");
         }
+    } else if (value.type == VAL_OBJ) {
+        printf("Obj\n");
     }
 }
 
@@ -176,13 +178,13 @@ void run(Vm* vm, OpArray* op_arr, ValueArray* value_arr) {
                 vm->ip++;
                 Obj* obj = AS_OBJ(value_arr->values[name_constant_index]);
                 ObjString* obj_string = (ObjString*)obj;
-                print_obj_string(obj_string);
+                // print_obj_string(obj_string);
 
                 OpCode value_constant_index = op_array->ops[vm->ip];
                 vm->ip++;
                 Value value = value_arr->values[value_constant_index];
                 double number = AS_NUMBER(value);
-                printf("number: %f\n", number);
+                // printf("number: %f\n", number);
 
                 // Add to the variables hashmap
                 push_hashmap(&vm->variables, obj_string, value);
@@ -190,6 +192,16 @@ void run(Vm* vm, OpArray* op_arr, ValueArray* value_arr) {
             }
             case OP_GET_GLOBAL: {
                 // printf("@@@ OP_GET_GLOBAL\n");
+                OpCode name_constant_index = op_array->ops[vm->ip];
+                vm->ip++;
+
+                Obj* obj = AS_OBJ(value_arr->values[name_constant_index]);
+                ObjString* obj_string = (ObjString*)obj;
+                // printf("variable name from OP_GET_GLOBAL\n");
+                // print_obj_string(obj_string);
+
+                Value value = get_hashmap(&vm->variables, obj_string);
+                push(value);
                 break;
             }
             default: // Just break out of those that are not handled yet

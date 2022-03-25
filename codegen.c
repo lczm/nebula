@@ -110,6 +110,27 @@ static void gen(Ast* ast) {
                 break;
             }
         }
+        case AST_VARIABLE_EXPR: {
+            VariableExpr* variable_expr = (VariableExpr*)ast->as;
+            emit_byte(OP_GET_GLOBAL);
+            // Find the constant
+            printf("Trying to find the constant : %d\n", constants_array->count);
+            // 1) obj_string
+            // 2) number : 10
+            Token name = variable_expr->name;
+            for (int i = 0; i < constants_array->count; i++) {
+                Value value = constants_array->values[i];
+                // If it is an object and is an ObjString*
+                if (IS_OBJ(value) && OBJ_TYPE(value) == OBJ_STRING) {
+                    ObjString* obj_string = AS_OBJ_STRING(value);
+                    if (token_value_equals(name, value)) {
+                        printf("found variable name at : %d\n", i);
+                        emit_byte(i);
+                        break;
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -162,9 +183,10 @@ void disassemble_opcode_values(OpArray* op_arr, ValueArray* value_arr) {
                 i++; // value index
                 break;
             case OP_GET_GLOBAL:
-                i++;
-                printf("[%-20s] at %d: %s\n", "OP_GET_GLOBAL", i,
-                    "temporary_variable_placeholder"); break;
+                i++; // 
+                printf("[%-20s] at constants_array: %d\n", "OP_GET_GLOBAL", 
+                        op_arr->ops[i]);
+                break;
         }
     }
 }
