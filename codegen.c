@@ -40,19 +40,16 @@ static void gen(Ast* ast) {
         }
         case AST_VARIABLE_STMT: {
             VariableStmt* variable_stmt = (VariableStmt*)ast->as;
+
+            if (variable_stmt->initializer_expr->type != AST_NONE)
+                gen(variable_stmt->initializer_expr);
+
             emit_byte(OP_SET_GLOBAL);
 
             ObjString* variable_name = 
                 make_obj_string(variable_stmt->name.start, variable_stmt->name.length);
             Value variable_name_value = OBJ_VAL(variable_name);
             make_constant(variable_name_value);
-
-            // Does not have a initializer
-            if (variable_stmt->initializer_expr->type == AST_NONE) {
-                make_constant(NIL_VAL);
-            } else { // has an initializer
-                make_constant(ast_to_value(variable_stmt->initializer_expr));
-            }
             break;
         }
         case AST_NUMBER: { // emit a constant
@@ -179,8 +176,10 @@ void disassemble_opcode_values(OpArray* op_arr, ValueArray* value_arr) {
                 printf("[%-20s]\n", "OP_PRINT"); break;
             case OP_SET_GLOBAL:
                 printf("[%-20s]\n", "OP_SET_GLOBAL"); 
+                // TODO : these values should be printed out and not
+                // just skipped over
                 i++; // name index
-                i++; // value index
+                // i++; // value index
                 break;
             case OP_GET_GLOBAL:
                 i++; // 

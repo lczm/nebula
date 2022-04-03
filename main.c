@@ -70,17 +70,17 @@ static void run_file(const char* path) {
     // TODO: Hide this behind a debug flag
     disassemble_ast(&ast_array);
 
-    OpArray op_array; ValueArray constants_array;
-    init_op_array(&op_array); init_value_array(&constants_array);
-    codegen(&op_array, &constants_array, &ast_array);
+    OpArray op_array; ValueArray ast_constants_array;
+    init_op_array(&op_array); init_value_array(&ast_constants_array);
+    codegen(&op_array, &ast_constants_array, &ast_array);
 
     // Temporary, to get out of the VM loop
     push_op_array(&op_array, OP_RETURN);
-    disassemble_opcode_values(&op_array, &constants_array);
+    disassemble_opcode_values(&op_array, &ast_constants_array);
 
     Vm vm;
     init_vm(&vm);
-    run(&vm, &op_array, &constants_array);
+    run(&vm, &op_array, &ast_constants_array);
 
     free_vm(&vm);
     free_op_array(&op_array);

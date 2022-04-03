@@ -107,6 +107,14 @@ Value ast_to_value(Ast* ast) {
             BoolExpr* bool_expr = (BoolExpr*)ast->as;
             return BOOLEAN_VAL(bool_expr->value);
         }
+        case AST_BINARY: {
+            BinaryExpr* binary_expr = (BinaryExpr*)ast->as;
+            Value left_value  = ast_to_value(binary_expr->left_expr);
+            Value right_value = ast_to_value(binary_expr->right_expr);
+            if (IS_NUMBER(left_value) && IS_NUMBER(right_value)) {
+                return NUMBER_VAL(AS_NUMBER(left_value) + AS_NUMBER(right_value));
+            }
+        }
         default: {
             return NIL_VAL;
         }

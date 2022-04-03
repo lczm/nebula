@@ -40,3 +40,5 @@ typedef struct {
 #define OBJ_VAL(object)    ((Value){VAL_OBJ, {.obj = (Obj*)object}})
 // Set nil values to be false booleans
 #define NIL_VAL            ((Value){VAL_NIL, {.b = false}})
+
+bool values_equal(Value value1, Value value2);

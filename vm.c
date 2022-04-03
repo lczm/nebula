@@ -3,10 +3,11 @@
 
 #include "op.h"
 #include "vm.h"
+#include "macros.h"
 
 static Vm* vm;
 static OpArray* op_array;
-static ValueArray* value_array;
+static ValueArray* ast_value_array;
 
 void init_vm(Vm* v) {
     vm = v;
@@ -23,32 +24,6 @@ void free_vm(Vm* v) {
     free_value_array(&v->vm_stack);
 }
 
-static void push(Value value) {
-    // If there is still space
-    if (vm->vm_stack.capacity == 1) {
-        push_value_array(&vm->vm_stack, value);
-    } else if (vm->stack_top < vm->vm_stack.capacity) {
-        vm->vm_stack.values[vm->stack_top] = value;
-    } else {
-        printf("push_value_array\n");
-        push_value_array(&vm->vm_stack, value);
-    }
-    vm->stack_top++;
-}
-
-static Value pop() {
-    // Decrement stack_top 
-    vm->stack_top--;
-    // TODO: Debug flag for this to check if its in range
-    Value value = vm->vm_stack.values[vm->stack_top];
-    return value;
-}
-
-static Value peek(int index) {
-    Value value = vm->vm_stack.values[vm->vm_stack.count - 1 - index];
-    return value;
-}
-
 static void print_value(Value value) {
     if (value.type == VAL_NUMBER) {
         printf("%f\n", AS_NUMBER(value));
@@ -63,16 +38,38 @@ static void print_value(Value value) {
     }
 }
 
-static bool values_equal(Value value1, Value value2) {
-    if (value1.type == VAL_NUMBER && 
-        value2.type == VAL_NUMBER) {
-        return AS_NUMBER(value1) == AS_NUMBER(value2);
-    } else if (value1.type == VAL_BOOLEAN &&
-               value2.type == VAL_BOOLEAN) {
-        return AS_BOOLEAN(value1) == AS_BOOLEAN(value2);
-    } else { // TODO : This should have a proper return
-        return false;
+static void push(Value value) {
+    // If there is still space
+    // note to use count and not capacity
+    if (vm->stack_top < vm->vm_stack.count) {
+        vm->vm_stack.values[vm->stack_top] = value;
+    } else {
+        push_value_array(&vm->vm_stack, value);
     }
+
+    vm->stack_top++;
+}
+
+static Value pop() {
+    // Decrement stack_top 
+    // vm->stack_top--;
+    // TODO: Debug flag for this to check if its in range
+
+    // it has to be more than 0 to be able to return anything
+    if (vm->stack_top > 0) {
+        Value value = vm->vm_stack.values[vm->stack_top - 1];
+        // print_value(value);
+        vm->stack_top--;
+        return value;
+    } else {
+        printf("returning nil value as there is nothing to pop()\n");
+        return NIL_VAL;
+    }
+}
+
+static Value peek(int index) {
+    Value value = vm->vm_stack.values[vm->stack_top - 1 - index];
+    return value;
 }
 
 static void debug_vm_stack_top() {
@@ -89,10 +86,10 @@ static void debug_vm_stack() {
     }
 }
 
-void run(Vm* vm, OpArray* op_arr, ValueArray* value_arr) {
+void run(Vm* vm, OpArray* op_arr, ValueArray* ast_value_arr) {
     // Set these to the static variables for convenience
     op_array = op_arr;
-    value_array = value_arr;
+    ast_value_array = ast_value_arr;
     // Temporary ip pointer
     OpCode instruction;
 
@@ -104,9 +101,10 @@ void run(Vm* vm, OpArray* op_arr, ValueArray* value_arr) {
         vm->ip++;
         switch (instruction) {
             case OP_CONSTANT: {
+                // Get the constant_index, and take the number from the ast_value_arr
                 OpCode constant_index = op_array->ops[vm->ip];
                 vm->ip++;
-                double number = AS_NUMBER(value_arr->values[constant_index]);
+                double number = AS_NUMBER(ast_value_arr->values[constant_index]);
                 push(NUMBER_VAL(number));
                 break;
             }
@@ -169,22 +167,22 @@ void run(Vm* vm, OpArray* op_arr, ValueArray* value_arr) {
                 return;
             }
             case OP_PRINT: {
-                print_value(pop());
+                // Value value = pop();
+                print_value(peek(0));
                 break;
             }
             case OP_SET_GLOBAL: {
-                // printf("@@@ OP_SET_GLOBAL\n");
+                // Get the variable_name from the constants_array
                 OpCode name_constant_index = op_array->ops[vm->ip];
+                // Increment it as it has 'eaten' this op
                 vm->ip++;
-                Obj* obj = AS_OBJ(value_arr->values[name_constant_index]);
+                Obj* obj = AS_OBJ(ast_value_arr->values[name_constant_index]);
+                // The variable_name representation is an ObjString*
                 ObjString* obj_string = (ObjString*)obj;
-                // print_obj_string(obj_string);
 
-                OpCode value_constant_index = op_array->ops[vm->ip];
-                vm->ip++;
-                Value value = value_arr->values[value_constant_index];
+                // Get the value from the top of the stack
+                Value value = peek(0);
                 double number = AS_NUMBER(value);
-                // printf("number: %f\n", number);
 
                 // Add to the variables hashmap
                 push_hashmap(&vm->variables, obj_string, value);
@@ -195,7 +193,7 @@ void run(Vm* vm, OpArray* op_arr, ValueArray* value_arr) {
                 OpCode name_constant_index = op_array->ops[vm->ip];
                 vm->ip++;
 
-                Obj* obj = AS_OBJ(value_arr->values[name_constant_index]);
+                Obj* obj = AS_OBJ(ast_value_arr->values[name_constant_index]);
                 ObjString* obj_string = (ObjString*)obj;
                 // printf("variable name from OP_GET_GLOBAL\n");
                 // print_obj_string(obj_string);
