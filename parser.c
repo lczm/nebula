@@ -96,7 +96,6 @@ void parse_tokens(TokenArray* token_arr, AstArray* ast_arr) {
 
     while (index != token_arr->count) {
         push_ast_array(ast_array, declaration());
-        printf("index : %d, token_arr->count: %d\n", index, token_arr->count);
     }
     // return declaration();
 }
