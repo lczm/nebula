@@ -9,6 +9,8 @@
 #include "vm.h"
 #include "debugging.h"
 
+#define DEBUGGING 1
+
 static void start_repl() {
     printf("Nebula\n");
 }
@@ -56,19 +58,20 @@ static char* read_file(const char* path) {
     return buffer;
 }
 
-static void run_file(const char* path) {
-    char* source = read_file(path);
+static void run_source(const char* source) {
     TokenArray token_array;
     init_token_array(&token_array);
     lex_source(&token_array, source);
-    // TODO: Hide this behind a debug flag
+#ifdef DEBUGGING
     disassemble_token_array(&token_array);
+#endif
 
     AstArray ast_array;
     init_ast_array(&ast_array);
     parse_tokens(&token_array, &ast_array);
-    // TODO: Hide this behind a debug flag
+#ifdef DEBUGGING
     disassemble_ast(&ast_array);
+#endif
 
     OpArray op_array; ValueArray ast_constants_array;
     init_op_array(&op_array); init_value_array(&ast_constants_array);
@@ -76,7 +79,9 @@ static void run_file(const char* path) {
 
     // Temporary, to get out of the VM loop
     push_op_array(&op_array, OP_RETURN);
+#ifdef DEBUGGING
     disassemble_opcode_values(&op_array, &ast_constants_array);
+#endif
 
     Vm vm;
     init_vm(&vm);
@@ -84,7 +89,48 @@ static void run_file(const char* path) {
 
     free_vm(&vm);
     free_op_array(&op_array);
+    free_value_array(&ast_constants_array);
     free_token_array(&token_array);
+    // free(source);
+}
+
+static void run_file(const char* path) {
+    char* source = read_file(path);
+
+    run_source(source);
+
+//     TokenArray token_array;
+//     init_token_array(&token_array);
+//     lex_source(&token_array, source);
+// #ifdef DEBUGGING
+//     disassemble_token_array(&token_array);
+// #endif
+// 
+//     AstArray ast_array;
+//     init_ast_array(&ast_array);
+//     parse_tokens(&token_array, &ast_array);
+// #ifdef DEBUGGING
+//     disassemble_ast(&ast_array);
+// #endif
+// 
+//     OpArray op_array; ValueArray ast_constants_array;
+//     init_op_array(&op_array); init_value_array(&ast_constants_array);
+//     codegen(&op_array, &ast_constants_array, &ast_array);
+// 
+//     // Temporary, to get out of the VM loop
+//     push_op_array(&op_array, OP_RETURN);
+// #ifdef DEBUGGING
+//     disassemble_opcode_values(&op_array, &ast_constants_array);
+// #endif
+// 
+//     Vm vm;
+//     init_vm(&vm);
+//     run(&vm, &op_array, &ast_constants_array);
+// 
+//     free_vm(&vm);
+//     free_op_array(&op_array);
+//     free_value_array(&ast_constants_array);
+//     free_token_array(&token_array);
     free(source);
 }
 

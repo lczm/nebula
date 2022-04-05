@@ -588,13 +588,15 @@ static void test_obj_string() {
     PASS();
 }
 
-static void test_vm_stack() {
-    printf("test_vm_stack()\n");
-    PASS();
-}
+static void test_vm_global_environment() {
+    printf("test_vm_global_environment()\n");
 
-static void test_vm_eval_binary() {
-    printf("test_vm_eval_binary()\n");
+    char test_string[] = "let a = 10;";
+    ObjString* obj_string = make_obj_string(test_string, strlen(test_string));
+    // Test obj_string length
+    if (obj_string->length != 11)
+        FAIL();
+
     PASS();
 }
 
@@ -629,8 +631,7 @@ int main(int argc, const char* argv[]) {
     // obj tests
     test_obj_string();
     // vm tests
-    test_vm_stack();
-    test_vm_eval_binary();
+    test_vm_global_environment();
 
     printf("[-----Tests results-----]\n");
     printf("Pass : %d\n", pass_count);
