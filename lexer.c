@@ -82,6 +82,15 @@ void lex_source(TokenArray* token_array, const char* source) {
             current++;
         }
 
+        // TODO : Ignore strings for now
+        // if (s[current] == '"') {
+        //     current++;
+        //     while (s[current] != '"') {
+        //         current++;
+        //     }
+        //     start = current;
+        // }
+
         if (is_digit()) {
             current = start;
             while (is_digit()) {
