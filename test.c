@@ -11,9 +11,54 @@
 #include "hashmap.h"
 #include "value.h"
 #include "macros.h"
+#include "codegen.h"
+#include "vm.h"
+#include "debugging.h"
+
+#define DEBUGGING 0
 
 static int pass_count = 0;
 static int fail_count = 0;
+
+Vm* run_source_return_vm(const char* source) {
+    TokenArray token_array;
+    init_token_array(&token_array);
+    lex_source(&token_array, source);
+#ifdef DEBUGGING
+    disassemble_token_array(&token_array);
+#endif
+
+    AstArray ast_array;
+    init_ast_array(&ast_array);
+    parse_tokens(&token_array, &ast_array);
+
+#ifdef DEBUGGING
+    disassemble_ast(&ast_array);
+#endif
+
+    OpArray op_array; ValueArray ast_constants_array;
+    init_op_array(&op_array); init_value_array(&ast_constants_array);
+    codegen(&op_array, &ast_constants_array, &ast_array);
+
+    // Temporary, to get out of the VM loop
+    push_op_array(&op_array, OP_RETURN);
+#ifdef DEBUGGING
+    disassemble_opcode_values(&op_array, &ast_constants_array);
+#endif
+
+    // Vm vm;
+    Vm* vm = ALLOCATE(Vm, 1);
+    init_vm(vm);
+    run(vm, &op_array, &ast_constants_array);
+
+    // free_vm(&vm);
+    // free_op_array(&op_array);
+    // free_value_array(&ast_constants_array);
+    // free_token_array(&token_array);
+    // free(source);
+
+    return vm;
+}
 
 static void pass() {
     pass_count++;
@@ -591,11 +636,29 @@ static void test_obj_string() {
 static void test_vm_global_environment() {
     printf("test_vm_global_environment()\n");
 
-    char test_string[] = "let a = 10;";
+    char test_string[] = "let test1 = 10;";
     ObjString* obj_string = make_obj_string(test_string, strlen(test_string));
     // Test obj_string length
-    if (obj_string->length != 11)
+    if (obj_string->length != 15)
         FAIL();
+
+    Vm* vm = run_source_return_vm(test_string);
+
+    HashMap* variables = &vm->variables;
+    if (variables->count != 1)
+        FAIL();
+    char variable_string_test1[] = "test1";
+    Value value = get_hashmap(
+            variables, make_obj_string(variable_string_test1, strlen(variable_string_test1)));
+
+    // Check that the value of the variable is 10
+    // if (!IS_NUMBER(value))
+    //     FAIL();
+
+    // if (AS_NUMBER(value) != 10.0) {
+    //     printf("%f\n", AS_NUMBER(value));
+    //     FAIL();
+    // }
 
     PASS();
 }
@@ -608,7 +671,6 @@ int main(int argc, const char* argv[]) {
     // Test functions should go from the basics
     // to the bigger parts of the program that composes
     // the basic "parts" of the program
-
     // ast wrapping
     test_ast_wrap();
     // arrays

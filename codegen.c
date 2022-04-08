@@ -111,7 +111,7 @@ static void gen(Ast* ast) {
             VariableExpr* variable_expr = (VariableExpr*)ast->as;
             emit_byte(OP_GET_GLOBAL);
             // Find the constant
-            printf("Trying to find the constant : %d\n", constants_array->count);
+            // printf("Trying to find the constant : %d\n", constants_array->count);
             // 1) obj_string
             // 2) number : 10
             Token name = variable_expr->name;
@@ -121,7 +121,7 @@ static void gen(Ast* ast) {
                 if (IS_OBJ(value) && OBJ_TYPE(value) == OBJ_STRING) {
                     ObjString* obj_string = AS_OBJ_STRING(value);
                     if (token_value_equals(name, value)) {
-                        printf("found variable name at : %d\n", i);
+                        // printf("found variable name at : %d\n", i);
                         emit_byte(i);
                         break;
                     }
