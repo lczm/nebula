@@ -647,6 +647,7 @@ static void test_vm_global_environment() {
     HashMap* variables = &vm->variables;
     if (variables->count != 1)
         FAIL();
+
     char variable_string_test1[] = "test1";
     Value value = get_hashmap(
             variables, make_obj_string(variable_string_test1, strlen(variable_string_test1)));
@@ -659,6 +660,37 @@ static void test_vm_global_environment() {
         printf("%f\n", AS_NUMBER(value));
         FAIL();
     }
+
+    PASS();
+}
+
+static void test_vm_order_of_operations() {
+    printf("test_vm_order_of_operations()\n");
+
+    char test_string[] = "let a = 10;"
+                         "let b = 20;"
+                         "let c = a + b;";
+
+    Vm* vm = run_source_return_vm(test_string);
+    HashMap* variables = &vm->variables;
+    if (variables->count != 3)
+        FAIL();
+
+    ObjString* obj_string_a = make_obj_string("a", strlen("a"));
+    ObjString* obj_string_b = make_obj_string("b", strlen("b"));
+    ObjString* obj_string_c = make_obj_string("c", strlen("c"));
+    Value value_a = get_hashmap(variables, obj_string_a);
+    Value value_b = get_hashmap(variables, obj_string_b);
+    Value value_c = get_hashmap(variables, obj_string_c);
+
+    if(!IS_NUMBER(value_a) || !IS_NUMBER(value_b) || !IS_NUMBER(value_c))
+        FAIL();
+    
+    if (AS_NUMBER(value_c) != AS_NUMBER(value_a) + AS_NUMBER(value_b))
+        FAIL();
+
+    if (AS_NUMBER(value_c) != 30.0)
+        FAIL();
 
     PASS();
 }
@@ -694,6 +726,7 @@ int main(int argc, const char* argv[]) {
     test_obj_string();
     // vm tests
     test_vm_global_environment();
+    test_vm_order_of_operations();
 
     printf("[-----Tests results-----]\n");
     printf("Pass : %d\n", pass_count);
