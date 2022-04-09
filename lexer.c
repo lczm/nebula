@@ -102,7 +102,7 @@ void lex_source(TokenArray* token_array, const char* source) {
         } else if (is_alpha()) {
             // Parse the alpha
             current = start;
-            while (is_alpha()) {
+            while (is_alpha() || is_digit()) {
                 current++;
             }
             // Check for the keywords
