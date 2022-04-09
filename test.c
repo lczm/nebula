@@ -15,7 +15,7 @@
 #include "vm.h"
 #include "debugging.h"
 
-#define DEBUGGING 0
+#define DEBUGGING_ON 0
 
 static int pass_count = 0;
 static int fail_count = 0;
@@ -24,7 +24,7 @@ Vm* run_source_return_vm(const char* source) {
     TokenArray token_array;
     init_token_array(&token_array);
     lex_source(&token_array, source);
-#ifdef DEBUGGING
+#if DEBUGGING_ON
     disassemble_token_array(&token_array);
 #endif
 
@@ -32,7 +32,7 @@ Vm* run_source_return_vm(const char* source) {
     init_ast_array(&ast_array);
     parse_tokens(&token_array, &ast_array);
 
-#ifdef DEBUGGING
+#if DEBUGGING_ON
     disassemble_ast(&ast_array);
 #endif
 
@@ -42,7 +42,7 @@ Vm* run_source_return_vm(const char* source) {
 
     // Temporary, to get out of the VM loop
     push_op_array(&op_array, OP_RETURN);
-#ifdef DEBUGGING
+#if DEBUGGING_ON
     disassemble_opcode_values(&op_array, &ast_constants_array);
 #endif
 
@@ -652,13 +652,13 @@ static void test_vm_global_environment() {
             variables, make_obj_string(variable_string_test1, strlen(variable_string_test1)));
 
     // Check that the value of the variable is 10
-    // if (!IS_NUMBER(value))
-    //     FAIL();
+    if (!IS_NUMBER(value))
+        FAIL();
 
-    // if (AS_NUMBER(value) != 10.0) {
-    //     printf("%f\n", AS_NUMBER(value));
-    //     FAIL();
-    // }
+    if (AS_NUMBER(value) != 10.0) {
+        printf("%f\n", AS_NUMBER(value));
+        FAIL();
+    }
 
     PASS();
 }
