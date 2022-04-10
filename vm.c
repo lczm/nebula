@@ -165,12 +165,16 @@ void run(Vm* vm, OpArray* op_arr, ValueArray* ast_value_arr) {
                 break;
             }
             case OP_RETURN: {
+#if DEBUGGING
                 printf("op_return %f\n", AS_NUMBER(pop()));
+#endif
                 return;
             }
             case OP_PRINT: {
                 // Value value = pop();
+#if DEBUGGING
                 print_value(peek(0));
+#endif
                 break;
             }
             case OP_SET_GLOBAL: {

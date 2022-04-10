@@ -693,24 +693,37 @@ static void test_vm_order_of_operations() {
         FAIL();
 
     char test_string2[] = "let a2 = 10 / 2 + 3;"
-                          "let b2 = (10 + 5) / 3;";
+                          "let b2 = (10 + 5) / 3;"
+                          "let c2 = 3 - (10 * 5);"
+                          "let d2 = 3 + (10 * 5);";
     vm = run_source_return_vm(test_string2);
     variables = &vm->variables;
-    if (variables->count != 1)
+    if (variables->count != 4)
         FAIL();
 
     ObjString* obj_string_a2 = make_obj_string("a2", strlen("a2"));
     ObjString* obj_string_b2 = make_obj_string("b2", strlen("b2"));
+    ObjString* obj_string_c2 = make_obj_string("c2", strlen("c2"));
+    ObjString* obj_string_d2 = make_obj_string("d2", strlen("d2"));
     Value value_a2 = get_hashmap(variables, obj_string_a2);
     Value value_b2 = get_hashmap(variables, obj_string_b2);
+    Value value_c2 = get_hashmap(variables, obj_string_c2);
+    Value value_d2 = get_hashmap(variables, obj_string_d2);
     
-    if (!IS_NUMBER(value_a2) || !IS_NUMBER(value_b2))
+    if (!IS_NUMBER(value_a2) || !IS_NUMBER(value_b2) || 
+        !IS_NUMBER(value_c2) || !IS_NUMBER(value_d2))
         FAIL();
 
     if (AS_NUMBER(value_a2) != 8.0)
         FAIL();
     
     if (AS_NUMBER(value_b2) != 5.0)
+        FAIL();
+
+    if (AS_NUMBER(value_c2) != -47.0)
+        FAIL();
+
+    if (AS_NUMBER(value_d2) != 53)
         FAIL();
 
     PASS();
