@@ -143,11 +143,6 @@ static Ast* var_declaration() {
 }
 
 static Ast* statement() {
-    Ast* ast = expression_statement();
-    return ast;
-}
-
-static Ast* expression_statement() {
     if (match(TOKEN_PRINT)) {
         move();
         Ast* ast = expression();
@@ -158,7 +153,13 @@ static Ast* expression_statement() {
 
         eat_or_error(TOKEN_SEMICOLON, "Must have ';' after statement");
         return ast_stmt;
+    } else {
+        Ast* ast = expression_statement();
+        return ast;
     }
+}
+
+static Ast* expression_statement() {
 
     return expression();
 
