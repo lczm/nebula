@@ -105,8 +105,19 @@ void lex_source(TokenArray* token_array, const char* source) {
             while (is_alpha() || is_digit()) {
                 current++;
             }
+            // The if clauses can become quite troublesome
+            // especially if considering cases like 'if else'
+            // TODO : if else should collpas einto something simpler
+            if (check_keyword("if", 2)) {
+                Token token_if = make_token(TOKEN_IF);
+                push_token_array(token_array, token_if);
+            } else if (check_keyword("else", 4)) {
+                Token token_else = make_token(TOKEN_ELSE);
+                push_token_array(token_array, token_else);
+            }
+
             // Check for the keywords
-            if (check_keyword("let", 3)) {
+            else if (check_keyword("let", 3)) {
                 Token token_let = make_token(TOKEN_LET);
                 push_token_array(token_array, token_let);
             } else if (check_keyword("for", 3)) {
@@ -124,12 +135,6 @@ void lex_source(TokenArray* token_array, const char* source) {
             } else if (check_keyword("func", 4)) {
                 Token token_func = make_token(TOKEN_FUNC);
                 push_token_array(token_array, token_func);
-            } else if (check_keyword("if", 2)) {
-                Token token_if = make_token(TOKEN_IF);
-                push_token_array(token_array, token_if);
-            } else if (check_keyword("else", 4)) {
-                Token token_else = make_token(TOKEN_ELSE);
-                push_token_array(token_array, token_else);
             } else if (check_keyword("nil", 3)) {
                 Token token_nil = make_token(TOKEN_NIL);
                 push_token_array(token_array, token_nil);
