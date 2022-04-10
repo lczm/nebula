@@ -73,6 +73,13 @@ void disassemble_individual_ast(Ast* ast) {
             strncpy(s, variable_expr->name.start, variable_expr->name.length);
             s[variable_expr->name.length] = '\0';
             printf("[%-20s]: %s\n", "AST_VARIABLE_EXPR", s);
+            break;
+        }
+        case AST_GROUP: {
+            GroupExpr* group_expr = (GroupExpr*)ast->as;
+            printf("[%-20s]\n", "GROUP_EXPR");
+            disassemble_individual_ast(group_expr->expr);
+            break;
         }
     }
 }

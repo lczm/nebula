@@ -667,29 +667,50 @@ static void test_vm_global_environment() {
 static void test_vm_order_of_operations() {
     printf("test_vm_order_of_operations()\n");
 
-    char test_string[] = "let a = 10;"
-                         "let b = 20;"
-                         "let c = a + b;";
+    char test_string1[] = "let a1 = 10;"
+                          "let b1 = 20;"
+                          "let c1 = a1 + b1;";
 
-    Vm* vm = run_source_return_vm(test_string);
+    Vm* vm = run_source_return_vm(test_string1);
     HashMap* variables = &vm->variables;
     if (variables->count != 3)
         FAIL();
 
-    ObjString* obj_string_a = make_obj_string("a", strlen("a"));
-    ObjString* obj_string_b = make_obj_string("b", strlen("b"));
-    ObjString* obj_string_c = make_obj_string("c", strlen("c"));
-    Value value_a = get_hashmap(variables, obj_string_a);
-    Value value_b = get_hashmap(variables, obj_string_b);
-    Value value_c = get_hashmap(variables, obj_string_c);
+    ObjString* obj_string_a1 = make_obj_string("a1", strlen("a1"));
+    ObjString* obj_string_b1 = make_obj_string("b1", strlen("b1"));
+    ObjString* obj_string_c1 = make_obj_string("c1", strlen("c1"));
+    Value value_a1 = get_hashmap(variables, obj_string_a1);
+    Value value_b1 = get_hashmap(variables, obj_string_b1);
+    Value value_c1 = get_hashmap(variables, obj_string_c1);
 
-    if(!IS_NUMBER(value_a) || !IS_NUMBER(value_b) || !IS_NUMBER(value_c))
+    if(!IS_NUMBER(value_a1) || !IS_NUMBER(value_b1) || !IS_NUMBER(value_c1))
         FAIL();
     
-    if (AS_NUMBER(value_c) != AS_NUMBER(value_a) + AS_NUMBER(value_b))
+    if (AS_NUMBER(value_c1) != AS_NUMBER(value_a1) + AS_NUMBER(value_b1))
         FAIL();
 
-    if (AS_NUMBER(value_c) != 30.0)
+    if (AS_NUMBER(value_c1) != 30.0)
+        FAIL();
+
+    char test_string2[] = "let a2 = 10 / 2 + 3;"
+                          "let b2 = (10 + 5) / 3;";
+    vm = run_source_return_vm(test_string2);
+    variables = &vm->variables;
+    if (variables->count != 1)
+        FAIL();
+
+    ObjString* obj_string_a2 = make_obj_string("a2", strlen("a2"));
+    ObjString* obj_string_b2 = make_obj_string("b2", strlen("b2"));
+    Value value_a2 = get_hashmap(variables, obj_string_a2);
+    Value value_b2 = get_hashmap(variables, obj_string_b2);
+    
+    if (!IS_NUMBER(value_a2) || !IS_NUMBER(value_b2))
+        FAIL();
+
+    if (AS_NUMBER(value_a2) != 8.0)
+        FAIL();
+    
+    if (AS_NUMBER(value_b2) != 5.0)
         FAIL();
 
     PASS();

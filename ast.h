@@ -13,6 +13,7 @@ typedef enum {
     AST_UNARY,
     AST_BOOL,
     AST_VARIABLE_EXPR,
+    AST_GROUP,
 } AstType;
 
 typedef struct {
@@ -59,6 +60,10 @@ typedef struct {
     Token name;
 } VariableExpr;
 
+typedef struct {
+    Ast* expr;
+} GroupExpr;
+
 bool is_stmt(Ast* ast);
 bool is_expr(Ast* ast);
 
@@ -74,6 +79,7 @@ BinaryExpr* make_binary_expr(Ast* left_expr, Ast* right_expr, Token op);
 UnaryExpr* make_unary_expr(Ast* right_expr, Token op);
 BoolExpr* make_bool_expr(bool value);
 VariableExpr* make_variable_expr(Token name);
+GroupExpr* make_group_expr(Ast* expr);
 
 // Convert expressions into values
 Value ast_to_value(Ast* ast);

@@ -127,6 +127,12 @@ static void gen(Ast* ast) {
                     }
                 }
             }
+            break;
+        }
+        case AST_GROUP: {
+            GroupExpr* group_expr = (GroupExpr*)ast->as;
+            gen(group_expr->expr);
+            break;
         }
     }
 }

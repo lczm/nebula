@@ -127,6 +127,7 @@ static Ast* var_declaration() {
         Ast* initializer_expr = expression();
         if (!match_and_move(TOKEN_SEMICOLON)) {
             printf("Did not have semicolon after variable declaration initialization\n");
+            return NULL;
         }
         VariableStmt* variable_stmt = make_variable_stmt(identifier_name, initializer_expr);
         ast->type = AST_VARIABLE_STMT;
@@ -295,6 +296,16 @@ static Ast* primary() {
         VariableExpr* variable_expr = make_variable_expr(identifier_name);
         ast->as = variable_expr;
         ast->type = AST_VARIABLE_EXPR;
+    } else if (match(TOKEN_LEFT_PAREN)) {
+        move();
+        Ast* expr = expression();
+        if (!match_and_move(TOKEN_RIGHT_PAREN)) {
+            printf("After a '(', followed by an expression, should have a closing ')'.\n");
+            return NULL;
+        }
+        GroupExpr* group_expr = make_group_expr(expr);
+        ast->as = group_expr;
+        ast->type = AST_GROUP;
     }
 
     return ast;

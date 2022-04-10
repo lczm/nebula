@@ -11,6 +11,7 @@ bool is_stmt(Ast* ast) {
         case AST_UNARY:
         case AST_BOOL:
         case AST_VARIABLE_EXPR:
+        case AST_GROUP:
             return false;
         case AST_PRINT:
         case AST_VARIABLE_STMT:
@@ -30,6 +31,7 @@ bool is_expr(Ast* ast) {
         case AST_UNARY:
         case AST_BOOL:
         case AST_VARIABLE_EXPR:
+        case AST_GROUP:
             return true;
     }
     return false;
@@ -95,6 +97,13 @@ VariableExpr* make_variable_expr(Token name) {
             VariableExpr*)malloc(sizeof(VariableExpr) * 1);
     variable_expr->name = name;
     return variable_expr;
+}
+
+GroupExpr* make_group_expr(Ast* expr) {
+    GroupExpr* group_expr = (
+        GroupExpr*)malloc(sizeof(GroupExpr) * 1);
+    group_expr->expr = expr;
+    return group_expr;
 }
 
 Value ast_to_value(Ast* ast) {
