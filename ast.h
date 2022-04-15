@@ -1,12 +1,15 @@
 #pragma once
 
 #include <stdbool.h>
+#include "array.h"
 #include "token.h"
 #include "value.h"
 
 typedef enum {
     AST_NONE,
     AST_PRINT,
+    AST_IF,
+    AST_BLOCK,
     AST_VARIABLE_STMT,
     AST_NUMBER,
     AST_BINARY,
@@ -16,16 +19,27 @@ typedef enum {
     AST_GROUP,
 } AstType;
 
-typedef struct {
+// Since in array.h it already declares typdef struct Ast to Ast
+struct Ast {
     AstType type;
     void*   as;
-} Ast;
+};
 
 // This should only be used for debugging
 // until built-in functions work
 typedef struct {
     Ast* expr;
 } PrintStmt;
+
+typedef struct {
+    Ast* condition_expr;
+    Ast* then_stmt;
+    Ast* else_stmt;
+} IfStmt;
+
+typedef struct {
+    AstArray ast_array;
+} BlockStmt;
 
 typedef struct {
     Token name;
@@ -72,6 +86,8 @@ Ast* make_ast();
 // Statements
 PrintStmt* make_print_stmt(Ast* expr);
 VariableStmt* make_variable_stmt(Token name, Ast* initializer_expr);
+IfStmt* make_if_stmt(Ast* condition_expr, Ast* then_stmt, Ast* else_stmt);
+BlockStmt* make_block_stmt();
 
 // Expressions
 NumberExpr* make_number_expr(double value);

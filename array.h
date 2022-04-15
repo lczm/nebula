@@ -3,7 +3,11 @@
 #include "op.h"
 #include "token.h"
 #include "value.h"
-#include "ast.h"
+
+// Forward declare the ast type
+// makes array.h tinier, and allows ast.h itself to include array.h
+// ast.h itself will need types from here like AstArray
+typedef struct Ast Ast;
 
 // This file will contain all the arrays used internally in this program
 typedef struct {

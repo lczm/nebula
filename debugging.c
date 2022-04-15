@@ -5,6 +5,10 @@
 #include "ast.h"
 
 void disassemble_individual_ast(Ast* ast) {
+    if (ast == NULL) {
+        printf("[%-20s]\n", "NULL");
+        return;
+    }
     switch (ast->type) {
         case AST_NONE:
             return;
@@ -12,6 +16,26 @@ void disassemble_individual_ast(Ast* ast) {
             PrintStmt* print_stmt = (PrintStmt*)ast->as;
             printf("[%-20s]\n", "PRINT_STMT");
             disassemble_individual_ast(print_stmt->expr);
+            break;
+        }
+        case AST_IF: {
+            IfStmt* if_stmt = (IfStmt*)ast->as;
+            printf("[%-20s]\n", "IF_STMT");
+            printf("[%-20s]\n", " IF_STMT [CONDITION]");
+            disassemble_individual_ast(if_stmt->condition_expr);
+            printf("[%-20s]\n", " IF_STMT [THEN]");
+            disassemble_individual_ast(if_stmt->then_stmt);
+            printf("[%-20s]\n", " IF_STMT [ELSE]");
+            disassemble_individual_ast(if_stmt->else_stmt);
+            // condition, then & else
+            break;
+        }
+        case AST_BLOCK: {
+            BlockStmt* block_stmt = (BlockStmt*)ast->as;
+            printf("[%-20s]\n", "BLOCK_STMT");
+            for (int i = 0; i < block_stmt->ast_array.count; i++) {
+                disassemble_individual_ast(block_stmt->ast_array.ast[i]);
+            }
             break;
         }
         case AST_VARIABLE_STMT: {
@@ -40,7 +64,7 @@ void disassemble_individual_ast(Ast* ast) {
             printf("[%-10s]: ", "Right:");
             disassemble_individual_ast(binary_expr->right_expr);
             // Delimit it with c_str end char
-            char s[binary_expr->op.length + 1]; 
+            char s[binary_expr->op.length + 1];
             strncpy(s, binary_expr->op.start, binary_expr->op.length);
             s[binary_expr->op.length] = '\0';
             printf("[%-10s]: %s\n", "Token: ", s);
@@ -50,7 +74,7 @@ void disassemble_individual_ast(Ast* ast) {
             UnaryExpr* unary_expr = (UnaryExpr*)ast->as;
             printf("[%-20s]\n", "UNARY_EXPR");
             // Delimit it with c_str end char
-            char s[unary_expr->op.length + 1]; 
+            char s[unary_expr->op.length + 1];
             strncpy(s, unary_expr->op.start, unary_expr->op.length);
             s[unary_expr->op.length] = '\0';
             printf("[%-10s]: %s\n", "Token: ", s);
@@ -69,7 +93,7 @@ void disassemble_individual_ast(Ast* ast) {
         }
         case AST_VARIABLE_EXPR: {
             VariableExpr* variable_expr = (VariableExpr*)ast->as;
-            char s[variable_expr->name.length + 1]; 
+            char s[variable_expr->name.length + 1];
             strncpy(s, variable_expr->name.start, variable_expr->name.length);
             s[variable_expr->name.length] = '\0';
             printf("[%-20s]: %s\n", "AST_VARIABLE_EXPR", s);

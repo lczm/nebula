@@ -143,15 +143,41 @@ static Ast* var_declaration() {
 }
 
 static Ast* statement() {
-    if (match(TOKEN_PRINT)) {
-        move();
+    if (match_and_move(TOKEN_PRINT)) {
         Ast* ast = expression();
         PrintStmt* print_stmt = make_print_stmt(ast);
-        Ast* ast_stmt = make_ast();
-        ast_stmt->as = print_stmt;
-        ast_stmt->type = AST_PRINT;
+        Ast* ast_stmt = wrap_ast(print_stmt, AST_PRINT);
 
         eat_or_error(TOKEN_SEMICOLON, "Must have ';' after statement");
+        return ast_stmt;
+    } else if (match_and_move(TOKEN_IF)) {
+        match_and_move(TOKEN_LEFT_PAREN);
+        Ast* condition_expr = expression();
+        match_and_move(TOKEN_RIGHT_PAREN);
+
+        // Check that there is a left brace
+        if (!match(TOKEN_LEFT_BRACE)) {
+            printf("After if needs to have a left brace\n");
+        }
+
+        // Block statement
+        Ast* then_stmt = statement();
+        // match_and_move(TOKEN_RIGHT_BRACE);
+
+        IfStmt* if_stmt = make_if_stmt(condition_expr, then_stmt, NULL);
+        Ast* ast_stmt = wrap_ast(if_stmt, AST_IF);
+
+        return ast_stmt;
+    } else if (match_and_move(TOKEN_LEFT_BRACE)) {
+        BlockStmt* block_stmt = make_block_stmt();
+
+        while (get_current().type != TOKEN_RIGHT_BRACE) {
+            push_ast_array(&block_stmt->ast_array, statement());
+        }
+        // Move past the right brace
+        move();
+
+        Ast* ast_stmt = wrap_ast(block_stmt, AST_BLOCK);
         return ast_stmt;
     } else {
         Ast* ast = expression_statement();
@@ -160,9 +186,7 @@ static Ast* statement() {
 }
 
 static Ast* expression_statement() {
-
     return expression();
-
 }
 
 static Ast* expression() {
@@ -297,7 +321,7 @@ static Ast* primary() {
         VariableExpr* variable_expr = make_variable_expr(identifier_name);
         ast->as = variable_expr;
         ast->type = AST_VARIABLE_EXPR;
-    } else if (match(TOKEN_LEFT_PAREN)) {
+    } else if (match(TOKEN_LEFT_PAREN)) { // let a = (10 + 2)
         move();
         Ast* expr = expression();
         if (!match_and_move(TOKEN_RIGHT_PAREN)) {

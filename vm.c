@@ -1,3 +1,4 @@
+#include <stdint.h>
 #include <stdio.h>
 #include <stdbool.h>
 
@@ -86,6 +87,13 @@ static void debug_vm_stack() {
     }
 }
 
+static uint16_t read_short() {
+    // move the vm instruction pointer up by two
+    vm->ip += 2;
+    return (uint16_t)((op_array->ops[vm->ip - 2] << 8) |
+                      (op_array->ops[vm->ip - 1]));
+}
+
 void run(Vm* vm, OpArray* op_arr, ValueArray* ast_value_arr) {
     // Set these to the static variables for convenience
     op_array = op_arr;
@@ -108,6 +116,10 @@ void run(Vm* vm, OpArray* op_arr, ValueArray* ast_value_arr) {
                 vm->ip++;
                 double number = AS_NUMBER(ast_value_arr->values[constant_index]);
                 push(NUMBER_VAL(number));
+                break;
+            }
+            case OP_POP: {
+                pop();
                 break;
             }
             case OP_TRUE:
@@ -141,7 +153,7 @@ void run(Vm* vm, OpArray* op_arr, ValueArray* ast_value_arr) {
                 break;
             }
             case OP_MULTIPLY: {
-                Value value1 = pop(); 
+                Value value1 = pop();
                 Value value2 = pop();
                 double number1 = AS_NUMBER(value1);
                 double number2 = AS_NUMBER(value2);
@@ -150,7 +162,7 @@ void run(Vm* vm, OpArray* op_arr, ValueArray* ast_value_arr) {
                 break;
             }
             case OP_DIVIDE: {
-                Value value1 = pop(); 
+                Value value1 = pop();
                 Value value2 = pop();
                 double number1 = AS_NUMBER(value1);
                 double number2 = AS_NUMBER(value2);
@@ -165,16 +177,16 @@ void run(Vm* vm, OpArray* op_arr, ValueArray* ast_value_arr) {
                 break;
             }
             case OP_RETURN: {
-#if DEBUGGING
+// #if DEBUGGING
                 printf("op_return %f\n", AS_NUMBER(pop()));
-#endif
+// #endif
                 return;
             }
             case OP_PRINT: {
                 // Value value = pop();
-#if DEBUGGING
+// #if DEBUGGING
                 print_value(peek(0));
-#endif
+// #endif
                 break;
             }
             case OP_SET_GLOBAL: {
@@ -206,6 +218,11 @@ void run(Vm* vm, OpArray* op_arr, ValueArray* ast_value_arr) {
 
                 Value value = get_hashmap(&vm->variables, obj_string);
                 push(value);
+                break;
+            }
+            case OP_JUMP_IF_FALSE: {
+                uint16_t jump_index_if_false = read_short();
+                printf("jump index: %d\n", jump_index_if_false);
                 break;
             }
             default: // Just break out of those that are not handled yet

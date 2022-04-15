@@ -15,6 +15,7 @@ bool is_stmt(Ast* ast) {
             return false;
         case AST_PRINT:
         case AST_VARIABLE_STMT:
+        case AST_IF:
             return true;
     }
     return false;
@@ -25,6 +26,7 @@ bool is_expr(Ast* ast) {
         case AST_NONE:
         case AST_PRINT:
         case AST_VARIABLE_STMT:
+        case AST_IF:
             return false;
         case AST_NUMBER:
         case AST_BINARY:
@@ -59,6 +61,20 @@ VariableStmt* make_variable_stmt(Token name, Ast* initializer_expr) {
     variable_stmt->name = name;
     variable_stmt->initializer_expr = initializer_expr;
     return variable_stmt;
+}
+
+IfStmt* make_if_stmt(Ast* condition_expr, Ast* then_stmt, Ast* else_stmt) {
+    IfStmt* if_stmt = (IfStmt*)malloc(sizeof(IfStmt) * 1);
+    if_stmt->condition_expr = condition_expr;
+    if_stmt->then_stmt = then_stmt;
+    if_stmt->else_stmt = else_stmt;
+    return if_stmt;
+}
+
+BlockStmt* make_block_stmt() {
+    BlockStmt* block_stmt = (BlockStmt*)malloc(sizeof(BlockStmt) * 1);
+    init_ast_array(&block_stmt->ast_array);
+    return block_stmt;
 }
 
 NumberExpr* make_number_expr(double value) {

@@ -28,14 +28,59 @@ static int make_constant(Value value) {
 }
 
 static void gen(Ast* ast) {
+    if (ast == NULL)
+        return;
+
     switch (ast->type) {
-        case AST_NONE: 
+        case AST_NONE:
             break;
         case AST_PRINT: {
             PrintStmt* print_stmt = (PrintStmt*)ast->as;
             // Emit nested statement, then emit print
             gen(print_stmt->expr);
             emit_byte(OP_PRINT);
+            break;
+        }
+        case AST_IF: {
+            IfStmt* if_stmt = (IfStmt*)ast->as;
+            gen(if_stmt->condition_expr);
+
+            emit_byte(OP_JUMP_IF_FALSE);
+            // Placeholder, this placeholder is two bytes, uint16_t
+            // This is so that it can jump (65536 - 1) times.
+            emit_byte(0xff);
+            emit_byte(0xff);
+            // minus two because the jump position is in two counts, add one becuase
+            // this is zero indexed
+            int jump_if_false_index = op_array->count - 2;
+
+            // If the condition goes through to the then_expression, it will first
+            // run OP_POP to keep the stack clean. This clears the if (condition)
+            // codegen
+            emit_byte(OP_POP);
+
+            gen(if_stmt->then_stmt);
+            // patch the jump index
+            // minus one because this is zero indexed
+            // tried setting it to 100 to test if 
+            int jump_position = op_array->count - 1;
+            // int jump_position = 100;
+
+            op_array->ops[jump_if_false_index] = (jump_position >> 8) & 0xff;
+            op_array->ops[jump_if_false_index + 1] = jump_position & 0xff;
+
+            emit_byte(OP_POP);
+            // TODO : Currently ignores the else branch, this can just gen a op_nil
+            // gen(if_stmt->else_stmt);
+            emit_byte(OP_NIL);
+            break;
+        }
+        case AST_BLOCK: {
+            BlockStmt* block_stmt = (BlockStmt*)ast->as;
+            // For every statement inside the block, do the codegen
+            for (int i = 0; i < block_stmt->ast_array.count; i++) {
+                gen(block_stmt->ast_array.ast[i]);
+            }
             break;
         }
         case AST_VARIABLE_STMT: {
@@ -46,7 +91,7 @@ static void gen(Ast* ast) {
 
             emit_byte(OP_SET_GLOBAL);
 
-            ObjString* variable_name = 
+            ObjString* variable_name =
                 make_obj_string(variable_stmt->name.start, variable_stmt->name.length);
             Value variable_name_value = OBJ_VAL(variable_name);
             make_constant(variable_name_value);
@@ -102,10 +147,10 @@ static void gen(Ast* ast) {
             if (bool_expr->value) {
                 emit_byte(OP_TRUE);
                 break;
-            } else {
-                emit_byte(OP_FALSE);
-                break;
             }
+            // if not the above if clause, then it will naturally reach here
+            emit_byte(OP_FALSE);
+            break;
         }
         case AST_VARIABLE_EXPR: {
             VariableExpr* variable_expr = (VariableExpr*)ast->as;
@@ -119,7 +164,8 @@ static void gen(Ast* ast) {
                 Value value = constants_array->values[i];
                 // If it is an object and is an ObjString*
                 if (IS_OBJ(value) && OBJ_TYPE(value) == OBJ_STRING) {
-                    ObjString* obj_string = AS_OBJ_STRING(value);
+                    // this obj_string can be used to debug string variables
+                    // ObjString* obj_string = AS_OBJ_STRING(value);
                     if (token_value_equals(name, value)) {
                         // printf("found variable name at : %d\n", i);
                         emit_byte(i);
@@ -151,6 +197,8 @@ void disassemble_opcode_values(OpArray* op_arr, ValueArray* value_arr) {
     printf("-----%s-----\n", "Codegen Disassembly");
     for (int i = 0; i < op_arr->count; i++) {
         switch (op_arr->ops[i]) {
+            case OP_POP:
+                printf("[%-20s]\n", "OP_POP"); break;
             case OP_ADD:
                 printf("[%-20s]\n", "OP_ADD"); break;
             case OP_TRUE:
@@ -181,16 +229,28 @@ void disassemble_opcode_values(OpArray* op_arr, ValueArray* value_arr) {
             case OP_PRINT:
                 printf("[%-20s]\n", "OP_PRINT"); break;
             case OP_SET_GLOBAL:
-                printf("[%-20s]\n", "OP_SET_GLOBAL"); 
+                printf("[%-20s]\n", "OP_SET_GLOBAL");
                 // TODO : these values should be printed out and not
                 // just skipped over
                 i++; // name index
                 // i++; // value index
                 break;
             case OP_GET_GLOBAL:
-                i++; // 
-                printf("[%-20s] at constants_array: %d\n", "OP_GET_GLOBAL", 
+                i++; //
+                printf("[%-20s] at constants_array: %d\n", "OP_GET_GLOBAL",
                         op_arr->ops[i]);
+                break;
+            case OP_JUMP_IF_FALSE: {
+                // i+=2; // get the index of the jump, if false
+                uint16_t number =  (uint16_t)((op_arr->ops[i+1] << 8) |
+                                              (op_arr->ops[i+2]));
+                i+=2;
+                printf("[%-20s] jump if false to : %d\n", "OP_JUMP_IF_FALSE",
+                        number);
+                break;
+            }
+            case OP_NIL:
+                printf("[%-20s]\n", "OP_NIL"); break;
                 break;
         }
     }

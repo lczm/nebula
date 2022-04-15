@@ -2,6 +2,7 @@
 
 typedef enum {
     OP_CONSTANT,
+    OP_POP,
     OP_TRUE,
     OP_FALSE,
     OP_ADD,
@@ -16,4 +17,10 @@ typedef enum {
     // Variable setters and getters
     OP_SET_GLOBAL,
     OP_GET_GLOBAL,
+
+    // Jumps
+    OP_JUMP_IF_FALSE,
+
+    // NIL
+    OP_NIL,
 } OpCode;
