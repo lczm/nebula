@@ -1,57 +1,59 @@
 #include <stdio.h>
 #include <stdlib.h>
+
 #include "ast.h"
 #include "parser.h"
+#include "macros.h"
 
 // Parser state
-static int index = 0;
+static int parser_index = 0;
 static int token_array_len = 0;
 static TokenArray* token_array;
 static AstArray* ast_array;
 
 static void move() {
-    index++;
+    parser_index++;
 }
 
 static bool match(TokenType type) {
-    if (token_array->tokens[index].type == type)
+    if (token_array->tokens[parser_index].type == type)
         return true;
     return false;
 }
 
 static bool match_either(TokenType type1, TokenType type2) {
-    if (token_array->tokens[index].type == type1 ||
-        token_array->tokens[index].type == type2) {
+    if (token_array->tokens[parser_index].type == type1 ||
+        token_array->tokens[parser_index].type == type2) {
         return true;
     }
     return false;
 }
 
 static bool match_and_move(TokenType type) {
-    if (token_array->tokens[index].type == type) {
-        index++;
+    if (token_array->tokens[parser_index].type == type) {
+        parser_index++;
         return true;
     }
     return false;
 }
 
 static Token peek(int offset) {
-    return token_array->tokens[index + offset];
+    return token_array->tokens[parser_index + offset];
 }
 
 static bool peek_match(int offset, TokenType type) {
-    Token token = token_array->tokens[index + offset];
+    Token token = token_array->tokens[parser_index + offset];
     if (token.type == type)
         return true;
     return false;
 }
 
 static Token get_current() {
-    return token_array->tokens[index];
+    return token_array->tokens[parser_index];
 }
 
 static Token get_previous() {
-    return token_array->tokens[index--];
+    return token_array->tokens[parser_index--];
 }
 
 static bool eat(TokenType type) {
@@ -89,12 +91,12 @@ static Ast* primary();
 
 void parse_tokens(TokenArray* token_arr, AstArray* ast_arr) {
     // Initialize the static variables for convenience
-    index = 0; // Reset to 0 just in case
+    parser_index = 0; // Reset to 0 just in case
     token_array = token_arr;
     token_array_len = token_arr->count;
     ast_array = ast_arr;
 
-    while (index != token_arr->count) {
+    while (parser_index != token_arr->count) {
         push_ast_array(ast_array, declaration());
     }
     // return declaration();
@@ -186,7 +188,14 @@ static Ast* statement() {
 }
 
 static Ast* expression_statement() {
-    return expression();
+    Ast* ast = expression();
+
+    if (!eat(TOKEN_SEMICOLON)) {
+        printf("After an expression_statement, there needs to be a semicolon\n");
+        return NULL;
+    }
+
+    return ast;
 }
 
 static Ast* expression() {
@@ -196,19 +205,34 @@ static Ast* expression() {
 
 static Ast* assignment() {
     Ast* ast = and_();
+
+    // a = 10;
+    if (match_and_move(TOKEN_EQUAL)) {
+        // check that the Ast* ast above is a VariableExpr
+        if (ast->type != AST_VARIABLE_EXPR) {
+            printf("assignment parsing tried to assign a non variable\n");
+            return NULL;
+        }
+
+        Ast* value = assignment();
+        AssignmentExpr* assignment_expr = make_assignment_expr(
+                ((VariableExpr*)ast->as)->name, value);
+        Ast* assignment_ast = wrap_ast(assignment_expr, AST_ASSIGNMENT_EXPR);
+        return assignment_ast;
+    }
     return ast;
 }
- 
+
 static Ast* and_() {
     Ast* ast = or_();
     return ast;
 }
- 
+
 static Ast* or_() {
     Ast* ast = equality();
     return ast;
 }
- 
+
 static Ast* equality() {
     Ast* ast = comparison();
 
@@ -226,12 +250,12 @@ static Ast* equality() {
 
     return ast;
 }
- 
+
 static Ast* comparison() {
     Ast* ast = addition();
     return ast;
 }
- 
+
 static Ast* addition() {
     Ast* ast = multiplication(); // number_expr
 
@@ -250,7 +274,7 @@ static Ast* addition() {
 
     return ast;
 }
- 
+
 static Ast* multiplication() {
     Ast* ast = unary();
 
@@ -269,7 +293,7 @@ static Ast* multiplication() {
 
     return ast;
 }
- 
+
 static Ast* unary() {
     if (match_either(TOKEN_BANG, TOKEN_MINUS)) {
         Token operator = get_current();
@@ -285,19 +309,19 @@ static Ast* unary() {
     Ast* ast = call();
     return ast;
 }
- 
+
 static Ast* call() {
     Ast* ast = primary();
     return ast;
 }
- 
+
 static Ast* primary() {
     Ast* ast = make_ast();
 
     if (match(TOKEN_NUMBER)) {
-        const char* start = token_array->tokens[index].start;
-        char* end = (char*)token_array->tokens[index].start +
-            token_array->tokens[index].length;
+        const char* start = token_array->tokens[parser_index].start;
+        char* end = (char*)token_array->tokens[parser_index].start +
+            token_array->tokens[parser_index].length;
         double value = strtod(start, &end);
         // printf("Parsing number: %f\n", value);
         // Print out debug information before moving
@@ -321,6 +345,7 @@ static Ast* primary() {
         VariableExpr* variable_expr = make_variable_expr(identifier_name);
         ast->as = variable_expr;
         ast->type = AST_VARIABLE_EXPR;
+        PRINT_AST_STRING(variable_expr);
     } else if (match(TOKEN_LEFT_PAREN)) { // let a = (10 + 2)
         move();
         Ast* expr = expression();

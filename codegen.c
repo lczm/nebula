@@ -180,6 +180,18 @@ static void gen(Ast* ast) {
             gen(group_expr->expr);
             break;
         }
+        case AST_ASSIGNMENT_EXPR: {
+            AssignmentExpr* assignment_expr = (AssignmentExpr*)ast->as;
+            gen(assignment_expr->expr);
+            emit_byte(OP_SET_GLOBAL);
+
+            ObjString* variable_name =
+                make_obj_string(assignment_expr->name.start,
+                                assignment_expr->name.length);
+            Value variable_name_value = OBJ_VAL(variable_name);
+            make_constant(variable_name_value);
+            break;
+        }
     }
 }
 

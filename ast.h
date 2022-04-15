@@ -17,6 +17,7 @@ typedef enum {
     AST_BOOL,
     AST_VARIABLE_EXPR,
     AST_GROUP,
+    AST_ASSIGNMENT_EXPR,
 } AstType;
 
 // Since in array.h it already declares typdef struct Ast to Ast
@@ -68,7 +69,7 @@ typedef struct {
 // The difference between a VariableStmt and a VariableExpr
 // is that a VariableStmt refers to `let x = 10;` for example
 // and a VariableExpr refers to the `a` in `print a;`
-// i.e. this is meant for the codegen backend to produce a 
+// i.e. this is meant for the codegen backend to produce a
 // OP_GET_{} opcode
 typedef struct {
     Token name;
@@ -77,6 +78,12 @@ typedef struct {
 typedef struct {
     Ast* expr;
 } GroupExpr;
+
+// a = 10; where a is the name, and NumberExpr{10} is the expr
+typedef struct {
+    Token name;
+    Ast* expr;
+} AssignmentExpr;
 
 bool is_stmt(Ast* ast);
 bool is_expr(Ast* ast);
@@ -96,6 +103,7 @@ UnaryExpr* make_unary_expr(Ast* right_expr, Token op);
 BoolExpr* make_bool_expr(bool value);
 VariableExpr* make_variable_expr(Token name);
 GroupExpr* make_group_expr(Ast* expr);
+AssignmentExpr* make_assignment_expr(Token name, Ast* expr);
 
 // Convert expressions into values
 Value ast_to_value(Ast* ast);

@@ -105,6 +105,15 @@ void disassemble_individual_ast(Ast* ast) {
             disassemble_individual_ast(group_expr->expr);
             break;
         }
+        case AST_ASSIGNMENT_EXPR: {
+            AssignmentExpr* assignment_expr = (AssignmentExpr*)ast->as;
+            char s[assignment_expr->name.length + 1];
+            strncpy(s, assignment_expr->name.start, assignment_expr->name.length);
+            s[assignment_expr->name.length] = '\0';
+            printf("[%-20s]: %s", "ASSIGNMENT_EXPR", s);
+            disassemble_individual_ast(assignment_expr->expr);
+            break;
+        }
     }
 }
 
