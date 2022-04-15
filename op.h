@@ -19,6 +19,7 @@ typedef enum {
     OP_GET_GLOBAL,
 
     // Jumps
+    OP_JUMP,
     OP_JUMP_IF_FALSE,
 
     // NIL

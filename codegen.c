@@ -62,8 +62,8 @@ static void gen(Ast* ast) {
             gen(if_stmt->then_stmt);
             // patch the jump index
             // minus one because this is zero indexed
-            // tried setting it to 100 to test if 
-            int jump_position = op_array->count - 1;
+            // tried setting it to 100 to test if
+            int jump_position = op_array->count;
             // int jump_position = 100;
 
             op_array->ops[jump_if_false_index] = (jump_position >> 8) & 0xff;
@@ -198,38 +198,38 @@ void disassemble_opcode_values(OpArray* op_arr, ValueArray* value_arr) {
     for (int i = 0; i < op_arr->count; i++) {
         switch (op_arr->ops[i]) {
             case OP_POP:
-                printf("[%-20s]\n", "OP_POP"); break;
+                printf("[%d] [%-20s]\n", i, "OP_POP"); break;
             case OP_ADD:
-                printf("[%-20s]\n", "OP_ADD"); break;
+                printf("[%d] [%-20s]\n", i, "OP_ADD"); break;
             case OP_TRUE:
-                printf("[%-20s]\n", "OP_TRUE"); break;
+                printf("[%d] [%-20s]\n", i, "OP_TRUE"); break;
             case OP_FALSE:
-                printf("[%-20s]\n", "OP_FALSE"); break;
+                printf("[%d] [%-20s]\n", i, "OP_FALSE"); break;
             case OP_SUBTRACT:
-                printf("[%-20s]\n", "OP_SUBTRACT"); break;
+                printf("[%d] [%-20s]\n", i, "OP_SUBTRACT"); break;
             case OP_MULTIPLY:
-                printf("[%-20s]\n", "OP_MULTIPLY"); break;
+                printf("[%d] [%-20s]\n", i, "OP_MULTIPLY"); break;
             case OP_DIVIDE:
-                printf("[%-20s]\n", "OP_DIVIDE"); break;
+                printf("[%d] [%-20s]\n", i, "OP_DIVIDE"); break;
             case OP_NEGATE:
-                printf("[%-20s]\n", "OP_NEGATE"); break;
+                printf("[%d] [%-20s]\n", i, "OP_NEGATE"); break;
                 break;
             case OP_NOT:
-                printf("[%-20s]\n", "OP_NOT"); break;
+                printf("[%d] [%-20s]\n", i, "OP_NOT"); break;
                 break;
             case OP_EQUAL:
-                printf("[%-20s]\n", "OP_EQUAL"); break;
+                printf("[%d] [%-20s]\n", i, "OP_EQUAL"); break;
                 break;
             case OP_CONSTANT:
                 i++;
-                printf("[%-20s] at %d: %f\n", "OP_CONSTANT", i,
+                printf("[%d-%d] [%-20s] at %d: %f\n", i-1, i, "OP_CONSTANT", i,
                         AS_NUMBER(value_arr->values[op_arr->ops[i]])); break;
             case OP_RETURN:
-                printf("[%-20s]\n", "OP_RETURN"); break;
+                printf("[%d] [%-20s]\n", i, "OP_RETURN"); break;
             case OP_PRINT:
-                printf("[%-20s]\n", "OP_PRINT"); break;
+                printf("[%d] [%-20s]\n", i, "OP_PRINT"); break;
             case OP_SET_GLOBAL:
-                printf("[%-20s]\n", "OP_SET_GLOBAL");
+                printf("[%d-%d] [%-20s]\n", i, i+1, "OP_SET_GLOBAL");
                 // TODO : these values should be printed out and not
                 // just skipped over
                 i++; // name index
@@ -237,20 +237,23 @@ void disassemble_opcode_values(OpArray* op_arr, ValueArray* value_arr) {
                 break;
             case OP_GET_GLOBAL:
                 i++; //
-                printf("[%-20s] at constants_array: %d\n", "OP_GET_GLOBAL",
-                        op_arr->ops[i]);
+                printf("[%d-%d] [%-20s] at constants_array: %d\n",
+                        i-1, i, "OP_GET_GLOBAL", op_arr->ops[i]);
+                break;
+            case OP_JUMP:
+                printf("[%d] [%-20s]\n", i, "OP_JUMP");
                 break;
             case OP_JUMP_IF_FALSE: {
                 // i+=2; // get the index of the jump, if false
                 uint16_t number =  (uint16_t)((op_arr->ops[i+1] << 8) |
                                               (op_arr->ops[i+2]));
                 i+=2;
-                printf("[%-20s] jump if false to : %d\n", "OP_JUMP_IF_FALSE",
-                        number);
+                printf("[%d-%d] [%-20s] jump if false to : %d\n", i-2, i,
+                        "OP_JUMP_IF_FALSE", number);
                 break;
             }
             case OP_NIL:
-                printf("[%-20s]\n", "OP_NIL"); break;
+                printf("[%d] [%-20s]\n", i, "OP_NIL"); break;
                 break;
         }
     }

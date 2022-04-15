@@ -94,6 +94,10 @@ static uint16_t read_short() {
                       (op_array->ops[vm->ip - 1]));
 }
 
+static bool is_falsey(Value value) {
+    return IS_NIL(value) || (IS_BOOLEAN(value) && !AS_BOOLEAN(value));
+}
+
 void run(Vm* vm, OpArray* op_arr, ValueArray* ast_value_arr) {
     // Set these to the static variables for convenience
     op_array = op_arr;
@@ -220,9 +224,26 @@ void run(Vm* vm, OpArray* op_arr, ValueArray* ast_value_arr) {
                 push(value);
                 break;
             }
+            case OP_JUMP: {
+                uint16_t jump_index = read_short();
+                // Jump to the jump_index
+                vm->ip = jump_index;
+                break;
+            }
             case OP_JUMP_IF_FALSE: {
                 uint16_t jump_index_if_false = read_short();
-                printf("jump index: %d\n", jump_index_if_false);
+                // printf("jump index: %d\n", jump_index_if_false);
+
+                Value condition_expr = peek(0);
+                // if false, jump to the jump_index, otherwise, continue
+                // executing the program.
+                if (is_falsey(condition_expr)) {
+                    vm->ip = jump_index_if_false;
+                }
+
+                break;
+            }
+            case OP_NIL: {
                 break;
             }
             default: // Just break out of those that are not handled yet
