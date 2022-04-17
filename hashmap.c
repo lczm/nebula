@@ -64,10 +64,13 @@ void push_hashmap(HashMap* hashmap, ObjString* key, Value value) {
 
     int hash_bucket = key->hash % hashmap->capacity;
 
+    // Only if the hashmap entry is null
+    // then the count should be incremented
+    if (hashmap->entries[hash_bucket].key == NULL)
+        hashmap->count++;
     // Set the key and value in that hash_bucket
     hashmap->entries[hash_bucket].key = key;
     hashmap->entries[hash_bucket].value = value;
-    hashmap->count++;
 }
 
 void free_hashmap(HashMap* hashmap) {

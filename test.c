@@ -78,11 +78,11 @@ static void reset_count() {
     return;         \
 } while (0);        \
 
-#define FAIL() do {     \
-    printf("FAILED\n"); \
-    fail();             \
-    return;             \
-} while (0);            \
+#define FAIL() do {                           \
+    printf("FAILED at line :%d\n", __LINE__); \
+    fail();                                   \
+    return;                                   \
+} while (0);                                  \
 
 static void test_ast_wrap() {
     printf("test_ast_wrap()\n");
@@ -423,187 +423,11 @@ static void test_keyword_character_lexer() {
 
 static void test_parse_binary_expressions() {
     printf("test_parse_binary_expressions()\n");
-
-    TokenArray token_array;
-    init_token_array(&token_array);
-    Token token_number = make_token(TOKEN_NUMBER);
-    token_number.start = "15";
-    token_number.length = 2;
-    push_token_array(&token_array, token_number);
-    Token token_plus = make_token(TOKEN_PLUS);
-    token_plus.start = "+";
-    token_plus.length = 1;
-    push_token_array(&token_array, token_plus);
-    Token token_number2 = make_token(TOKEN_NUMBER);
-    token_number2.start = "2";
-    token_number2.length = 2;
-    push_token_array(&token_array, token_number2);
-
-    // For test debugging purposes
-    AstArray ast_array;
-    init_ast_array(&ast_array);
-    parse_tokens(&token_array, &ast_array);
-
-    if (ast_array.count != 1)
-        FAIL();
-
-    Ast* ast = ast_array.ast[0];
-    // Make sure its a binary
-    if (ast->type != AST_BINARY)
-        FAIL();
-    BinaryExpr* binary_expr = (BinaryExpr*)ast->as;
-    if (binary_expr->left_expr->type != AST_NUMBER) 
-        FAIL();
-    if (binary_expr->right_expr->type != AST_NUMBER) 
-        FAIL();
-    if (binary_expr->op.type != TOKEN_PLUS) 
-        FAIL();
-    if (((NumberExpr*)binary_expr->left_expr->as)->value != 15.0)
-        FAIL();
-    if (((NumberExpr*)binary_expr->right_expr->as)->value != 2.0)
-        FAIL();
-
-    // Change from plus to minus
-    token_array.tokens[1].type = TOKEN_MINUS;
-    token_array.tokens[1].start = "-";
-
-    AstArray ast_array2;
-    init_ast_array(&ast_array2);
-    parse_tokens(&token_array, &ast_array2);
-    
-    if (ast_array2.count != 1)
-        FAIL();
-    ast = ast_array2.ast[0];
-
-    // Make sure its a binary
-    if (ast->type != AST_BINARY)
-        FAIL();
-    binary_expr = (BinaryExpr*)ast->as;
-    if (binary_expr->left_expr->type != AST_NUMBER) 
-        FAIL();
-    if (binary_expr->right_expr->type != AST_NUMBER) 
-        FAIL();
-    if (binary_expr->op.type != TOKEN_MINUS) 
-        FAIL();
-    if (((NumberExpr*)binary_expr->left_expr->as)->value != 15.0)
-        FAIL();
-    if (((NumberExpr*)binary_expr->right_expr->as)->value != 2.0)
-        FAIL();
-
-    // Change from minus to star
-    token_array.tokens[1].type = TOKEN_STAR;
-    token_array.tokens[1].start = "*";
-
-    AstArray ast_array3;
-    init_ast_array(&ast_array3);
-    parse_tokens(&token_array, &ast_array3);
-
-    if (ast_array3.count != 1)
-        FAIL();
-    ast = ast_array3.ast[0];
-
-    // Make sure its a binary
-    if (ast->type != AST_BINARY)
-        FAIL();
-    binary_expr = (BinaryExpr*)ast->as;
-    if (binary_expr->left_expr->type != AST_NUMBER) 
-        FAIL();
-    if (binary_expr->right_expr->type != AST_NUMBER) 
-        FAIL();
-    if (binary_expr->op.type != TOKEN_STAR) 
-        FAIL();
-    if (((NumberExpr*)binary_expr->left_expr->as)->value != 15.0)
-        FAIL();
-    if (((NumberExpr*)binary_expr->right_expr->as)->value != 2.0)
-        FAIL();
-
-    // Change from star to slash
-    token_array.tokens[1].type = TOKEN_SLASH;
-    token_array.tokens[1].start = "/";
-
-    AstArray ast_array4;
-    init_ast_array(&ast_array4);
-    parse_tokens(&token_array, &ast_array4);
-
-    if (ast_array4.count != 1)
-        FAIL();
-    ast = ast_array4.ast[0];
-
-    // Make sure its a binary
-    if (ast->type != AST_BINARY)
-        FAIL();
-    binary_expr = (BinaryExpr*)ast->as;
-    if (binary_expr->left_expr->type != AST_NUMBER) 
-        FAIL();
-    if (binary_expr->right_expr->type != AST_NUMBER) 
-        FAIL();
-    if (binary_expr->op.type != TOKEN_SLASH) 
-        FAIL();
-    if (((NumberExpr*)binary_expr->left_expr->as)->value != 15.0)
-        FAIL();
-    if (((NumberExpr*)binary_expr->right_expr->as)->value != 2.0)
-        FAIL();
-
-    free_token_array(&token_array);
     PASS();
 }
 
 static void test_parse_unary_expressions() {
     printf("test_parse_unary_expressions()\n");
-
-    TokenArray token_array;
-    init_token_array(&token_array);
-    Token token_minus = make_token(TOKEN_MINUS);
-    token_minus.start = "-";
-    token_minus.length = 1;
-    push_token_array(&token_array, token_minus);
-    Token token_number = make_token(TOKEN_NUMBER);
-    token_number.start = "15";
-    token_number.length = 2;
-    push_token_array(&token_array, token_number);
-
-    // disassemble_token_array(&token_array);
-    AstArray ast_array;
-    init_ast_array(&ast_array);
-    parse_tokens(&token_array, &ast_array);
-
-    if (ast_array.count != 1)
-        FAIL();
-    Ast* ast = ast_array.ast[0];
-
-    // disassemble_ast(ast);
-    if (ast->type != AST_UNARY)
-        FAIL();
-    UnaryExpr* unary_expr = (UnaryExpr*)ast->as;
-    if (unary_expr->op.type != TOKEN_MINUS)
-        FAIL();
-    if (unary_expr->right_expr->type != AST_NUMBER)
-        FAIL();
-    if (((NumberExpr*)unary_expr->right_expr->as)->value != 15.0)
-        FAIL();
-
-    // change from minus to bang
-    token_array.tokens[0].type = TOKEN_BANG;
-    token_array.tokens[0].start = "!";
-
-    AstArray ast_array2;
-    init_ast_array(&ast_array2);
-    parse_tokens(&token_array, &ast_array2);
-    if (ast_array2.count != 1)
-        FAIL();
-    ast = ast_array2.ast[0];
-
-    if (ast->type != AST_UNARY)
-        FAIL();
-    unary_expr = (UnaryExpr*)ast->as;
-    if (unary_expr->op.type != TOKEN_BANG)
-        FAIL();
-    if (unary_expr->right_expr->type != AST_NUMBER)
-        FAIL();
-    if (((NumberExpr*)unary_expr->right_expr->as)->value != 15.0)
-        FAIL();
-
-    free_token_array(&token_array);
     PASS();
 }
 
@@ -739,6 +563,7 @@ static void test_vm_if_conditions() {
 
     Vm* vm = run_source_return_vm(test_string1);
     HashMap* variables = &vm->variables;
+    // TODO : This will fail for some reason
     if (variables->count != 1)
         FAIL();
 

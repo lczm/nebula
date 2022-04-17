@@ -53,7 +53,7 @@ static void push(Value value) {
 }
 
 static Value pop() {
-    // Decrement stack_top 
+    // Decrement stack_top
     // vm->stack_top--;
     // TODO: Debug flag for this to check if its in range
 

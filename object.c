@@ -5,6 +5,12 @@
 #include "macros.h"
 #include "hash.h"
 
+// The length is needed here because for a lot of the program internals
+// there is the start of the characters, 'chars' in this case
+// can refer to a random middle point of a very long string,
+// in which case, the length will determine when it will be terminated
+// in the cases where the length is very obvious (such as in test.c)
+// another function can be used for it.
 ObjString* make_obj_string(const char* chars, int length) {
     ObjString* obj_string = ALLOCATE(ObjString, 1);
 
@@ -16,7 +22,25 @@ ObjString* make_obj_string(const char* chars, int length) {
     obj_string->obj.type = OBJ_STRING;
     obj_string->length = length;
     obj_string->chars = new_string;
-    // TODO : Set proper hash
+    obj_string->hash = fnv_hash32(new_string, length);
+
+    return obj_string;
+}
+
+// This is for when the length can be determined using strlen()
+ObjString* make_obj_string_sl(const char* chars) {
+    ObjString* obj_string = ALLOCATE(ObjString, 1);
+
+    int length = strlen(chars);
+
+    // Create a new string, add c string delimiter
+    char* new_string = ALLOCATE(char, length + 1);
+    strncpy(new_string, chars, length);
+    new_string[length] = '\0';
+
+    obj_string->obj.type = OBJ_STRING;
+    obj_string->length = length;
+    obj_string->chars = new_string;
     obj_string->hash = fnv_hash32(new_string, length);
 
     return obj_string;
