@@ -423,6 +423,45 @@ static void test_keyword_character_lexer() {
 
 static void test_parse_binary_expressions() {
     printf("test_parse_binary_expressions()\n");
+
+    char test_string[] = "let a = 10 + 1;"
+                         "let b = 10 - 1;"
+                         "let c = (10 + 1) * 3;"
+                         "let d = (10 + 2) / 3;"
+                         "let e = ((10 + 2) / 3) * 2;";
+
+    Vm* vm = run_source_return_vm(test_string);
+    HashMap* variables = &vm->variables;
+
+    ObjString* obj_string_a = make_obj_string_sl("a");
+    ObjString* obj_string_b = make_obj_string_sl("b");
+    ObjString* obj_string_c = make_obj_string_sl("c");
+    ObjString* obj_string_d = make_obj_string_sl("d");
+    ObjString* obj_string_e = make_obj_string_sl("e");
+    Value value_a = get_hashmap(variables, obj_string_a);
+    Value value_b = get_hashmap(variables, obj_string_b);
+    Value value_c = get_hashmap(variables, obj_string_c);
+    Value value_d = get_hashmap(variables, obj_string_d);
+    Value value_e = get_hashmap(variables, obj_string_e);
+
+    if (!IS_NUMBER(value_a) ||
+        !IS_NUMBER(value_b) ||
+        !IS_NUMBER(value_c) ||
+        !IS_NUMBER(value_d) ||
+        !IS_NUMBER(value_e))
+        FAIL();
+
+    if (AS_NUMBER(value_a) != 11.0)
+        FAIL();
+    if (AS_NUMBER(value_b) != 9.0)
+        FAIL();
+    if (AS_NUMBER(value_c) != 33.0)
+        FAIL();
+    if (AS_NUMBER(value_d) != 4.0)
+        FAIL();
+    if (AS_NUMBER(value_e) != 8.0)
+        FAIL();
+
     PASS();
 }
 
