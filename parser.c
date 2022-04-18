@@ -163,10 +163,23 @@ static Ast* statement() {
         }
 
         // Block statement
+        // Note that it will not eat a token right_brace here
+        // as the then_stmt here will be a block_statement, which
+        // will handle the eating of the right_brace in itself
         Ast* then_stmt = statement();
-        // match_and_move(TOKEN_RIGHT_BRACE);
 
-        IfStmt* if_stmt = make_if_stmt(condition_expr, then_stmt, NULL);
+        Ast* else_stmt = NULL;
+        // If there is an else statement
+        if (match_and_move(TOKEN_ELSE)) {
+            if (!match(TOKEN_LEFT_BRACE)) {
+                printf("After else needs to have a left brace\n");
+            }
+            // Same as above, the block statement will cover eating of the
+            // token_left and token_right brace
+            else_stmt = statement();
+        }
+
+        IfStmt* if_stmt = make_if_stmt(condition_expr, then_stmt, else_stmt);
         Ast* ast_stmt = wrap_ast(if_stmt, AST_IF);
 
         return ast_stmt;
