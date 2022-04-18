@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-// Forward declare this obj, 
+// Forward declare this obj,
 // as "object.h" will include "value.h", this will prevent further
 // cyclic dependencies
 typedef struct Obj Obj;

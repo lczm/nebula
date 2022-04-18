@@ -141,15 +141,15 @@ static void gen(Ast* ast) {
                 default:
                     break;
             }
+            break;
         }
         case AST_BOOL: {
             BoolExpr* bool_expr = (BoolExpr*)ast->as;
-            if (bool_expr->value) {
+            if (bool_expr->value == true) {
                 emit_byte(OP_TRUE);
-                break;
+            } else {
+                emit_byte(OP_FALSE);
             }
-            // if not the above if clause, then it will naturally reach here
-            emit_byte(OP_FALSE);
             break;
         }
         case AST_VARIABLE_EXPR: {

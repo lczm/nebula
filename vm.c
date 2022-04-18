@@ -27,14 +27,12 @@ void free_vm(Vm* v) {
 }
 
 static void print_value(Value value) {
-    if (value.type == VAL_NUMBER) {
+    if (IS_NUMBER(value)) {
         printf("%f\n", AS_NUMBER(value));
-    } else if (value.type == VAL_BOOLEAN) {
-        if (AS_BOOLEAN(value)) {
-            printf("true\n");
-        } else {
-            printf("false\n");
-        }
+    } else if (IS_BOOLEAN(value) && AS_BOOLEAN(value) == true) {
+        printf("@@@ true\n");
+    } else if (IS_BOOLEAN(value) && AS_BOOLEAN(value) == false) {
+        printf("@@@ false\n");
     } else if (value.type == VAL_OBJ) {
         printf("Obj\n");
     }
@@ -96,7 +94,12 @@ static uint16_t read_short() {
 }
 
 static bool is_falsey(Value value) {
-    return IS_NIL(value) || (IS_BOOLEAN(value) && !AS_BOOLEAN(value));
+    if (IS_NIL(value))
+        return true;
+    if (IS_BOOLEAN(value) && AS_BOOLEAN(value) == false)
+        return true;
+
+    return false;
 }
 
 void run(Vm* vm, OpArray* op_arr, ValueArray* ast_value_arr) {
@@ -173,6 +176,21 @@ void run(Vm* vm, OpArray* op_arr, ValueArray* ast_value_arr) {
                 double number2 = AS_NUMBER(value2);
                 double number3 = number2 / number1;
                 push(NUMBER_VAL(number3));
+                break;
+            }
+            case OP_NEGATE: {
+                break;
+            }
+            case OP_NOT: {
+                Value value = pop();
+                if (AS_BOOLEAN(value) == true) {
+                    printf("negate pushing is true, pushing false\n");
+                    push(BOOLEAN_VAL(false));
+                } else {
+                    printf("negate pushing is false, pushing true\n");
+                    push(BOOLEAN_VAL(true));
+                }
+                // push(BOOLEAN_VAL(value));
                 break;
             }
             case OP_EQUAL: {

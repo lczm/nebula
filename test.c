@@ -20,6 +20,20 @@
 static int pass_count = 0;
 static int fail_count = 0;
 
+static void print_value(Value value) {
+    if (value.type == VAL_NUMBER) {
+        printf("%f\n", AS_NUMBER(value));
+    } else if (value.type == VAL_BOOLEAN) {
+        if (AS_BOOLEAN(value)) {
+            printf("true\n");
+        } else {
+            printf("false\n");
+        }
+    } else if (value.type == VAL_OBJ) {
+        printf("Obj\n");
+    }
+}
+
 Vm* run_source_return_vm(const char* source) {
     TokenArray token_array;
     init_token_array(&token_array);
@@ -467,6 +481,37 @@ static void test_parse_binary_expressions() {
 
 static void test_parse_unary_expressions() {
     printf("test_parse_unary_expressions()\n");
+
+    char test_string[] = "let a = -3;"
+                         "let b = !(1 == 1);"
+                         "let c = !true;";
+
+    Vm* vm = run_source_return_vm(test_string);
+    HashMap* variables = &vm->variables;
+
+    ObjString* obj_string_a = make_obj_string_sl("a");
+    ObjString* obj_string_b = make_obj_string_sl("b");
+    ObjString* obj_string_c = make_obj_string_sl("c");
+    Value value_a = get_hashmap(variables, obj_string_a);
+    Value value_b = get_hashmap(variables, obj_string_b);
+    Value value_c = get_hashmap(variables, obj_string_c);
+
+    // TODO : Have not implemented the OP_NOT & OP_NEGATE operator
+    if (!IS_NUMBER(value_a))
+        FAIL();
+    if (!IS_BOOLEAN(value_b))
+        FAIL();
+    if (!IS_BOOLEAN(value_c))
+        FAIL();
+
+    if (AS_NUMBER(value_a) != -3.0) {
+        FAIL();
+    }
+    if (AS_BOOLEAN(value_b) != false)
+        FAIL();
+    if (AS_BOOLEAN(value_c) != false)
+        FAIL();
+
     PASS();
 }
 
