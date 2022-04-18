@@ -484,7 +484,8 @@ static void test_parse_unary_expressions() {
 
     char test_string[] = "let a = -3;"
                          "let b = !(1 == 1);"
-                         "let c = !true;";
+                         "let c = !true;"
+                         "let d = !false;";
 
     Vm* vm = run_source_return_vm(test_string);
     HashMap* variables = &vm->variables;
@@ -492,24 +493,28 @@ static void test_parse_unary_expressions() {
     ObjString* obj_string_a = make_obj_string_sl("a");
     ObjString* obj_string_b = make_obj_string_sl("b");
     ObjString* obj_string_c = make_obj_string_sl("c");
+    ObjString* obj_string_d = make_obj_string_sl("d");
     Value value_a = get_hashmap(variables, obj_string_a);
     Value value_b = get_hashmap(variables, obj_string_b);
     Value value_c = get_hashmap(variables, obj_string_c);
+    Value value_d = get_hashmap(variables, obj_string_d);
 
-    // TODO : Have not implemented the OP_NOT & OP_NEGATE operator
     if (!IS_NUMBER(value_a))
         FAIL();
     if (!IS_BOOLEAN(value_b))
         FAIL();
     if (!IS_BOOLEAN(value_c))
         FAIL();
-
-    if (AS_NUMBER(value_a) != -3.0) {
+    if (!IS_BOOLEAN(value_d))
         FAIL();
-    }
+
+    if (AS_NUMBER(value_a) != -3.0)
+        FAIL();
     if (AS_BOOLEAN(value_b) != false)
         FAIL();
     if (AS_BOOLEAN(value_c) != false)
+        FAIL();
+    if (AS_BOOLEAN(value_d) != true)
         FAIL();
 
     PASS();

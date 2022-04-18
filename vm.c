@@ -30,9 +30,9 @@ static void print_value(Value value) {
     if (IS_NUMBER(value)) {
         printf("%f\n", AS_NUMBER(value));
     } else if (IS_BOOLEAN(value) && AS_BOOLEAN(value) == true) {
-        printf("@@@ true\n");
+        printf("true\n");
     } else if (IS_BOOLEAN(value) && AS_BOOLEAN(value) == false) {
-        printf("@@@ false\n");
+        printf("false\n");
     } else if (value.type == VAL_OBJ) {
         printf("Obj\n");
     }
@@ -188,13 +188,10 @@ void run(Vm* vm, OpArray* op_arr, ValueArray* ast_value_arr) {
             case OP_NOT: {
                 Value value = pop();
                 if (AS_BOOLEAN(value) == true) {
-                    printf("negate pushing is true, pushing false\n");
                     push(BOOLEAN_VAL(false));
                 } else {
-                    printf("negate pushing is false, pushing true\n");
                     push(BOOLEAN_VAL(true));
                 }
-                // push(BOOLEAN_VAL(value));
                 break;
             }
             case OP_EQUAL: {
