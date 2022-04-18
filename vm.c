@@ -179,6 +179,10 @@ void run(Vm* vm, OpArray* op_arr, ValueArray* ast_value_arr) {
                 break;
             }
             case OP_NEGATE: {
+                Value value = pop();
+                if (IS_NUMBER(value)) {
+                    push(NUMBER_VAL(-(AS_NUMBER(value))));
+                }
                 break;
             }
             case OP_NOT: {
