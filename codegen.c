@@ -69,7 +69,6 @@ static void gen(Ast* ast) {
             op_array->ops[jump_if_false_index] = (jump_position >> 8) & 0xff;
             op_array->ops[jump_if_false_index + 1] = jump_position & 0xff;
 
-
             emit_byte(OP_POP);
 
             // TODO : Currently ignores the else branch, this can just gen a op_nil

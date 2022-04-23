@@ -646,22 +646,36 @@ static void test_vm_if_conditions() {
     printf("test_vm_if_conditions()\n");
 
     char test_string1[] = "let a = 10;"
+                          "let b = 0;"
                           "if (a == 10) {"
                           "    a = 50;"
+                          "}"
+                          "if (b == 10) {"
+                          "   b = 50;"
+                          "} else {"
+                          "   b = 100;"
                           "}";
 
     Vm* vm = run_source_return_vm(test_string1);
     HashMap* variables = &vm->variables;
-    // TODO : This will fail for some reason
-    if (variables->count != 1)
+    if (variables->count != 2)
         FAIL();
 
     ObjString* obj_string_a = make_obj_string("a", strlen("a"));
+    ObjString* obj_string_b = make_obj_string("b", strlen("b"));
     Value value_a = get_hashmap(variables, obj_string_a);
+    Value value_b = get_hashmap(variables, obj_string_b);
 
+    // Test then branch codegen & run
     if (!IS_NUMBER(value_a))
         FAIL();
     if (AS_NUMBER(value_a) != 50.0)
+        FAIL();
+
+    // Test else branch codegen & run
+    if (!IS_NUMBER(value_b))
+        FAIL();
+    if (AS_NUMBER(value_b) != 100.0)
         FAIL();
 
     PASS();
