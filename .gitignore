@@ -2,6 +2,7 @@
 *.neb
 nebula
 *.o
+*.d
 tags*
 test
 .vscode/
