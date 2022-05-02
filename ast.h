@@ -18,6 +18,7 @@ typedef enum {
     AST_VARIABLE_EXPR,
     AST_GROUP,
     AST_ASSIGNMENT_EXPR,
+    AST_STRING,
 } AstType;
 
 // Since in array.h it already declares typdef struct Ast to Ast
@@ -85,6 +86,11 @@ typedef struct {
     Ast* expr;
 } AssignmentExpr;
 
+typedef struct {
+    const char* start;
+    int length;
+} StringExpr;
+
 bool is_stmt(Ast* ast);
 bool is_expr(Ast* ast);
 
@@ -104,6 +110,7 @@ BoolExpr* make_bool_expr(bool value);
 VariableExpr* make_variable_expr(Token name);
 GroupExpr* make_group_expr(Ast* expr);
 AssignmentExpr* make_assignment_expr(Token name, Ast* expr);
+StringExpr* make_string_expr(const char* start, int length);
 
 // Convert expressions into values
 Value ast_to_value(Ast* ast);

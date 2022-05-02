@@ -66,14 +66,14 @@ static void run_source(const char* source) {
     disassemble_token_array(&token_array);
 #endif
 
-    exit(0);
-
     AstArray ast_array;
     init_ast_array(&ast_array);
     parse_tokens(&token_array, &ast_array);
 #ifdef DEBUGGING
     disassemble_ast(&ast_array);
 #endif
+
+    exit(0);
 
     OpArray op_array; ValueArray ast_constants_array;
     init_op_array(&op_array); init_value_array(&ast_constants_array);

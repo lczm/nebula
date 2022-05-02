@@ -13,6 +13,7 @@ bool is_stmt(Ast* ast) {
         case AST_VARIABLE_EXPR:
         case AST_GROUP:
         case AST_ASSIGNMENT_EXPR:
+        case AST_STRING:
             return false;
         case AST_PRINT:
         case AST_VARIABLE_STMT:
@@ -38,6 +39,7 @@ bool is_expr(Ast* ast) {
         case AST_VARIABLE_EXPR:
         case AST_GROUP:
         case AST_ASSIGNMENT_EXPR:
+        case AST_STRING:
             return true;
     }
     return false;
@@ -132,6 +134,14 @@ AssignmentExpr* make_assignment_expr(Token name, Ast* expr) {
     assignment_expr->name = name;
     assignment_expr->expr = expr;
     return assignment_expr;
+}
+
+StringExpr* make_string_expr(const char* start, int length) {
+    StringExpr* string_expr = (
+            StringExpr*)malloc(sizeof(StringExpr) * 1);
+    string_expr->start = start;
+    string_expr->length = length;
+    return string_expr;
 }
 
 Value ast_to_value(Ast* ast) {

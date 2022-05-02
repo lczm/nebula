@@ -342,6 +342,13 @@ static Ast* primary() {
         NumberExpr* number_expr = make_number_expr(value);
         ast->as = number_expr;
         ast->type = AST_NUMBER;
+    } else if (match(TOKEN_STRING)) {
+        Token token_string = get_current();
+        move();
+        StringExpr* string_expr = make_string_expr(token_string.start,
+                token_string.length);
+        ast->as = string_expr;
+        ast->type = AST_STRING;
     } else if (match(TOKEN_TRUE)) {
         move();
         BoolExpr* bool_expr = make_bool_expr(true);

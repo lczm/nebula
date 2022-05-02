@@ -114,6 +114,14 @@ void disassemble_individual_ast(Ast* ast) {
             disassemble_individual_ast(assignment_expr->expr);
             break;
         }
+        case AST_STRING: {
+            StringExpr* string_expr = (StringExpr*)ast->as;
+            char s[string_expr->length + 1];
+            strncpy(s, string_expr->start, string_expr->length);
+            s[string_expr->length] = '\0';
+            printf("[%-20s]: %s\n", "STRING", s);
+            break;
+        }
     }
 }
 

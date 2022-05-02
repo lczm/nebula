@@ -85,8 +85,6 @@ void lex_source(TokenArray* token_array, const char* source) {
         // TODO : Ignore strings for now
         if (s[current] == '"') {
             current++;
-            printf("lkajd\n");
-
             while (s[current] != '"') {
                 current++;
             }
