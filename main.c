@@ -66,6 +66,8 @@ static void run_source(const char* source) {
     disassemble_token_array(&token_array);
 #endif
 
+    exit(0);
+
     AstArray ast_array;
     init_ast_array(&ast_array);
     parse_tokens(&token_array, &ast_array);

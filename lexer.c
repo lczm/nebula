@@ -83,13 +83,22 @@ void lex_source(TokenArray* token_array, const char* source) {
         }
 
         // TODO : Ignore strings for now
-        // if (s[current] == '"') {
-        //     current++;
-        //     while (s[current] != '"') {
-        //         current++;
-        //     }
-        //     start = current;
-        // }
+        if (s[current] == '"') {
+            current++;
+            printf("lkajd\n");
+
+            while (s[current] != '"') {
+                current++;
+            }
+            // Increment past the last semicolon
+            current++;
+
+            Token token_string = make_token(TOKEN_STRING);
+            push_token_array(token_array, token_string);
+
+            // Update start
+            start = current;
+        }
 
         if (is_digit()) {
             current = start;
@@ -310,8 +319,13 @@ void disassemble_token_array(TokenArray* token_array) {
                 s[token_array->tokens[i].length] = '\0';
                 printf("[%-20s]: %s\n", "TOKEN_IDENTIFIER", s); break;
             }
-            case TOKEN_STRING:
-                printf("[%-20s]: %s\n", "TOKEN_STRING", "STRING-PLACEHOLDER"); break;
+            case TOKEN_STRING: {
+                char s[token_array->tokens[i].length + 1];
+                strncpy(s, token_array->tokens[i].start, token_array->tokens[i].length);
+                // Delimit it with c_str end char
+                s[token_array->tokens[i].length] = '\0';
+                printf("[%-20s]: %s\n", "TOKEN_STRING", s); break;
+            }
             case TOKEN_AND:
                 printf("[%-20s]: %s\n", "TOKEN_AND", "AND"); break;
             case TOKEN_ELSE:
