@@ -8,8 +8,7 @@
 #include "codegen.h"
 #include "vm.h"
 #include "debugging.h"
-
-#define DEBUGGING
+#include "define.h"
 
 static void start_repl() {
     printf("Nebula\n");
@@ -72,8 +71,6 @@ static void run_source(const char* source) {
 #ifdef DEBUGGING
     disassemble_ast(&ast_array);
 #endif
-
-    exit(0);
 
     OpArray op_array; ValueArray ast_constants_array;
     init_op_array(&op_array); init_value_array(&ast_constants_array);

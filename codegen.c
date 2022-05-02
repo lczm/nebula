@@ -193,6 +193,14 @@ static void gen(Ast* ast) {
             make_constant(variable_name_value);
             break;
         }
+        case AST_STRING: {
+            StringExpr* string_expr = (StringExpr*)ast->as;
+            ObjString* string = make_obj_string(string_expr->start,
+                                                string_expr->length);
+            Value string_value = OBJ_VAL(string);
+            emit_constant(string_value);
+            break;
+        }
     }
 }
 

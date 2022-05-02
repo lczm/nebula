@@ -20,6 +20,15 @@ Token make_token(TokenType type) {
     return token;
 }
 
+static Token make_token_string() {
+    Token token;
+    token.type = TOKEN_STRING;
+    token.start = s + start + 1;
+    token.length = (int)(current - start - 2);
+    token.line = line;
+    return token;
+}
+
 static void reset_local_varables() {
     line = 1;
     start = 0;
@@ -91,7 +100,8 @@ void lex_source(TokenArray* token_array, const char* source) {
             // Increment past the last semicolon
             current++;
 
-            Token token_string = make_token(TOKEN_STRING);
+            // Token token_string = make_token(TOKEN_STRING);
+            Token token_string = make_token_string();
             push_token_array(token_array, token_string);
 
             // Update start

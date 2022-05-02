@@ -6,6 +6,7 @@
 #include "op.h"
 #include "vm.h"
 #include "macros.h"
+#include "define.h"
 
 static Vm* vm;
 static OpArray* op_array;
@@ -33,8 +34,8 @@ static void print_value(Value value) {
         printf("true\n");
     } else if (IS_BOOLEAN(value) && AS_BOOLEAN(value) == false) {
         printf("false\n");
-    } else if (value.type == VAL_OBJ) {
-        printf("Obj\n");
+    } else if (IS_OBJ(value) && AS_OBJ(value)->type == OBJ_STRING) {
+        print_obj_string((ObjString*)AS_OBJ(value));
     }
 }
 
@@ -123,8 +124,11 @@ void run(Vm* vm, OpArray* op_arr, ValueArray* ast_value_arr) {
                 // Get the constant_index, and take the number from the ast_value_arr
                 OpCode constant_index = op_array->ops[vm->ip];
                 vm->ip++;
-                double number = AS_NUMBER(ast_value_arr->values[constant_index]);
-                push(NUMBER_VAL(number));
+
+                // double number = AS_NUMBER(ast_value_arr->values[constant_index]);
+                // push(NUMBER_VAL(number));
+                Value value = ast_value_arr->values[constant_index];
+                push(value);
                 break;
             }
             case OP_POP: {
@@ -219,6 +223,7 @@ void run(Vm* vm, OpArray* op_arr, ValueArray* ast_value_arr) {
                 OpCode name_constant_index = op_array->ops[vm->ip];
                 // Increment it as it has 'eaten' this op
                 vm->ip++;
+
                 Obj* obj = AS_OBJ(ast_value_arr->values[name_constant_index]);
                 // The variable_name representation is an ObjString*
                 ObjString* obj_string = (ObjString*)obj;
