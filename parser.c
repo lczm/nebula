@@ -358,7 +358,7 @@ static Ast* primary() {
         VariableExpr* variable_expr = make_variable_expr(identifier_name);
         ast->as = variable_expr;
         ast->type = AST_VARIABLE_EXPR;
-        PRINT_AST_STRING(variable_expr);
+        // PRINT_AST_STRING(variable_expr);
     } else if (match(TOKEN_LEFT_PAREN)) { // let a = (10 + 2)
         move();
         Ast* expr = expression();

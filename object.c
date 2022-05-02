@@ -57,6 +57,9 @@ bool token_value_equals(Token token, Value value) {
     if (!(OBJ_TYPE(value) == OBJ_STRING))
         return false;
 
+    // This obj_string comparison only checks for 
+    // the length being the same, it does not check
+    // that they belong to the same start
     ObjString* obj_string = AS_OBJ_STRING(value);
     if (token.length != obj_string->length)
         return false;
@@ -72,5 +75,12 @@ bool token_value_equals(Token token, Value value) {
 }
 
 bool obj_string_equals(ObjString* obj1, ObjString* obj2) {
-    return false;
+    // They must be of the same length at the minimum
+    if (obj1->length != obj2->length)
+        return false;
+    // They must also be referring to the same char pointer
+    if (obj1->chars != obj2->chars)
+        return false;
+    // if the above checks all pass, then it can only be true
+    return true;
 }

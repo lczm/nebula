@@ -15,7 +15,9 @@
 #include "vm.h"
 #include "debugging.h"
 
-#define DEBUGGING_ON 0
+#define TEST_DEBUGGING
+// Comment out the undef if need to debug tests
+#undef TEST_DEBUGGING
 
 static int pass_count = 0;
 static int fail_count = 0;
@@ -38,7 +40,7 @@ Vm* run_source_return_vm(const char* source) {
     TokenArray token_array;
     init_token_array(&token_array);
     lex_source(&token_array, source);
-#if DEBUGGING_ON
+#ifdef TEST_DEBUGGING
     disassemble_token_array(&token_array);
 #endif
 
@@ -46,7 +48,7 @@ Vm* run_source_return_vm(const char* source) {
     init_ast_array(&ast_array);
     parse_tokens(&token_array, &ast_array);
 
-#if DEBUGGING_ON
+#ifdef TEST_DEBUGGING
     disassemble_ast(&ast_array);
 #endif
 
@@ -56,7 +58,7 @@ Vm* run_source_return_vm(const char* source) {
 
     // Temporary, to get out of the VM loop
     push_op_array(&op_array, OP_RETURN);
-#if DEBUGGING_ON
+#ifdef TEST_DEBUGGING
     disassemble_opcode_values(&op_array, &ast_constants_array);
 #endif
 

@@ -9,7 +9,7 @@
 #include "vm.h"
 #include "debugging.h"
 
-#define DEBUGGING 1
+#define DEBUGGING
 
 static void start_repl() {
     printf("Nebula\n");

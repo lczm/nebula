@@ -19,3 +19,4 @@ void push_hashmap(HashMap* hashmap, ObjString* key, Value value);
 void free_hashmap(HashMap* hashmap);
 
 Value get_hashmap(HashMap* hashmap, ObjString* key);
+

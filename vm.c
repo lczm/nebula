@@ -72,19 +72,20 @@ static Value peek(int index) {
     return value;
 }
 
-static void debug_vm_stack_top() {
-    printf("vm->stack_top: %d\n", vm->stack_top);
-    for (int i = 0; i < vm->stack_top + 1; i++) {
-        print_value(vm->vm_stack.values[i]);
-    }
-}
-
-static void debug_vm_stack() {
-    printf("vm->vm_stack.count: %d\n", vm->vm_stack.count);
-    for (int i = 0; i < vm->vm_stack.count; i++) {
-        print_value(vm->vm_stack.values[i]);
-    }
-}
+// Both of these debugging functions are unused now
+// static void debug_vm_stack_top() {
+//     printf("vm->stack_top: %d\n", vm->stack_top);
+//     for (int i = 0; i < vm->stack_top + 1; i++) {
+//         print_value(vm->vm_stack.values[i]);
+//     }
+// }
+// 
+// static void debug_vm_stack() {
+//     printf("vm->vm_stack.count: %d\n", vm->vm_stack.count);
+//     for (int i = 0; i < vm->vm_stack.count; i++) {
+//         print_value(vm->vm_stack.values[i]);
+//     }
+// }
 
 static uint16_t read_short() {
     // move the vm instruction pointer up by two
@@ -201,16 +202,16 @@ void run(Vm* vm, OpArray* op_arr, ValueArray* ast_value_arr) {
                 break;
             }
             case OP_RETURN: {
-// #if DEBUGGING
+#ifdef DEBUGGING
                 printf("op_return %f\n", AS_NUMBER(pop()));
-// #endif
+#endif
                 return;
             }
             case OP_PRINT: {
                 // Value value = pop();
-// #if DEBUGGING
+#ifdef DEBUGGING
                 print_value(peek(0));
-// #endif
+#endif
                 break;
             }
             case OP_SET_GLOBAL: {
@@ -224,7 +225,6 @@ void run(Vm* vm, OpArray* op_arr, ValueArray* ast_value_arr) {
 
                 // Get the value from the top of the stack
                 Value value = peek(0);
-                double number = AS_NUMBER(value);
 
                 // Add to the variables hashmap
                 push_hashmap(&vm->variables, obj_string, value);
