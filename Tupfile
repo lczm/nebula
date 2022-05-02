@@ -1,6 +1,0 @@
-CXX    = gcc
-CFLAGS = -g -Wall -Wextra -Wpedantic -Wfloat-equal -O0
-
-: foreach *.c ^test.c ^main.c |> $(CXX) $(CFLAGS) -c %f -o %o |> %B.o
-: *.o |> $(CXX) main.c %f -o %o |> nebula
-: *.o |> $(CXX) test.c %f -o %o |> test
