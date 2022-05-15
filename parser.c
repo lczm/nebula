@@ -152,6 +152,29 @@ static Ast* statement() {
 
         eat_or_error(TOKEN_SEMICOLON, "Must have ';' after statement");
         return ast_stmt;
+    } else if (match_and_move(TOKEN_WHILE)) {
+        match_and_move(TOKEN_LEFT_PAREN);
+        // This is the condition that the while loop uses to evaluate
+        // whether it will go next or not
+        Ast* condition_expr = expression();
+        // The closing parameter on the condition
+        match_and_move(TOKEN_RIGHT_PAREN);
+
+        // Check that it has a left brace, as the block condition
+        if (!match(TOKEN_LEFT_BRACE)) {
+            printf("After a while statement needs to have a left brace\n");
+        }
+
+        // Parse the block statement here
+        // TODO : In the semantic analysis portion of the block statement here
+        // the semanti analyzer can check whether the block statement includes
+        // an increment or a return to break out of the loop, in the case
+        // the user includes an infinit eloop that does not go anywhere
+        Ast* block_stmt = statement();
+
+        WhileStmt* while_stmt = make_while_stmt(condition_expr, block_stmt);
+        Ast* ast_stmt = wrap_ast(while_stmt, AST_WHILE);
+        return ast_stmt;
     } else if (match_and_move(TOKEN_IF)) {
         match_and_move(TOKEN_LEFT_PAREN);
         Ast* condition_expr = expression();
@@ -205,6 +228,7 @@ static Ast* expression_statement() {
 
     if (!eat(TOKEN_SEMICOLON)) {
         printf("After an expression_statement, there needs to be a semicolon\n");
+        exit(0);
         return NULL;
     }
 

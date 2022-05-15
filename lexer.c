@@ -285,7 +285,7 @@ void disassemble_token_array(TokenArray* token_array) {
     for (int i = 0; i < token_array->count; i++) {
         switch (token_array->tokens[i].type) {
             case TOKEN_LEFT_PAREN:
-                printf("[%-20s]: %s\n", "TOKEN_LEFT_PAREN", ")"); break;
+                printf("[%-20s]: %s\n", "TOKEN_LEFT_PAREN", "("); break;
             case TOKEN_RIGHT_PAREN:
                 printf("[%-20s]: %s\n", "TOKEN_RIGHT_PAREN", ")"); break;
             case TOKEN_LEFT_BRACE:

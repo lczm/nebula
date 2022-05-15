@@ -1,9 +1,11 @@
 #pragma once
 
 // Only if in main
-#ifdef main_h
+#ifdef MAIN_H
   #define DEBUGGING
 #endif
+
+#define DEBUGGING
 
 // For tests
 #ifdef test_h

@@ -30,6 +30,15 @@ void disassemble_individual_ast(Ast* ast) {
             // condition, then & else
             break;
         }
+        case AST_WHILE: {
+            WhileStmt* while_stmt = (WhileStmt*)ast->as;
+            printf("[%-20s]\n", "WHILE_STMT");
+            printf("[%-20s]\n", " WHILE_STMT [CONDITION]");
+            disassemble_individual_ast(while_stmt->condition_expr);
+            printf("[%-20s]\n", " WHILE_STMT [BLOCK]");
+            disassemble_individual_ast(while_stmt->block_stmt);
+            break;
+        }
         case AST_BLOCK: {
             BlockStmt* block_stmt = (BlockStmt*)ast->as;
             printf("[%-20s]\n", "BLOCK_STMT");

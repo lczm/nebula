@@ -9,6 +9,7 @@ typedef enum {
     AST_NONE,
     AST_PRINT,
     AST_IF,
+    AST_WHILE,
     AST_BLOCK,
     AST_VARIABLE_STMT,
     AST_NUMBER,
@@ -38,6 +39,11 @@ typedef struct {
     Ast* then_stmt;
     Ast* else_stmt;
 } IfStmt;
+
+typedef struct {
+    Ast* condition_expr;
+    Ast* block_stmt;
+} WhileStmt;
 
 typedef struct {
     AstArray ast_array;
@@ -100,6 +106,7 @@ Ast* make_ast();
 PrintStmt* make_print_stmt(Ast* expr);
 VariableStmt* make_variable_stmt(Token name, Ast* initializer_expr);
 IfStmt* make_if_stmt(Ast* condition_expr, Ast* then_stmt, Ast* else_stmt);
+WhileStmt* make_while_stmt(Ast* condition_expr, Ast* block_stmt);
 BlockStmt* make_block_stmt();
 
 // Expressions

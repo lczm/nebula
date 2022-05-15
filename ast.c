@@ -18,6 +18,7 @@ bool is_stmt(Ast* ast) {
         case AST_PRINT:
         case AST_VARIABLE_STMT:
         case AST_IF:
+        case AST_WHILE:
         case AST_BLOCK:
             return true;
     }
@@ -30,6 +31,7 @@ bool is_expr(Ast* ast) {
         case AST_PRINT:
         case AST_VARIABLE_STMT:
         case AST_IF:
+        case AST_WHILE:
         case AST_BLOCK:
             return false;
         case AST_NUMBER:
@@ -75,6 +77,13 @@ IfStmt* make_if_stmt(Ast* condition_expr, Ast* then_stmt, Ast* else_stmt) {
     if_stmt->then_stmt = then_stmt;
     if_stmt->else_stmt = else_stmt;
     return if_stmt;
+}
+
+WhileStmt* make_while_stmt(Ast* condition_expr, Ast* block_stmt) {
+    WhileStmt* while_stmt = (WhileStmt*)malloc(sizeof(WhileStmt) * 1);
+    while_stmt->condition_expr = condition_expr;
+    while_stmt->block_stmt = block_stmt;
+    return while_stmt;
 }
 
 BlockStmt* make_block_stmt() {
