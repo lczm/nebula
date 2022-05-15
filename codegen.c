@@ -66,7 +66,6 @@ static void gen(Ast* ast) {
       // minus one because this is zero indexed
       // tried setting it to 100 to test if
       int jump_position = op_array->count;
-      // int jump_position = 100;
 
       op_array->ops[jump_if_false_index] = (jump_position >> 8) & 0xff;
       op_array->ops[jump_if_false_index + 1] = jump_position & 0xff;
@@ -79,6 +78,39 @@ static void gen(Ast* ast) {
       break;
     }
     case AST_WHILE: {
+      WhileStmt* while_stmt = (WhileStmt*)ast->as;
+
+      // Need to keep track of this index, as it will jump back here
+      int while_start_index = op_array->count;
+
+      // Generate the condition for the while loop
+      gen(while_stmt->condition_expr);
+
+      // Create a placeholder for the jump
+      emit_byte(OP_JUMP_IF_FALSE);
+      emit_byte(0xff);
+      emit_byte(0xff);
+
+      // Minus two because the jump position is in two counts
+      int jump_if_false_index = op_array->count - 2;
+      emit_byte(OP_POP);
+
+      // Generate the block statement for the while loop
+      gen(while_stmt->block_stmt);
+
+      emit_byte(OP_JUMP);
+      emit_byte((while_start_index >> 8) & 0xff);
+      emit_byte(while_start_index & 0xff);
+
+      // jump to this after it is done
+      int jump_position = op_array->count;
+      // do the byte to integer conversion
+      op_array->ops[jump_if_false_index] = (jump_position >> 8) & 0xff;
+      op_array->ops[jump_if_false_index + 1] = jump_position & 0xff;
+
+      emit_byte(OP_POP);
+
+      break;
     }
     case AST_BLOCK: {
       BlockStmt* block_stmt = (BlockStmt*)ast->as;
@@ -127,6 +159,10 @@ static void gen(Ast* ast) {
           break;
         case TOKEN_EQUAL_EQUAL:
           emit_byte(OP_EQUAL);
+          break;
+        case TOKEN_BANG_EQUAL:
+          emit_byte(OP_EQUAL);
+          emit_byte(OP_NOT);
           break;
         default:
           break;
@@ -244,14 +280,11 @@ void disassemble_opcode_values(OpArray* op_arr, ValueArray* value_arr) {
       case OP_NEGATE:
         printf("[%d] [%-20s]\n", i, "OP_NEGATE");
         break;
-        break;
       case OP_NOT:
         printf("[%d] [%-20s]\n", i, "OP_NOT");
         break;
-        break;
       case OP_EQUAL:
         printf("[%d] [%-20s]\n", i, "OP_EQUAL");
-        break;
         break;
       case OP_CONSTANT:
         i++;
@@ -290,7 +323,6 @@ void disassemble_opcode_values(OpArray* op_arr, ValueArray* value_arr) {
       }
       case OP_NIL:
         printf("[%d] [%-20s]\n", i, "OP_NIL");
-        break;
         break;
     }
   }
