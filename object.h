@@ -1,26 +1,26 @@
 #pragma once
-#include <stdint.h>
 #include <stdbool.h>
+#include <stdint.h>
 
-#include "value.h"
 #include "token.h"
+#include "value.h"
 
 #define OBJ_TYPE(value) (AS_OBJ(value)->type)
 
 typedef enum {
-    OBJ_STRING,
+  OBJ_STRING,
 } ObjType;
 
-// No need to type define this again, as value as done 
+// No need to type define this again, as value as done
 struct Obj {
-    ObjType type;
+  ObjType type;
 };
 
 typedef struct {
-    Obj obj;
-    int length;
-    char* chars;
-    uint32_t hash;
+  Obj obj;
+  int length;
+  char* chars;
+  uint32_t hash;
 } ObjString;
 
 #define AS_OBJ_STRING(value) (ObjString*)AS_OBJ(value)

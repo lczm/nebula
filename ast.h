@@ -1,76 +1,77 @@
 #pragma once
 
 #include <stdbool.h>
+
 #include "array.h"
 #include "token.h"
 #include "value.h"
 
 typedef enum {
-    AST_NONE,
-    AST_PRINT,
-    AST_IF,
-    AST_WHILE,
-    AST_BLOCK,
-    AST_VARIABLE_STMT,
-    AST_NUMBER,
-    AST_BINARY,
-    AST_UNARY,
-    AST_BOOL,
-    AST_VARIABLE_EXPR,
-    AST_GROUP,
-    AST_ASSIGNMENT_EXPR,
-    AST_STRING,
+  AST_NONE,
+  AST_PRINT,
+  AST_IF,
+  AST_WHILE,
+  AST_BLOCK,
+  AST_VARIABLE_STMT,
+  AST_NUMBER,
+  AST_BINARY,
+  AST_UNARY,
+  AST_BOOL,
+  AST_VARIABLE_EXPR,
+  AST_GROUP,
+  AST_ASSIGNMENT_EXPR,
+  AST_STRING,
 } AstType;
 
 // Since in array.h it already declares typdef struct Ast to Ast
 struct Ast {
-    AstType type;
-    void*   as;
+  AstType type;
+  void* as;
 };
 
 // This should only be used for debugging
 // until built-in functions work
 typedef struct {
-    Ast* expr;
+  Ast* expr;
 } PrintStmt;
 
 typedef struct {
-    Ast* condition_expr;
-    Ast* then_stmt;
-    Ast* else_stmt;
+  Ast* condition_expr;
+  Ast* then_stmt;
+  Ast* else_stmt;
 } IfStmt;
 
 typedef struct {
-    Ast* condition_expr;
-    Ast* block_stmt;
+  Ast* condition_expr;
+  Ast* block_stmt;
 } WhileStmt;
 
 typedef struct {
-    AstArray ast_array;
+  AstArray ast_array;
 } BlockStmt;
 
 typedef struct {
-    Token name;
-    Ast* initializer_expr;
+  Token name;
+  Ast* initializer_expr;
 } VariableStmt;
 
 typedef struct {
-    double value;
+  double value;
 } NumberExpr;
 
 typedef struct {
-    Ast* left_expr;
-    Ast* right_expr;
-    Token op;
+  Ast* left_expr;
+  Ast* right_expr;
+  Token op;
 } BinaryExpr;
 
 typedef struct {
-    Ast* right_expr;
-    Token op;
+  Ast* right_expr;
+  Token op;
 } UnaryExpr;
 
 typedef struct {
-    bool value;
+  bool value;
 } BoolExpr;
 
 // The difference between a VariableStmt and a VariableExpr
@@ -79,22 +80,22 @@ typedef struct {
 // i.e. this is meant for the codegen backend to produce a
 // OP_GET_{} opcode
 typedef struct {
-    Token name;
+  Token name;
 } VariableExpr;
 
 typedef struct {
-    Ast* expr;
+  Ast* expr;
 } GroupExpr;
 
 // a = 10; where a is the name, and NumberExpr{10} is the expr
 typedef struct {
-    Token name;
-    Ast* expr;
+  Token name;
+  Ast* expr;
 } AssignmentExpr;
 
 typedef struct {
-    const char* start;
-    int length;
+  const char* start;
+  int length;
 } StringExpr;
 
 bool is_stmt(Ast* ast);
