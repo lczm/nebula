@@ -15,6 +15,8 @@
 #include "value.h"
 #include "vm.h"
 
+#undef DEBUGGING
+
 #define TEST_DEBUGGING
 // Comment out the undef if need to debug tests
 #undef TEST_DEBUGGING
@@ -66,7 +68,7 @@ Vm* run_source_return_vm(const char* source) {
 
   // Vm vm;
   Vm* vm = ALLOCATE(Vm, 1);
-  init_vm(vm);
+  init_vm(vm, false);
   run(vm, &op_array, &ast_constants_array);
 
   // free_vm(&vm);

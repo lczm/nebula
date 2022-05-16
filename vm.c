@@ -5,7 +5,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "define.h"
 #include "macros.h"
 #include "op.h"
 
@@ -13,10 +12,11 @@ static Vm* vm;
 static OpArray* op_array;
 static ValueArray* ast_value_array;
 
-void init_vm(Vm* v) {
+void init_vm(Vm* v, bool debugging) {
   vm = v;
   v->ip = 0;
   v->stack_top = 0;
+  v->debugging = debugging;
   init_hashmap(&v->variables);
   init_value_array(&v->vm_stack);
 }
@@ -113,9 +113,8 @@ void run(Vm* vm, OpArray* op_arr, ValueArray* ast_value_arr) {
   OpCode instruction;
 
   // Mostly for debugging purposes
-#ifdef DEBUGGING
-  printf("--- VM Output --- \n");
-#endif
+  if (vm->debugging)
+    printf("--- VM Output --- \n");
 
   for (;;) {
     instruction = op_array->ops[vm->ip];
@@ -211,16 +210,14 @@ void run(Vm* vm, OpArray* op_arr, ValueArray* ast_value_arr) {
         break;
       }
       case OP_RETURN: {
-#ifdef DEBUGGING
-        printf("op_return %f\n", AS_NUMBER(pop()));
-#endif
+        if (vm->debugging)
+          printf("op_return %f\n", AS_NUMBER(pop()));
         return;
       }
       case OP_PRINT: {
         // Value value = pop();
-#ifdef DEBUGGING
-        print_value(peek(0));
-#endif
+        if (vm->debugging)
+          print_value(peek(0));
         break;
       }
       case OP_SET_GLOBAL: {

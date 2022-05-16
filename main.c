@@ -1,11 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#define DEBUGGING
+
 #include "array.h"
 #include "ast.h"
 #include "codegen.h"
 #include "debugging.h"
-#include "define.h"
 #include "lexer.h"
 #include "parser.h"
 #include "vm.h"
@@ -85,7 +86,7 @@ static void run_source(const char* source) {
 #endif
 
   Vm vm;
-  init_vm(&vm);
+  init_vm(&vm, true);
   run(&vm, &op_array, &ast_constants_array);
 
   free_vm(&vm);
