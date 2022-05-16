@@ -15,8 +15,6 @@
 #include "value.h"
 #include "vm.h"
 
-#undef DEBUGGING
-
 #define TEST_DEBUGGING
 // Comment out the undef if need to debug tests
 #undef TEST_DEBUGGING
