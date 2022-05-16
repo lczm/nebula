@@ -40,6 +40,11 @@ typedef enum {
   TOKEN_WHILE,
   TOKEN_TRUE,
   TOKEN_FALSE,
+  // Augmented assignments
+  TOKEN_PLUS_EQUAL,
+  TOKEN_MINUS_EQUAL,
+  TOKEN_STAR_EQUAL,
+  TOKEN_SLASH_EQUAL,
 
   TOKEN_ERROR,
   TOKEN_EOF

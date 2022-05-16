@@ -196,30 +196,10 @@ void lex_source(TokenArray* token_array, const char* source) {
       Token token_dot = make_token(TOKEN_DOT);
       push_token_array(token_array, token_dot);
       start = current;
-    } else if (s[current] == '-') {
-      current++;
-      Token token_minus = make_token(TOKEN_MINUS);
-      push_token_array(token_array, token_minus);
-      start = current;
-    } else if (s[current] == '+') {
-      current++;
-      Token token_plus = make_token(TOKEN_PLUS);
-      push_token_array(token_array, token_plus);
-      start = current;
     } else if (s[current] == ';') {
       current++;
       Token token_semicolon = make_token(TOKEN_SEMICOLON);
       push_token_array(token_array, token_semicolon);
-      start = current;
-    } else if (s[current] == '/') {
-      current++;
-      Token token_slash = make_token(TOKEN_SLASH);
-      push_token_array(token_array, token_slash);
-      start = current;
-    } else if (s[current] == '*') {
-      current++;
-      Token token_star = make_token(TOKEN_STAR);
-      push_token_array(token_array, token_star);
       start = current;
     }
 
@@ -271,6 +251,54 @@ void lex_source(TokenArray* token_array, const char* source) {
         current++;
         Token token_less = make_token(TOKEN_LESS);
         push_token_array(token_array, token_less);
+        start = current;
+      }
+    } else if (s[current] == '+') {
+      if (s[current + 1] == '=') {
+        current += 2;
+        Token token_plus_equal = make_token(TOKEN_PLUS_EQUAL);
+        push_token_array(token_array, token_plus_equal);
+        start = current;
+      } else {
+        current++;
+        Token token_plus = make_token(TOKEN_PLUS);
+        push_token_array(token_array, token_plus);
+        start = current;
+      }
+    } else if (s[current] == '-') {
+      if (s[current + 1] == '=') {
+        current += 2;
+        Token token_minus_equal = make_token(TOKEN_MINUS_EQUAL);
+        push_token_array(token_array, token_minus_equal);
+        start = current;
+      } else {
+        current++;
+        Token token_minus = make_token(TOKEN_MINUS);
+        push_token_array(token_array, token_minus);
+        start = current;
+      }
+    } else if (s[current] == '*') {
+      if (s[current + 1] == '=') {
+        current += 2;
+        Token token_star_equal = make_token(TOKEN_STAR_EQUAL);
+        push_token_array(token_array, token_star_equal);
+        start = current;
+      } else {
+        current++;
+        Token token_star = make_token(TOKEN_STAR);
+        push_token_array(token_array, token_star);
+        start = current;
+      }
+    } else if (s[current] == '/') {
+      if (s[current + 1] == '=') {
+        current += 2;
+        Token token_slash_equal = make_token(TOKEN_SLASH_EQUAL);
+        push_token_array(token_array, token_slash_equal);
+        start = current;
+      } else {
+        current++;
+        Token token_slash = make_token(TOKEN_SLASH);
+        push_token_array(token_array, token_slash);
         start = current;
       }
     }
@@ -389,6 +417,18 @@ void disassemble_token_array(TokenArray* token_array) {
         break;
       case TOKEN_FALSE:
         printf("[%-20s]: %s\n", "TOKEN_FALSE", "FALSE");
+        break;
+      case TOKEN_PLUS_EQUAL:
+        printf("[%-20s]: %s\n", "TOKEN_PLUS_EQ", "PLUS_EQUAL");
+        break;
+      case TOKEN_MINUS_EQUAL:
+        printf("[%-20s]: %s\n", "TOKEN_MINUS_EQ", "MINUS_EQUAL");
+        break;
+      case TOKEN_STAR_EQUAL:
+        printf("[%-20s]: %s\n", "TOKEN_STAR_EQ", "STAR_EQUAL");
+        break;
+      case TOKEN_SLASH_EQUAL:
+        printf("[%-20s]: %s\n", "TOKEN_SLASH_EQ", "SLASH_EQUAL");
         break;
       case TOKEN_ERROR:
         printf("[%-20s]: %s\n", "TOKEN_ERROR", "ERROR");
