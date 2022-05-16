@@ -248,7 +248,9 @@ static Ast* assignment() {
   Ast* ast = and_();
 
   // a = 10;
-  if (match_and_move(TOKEN_EQUAL)) {
+  if (match_and_move(TOKEN_EQUAL) || match_and_move(TOKEN_PLUS_EQUAL) ||
+      match_and_move(TOKEN_MINUS_EQUAL) || match_and_move(TOKEN_STAR_EQUAL) ||
+      match_and_move(TOKEN_SLASH_EQUAL)) {
     // check that the Ast* ast above is a VariableExpr
     if (ast->type != AST_VARIABLE_EXPR) {
       printf("assignment parsing tried to assign a non variable\n");
@@ -261,6 +263,7 @@ static Ast* assignment() {
     Ast* assignment_ast = wrap_ast(assignment_expr, AST_ASSIGNMENT_EXPR);
     return assignment_ast;
   }
+
   return ast;
 }
 
