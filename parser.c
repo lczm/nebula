@@ -273,6 +273,9 @@ static Ast* assignment() {
     // This will come out to be some form of a expression
     // in the simplest cases this will just be a NumberExpr
     Ast* value_expr = expression();
+    // Here, we can use the token_plus_equal as the token to the
+    // binary expression creation, as in codegen, it will treat
+    // token_plus_equal and token_plus equlaly the same.
     BinaryExpr* binary_expr =
         make_binary_expr(ast, value_expr, token_plus_equal);
     Ast* binary_ast = wrap_ast(binary_expr, AST_BINARY);
