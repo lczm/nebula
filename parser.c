@@ -248,9 +248,7 @@ static Ast* assignment() {
   Ast* ast = and_();
 
   // a = 10;
-  if (match_and_move(TOKEN_EQUAL) || match_and_move(TOKEN_PLUS_EQUAL) ||
-      match_and_move(TOKEN_MINUS_EQUAL) || match_and_move(TOKEN_STAR_EQUAL) ||
-      match_and_move(TOKEN_SLASH_EQUAL)) {
+  if (match_and_move(TOKEN_EQUAL)) {
     // check that the Ast* ast above is a VariableExpr
     if (ast->type != AST_VARIABLE_EXPR) {
       printf("assignment parsing tried to assign a non variable\n");
@@ -260,6 +258,27 @@ static Ast* assignment() {
     Ast* value = assignment();
     AssignmentExpr* assignment_expr =
         make_assignment_expr(((VariableExpr*)ast->as)->name, value);
+    Ast* assignment_ast = wrap_ast(assignment_expr, AST_ASSIGNMENT_EXPR);
+    return assignment_ast;
+  } else if (match(TOKEN_PLUS_EQUAL)) {
+    Token token_plus_equal = get_current();
+    move();
+
+    // check that the Ast* ast above is a VariableExpr
+    if (ast->type != AST_VARIABLE_EXPR) {
+      printf("assignment parsing tried to assign a non variable\n");
+      return NULL;
+    }
+
+    // This will come out to be some form of a expression
+    // in the simplest cases this will just be a NumberExpr
+    Ast* value_expr = expression();
+    BinaryExpr* binary_expr =
+        make_binary_expr(ast, value_expr, token_plus_equal);
+    Ast* binary_ast = wrap_ast(binary_expr, AST_BINARY);
+
+    AssignmentExpr* assignment_expr =
+        make_assignment_expr(((VariableExpr*)ast->as)->name, binary_ast);
     Ast* assignment_ast = wrap_ast(assignment_expr, AST_ASSIGNMENT_EXPR);
     return assignment_ast;
   }

@@ -146,6 +146,7 @@ static void gen(Ast* ast) {
       // TODO : Handle the rest of the switch cases
       switch (binary_expr->op.type) {
         case TOKEN_PLUS:
+        case TOKEN_PLUS_EQUAL:
           emit_byte(OP_ADD);
           break;
         case TOKEN_MINUS:
