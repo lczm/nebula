@@ -260,8 +260,9 @@ static Ast* assignment() {
         make_assignment_expr(((VariableExpr*)ast->as)->name, value);
     Ast* assignment_ast = wrap_ast(assignment_expr, AST_ASSIGNMENT_EXPR);
     return assignment_ast;
-  } else if (match(TOKEN_PLUS_EQUAL)) {
-    Token token_plus_equal = get_current();
+  } else if (match(TOKEN_PLUS_EQUAL) || match(TOKEN_MINUS_EQUAL) ||
+             match(TOKEN_STAR_EQUAL) || match(TOKEN_SLASH_EQUAL)) {
+    Token token_augmented = get_current();
     move();
 
     // check that the Ast* ast above is a VariableExpr
@@ -277,7 +278,7 @@ static Ast* assignment() {
     // binary expression creation, as in codegen, it will treat
     // token_plus_equal and token_plus equlaly the same.
     BinaryExpr* binary_expr =
-        make_binary_expr(ast, value_expr, token_plus_equal);
+        make_binary_expr(ast, value_expr, token_augmented);
     Ast* binary_ast = wrap_ast(binary_expr, AST_BINARY);
 
     AssignmentExpr* assignment_expr =

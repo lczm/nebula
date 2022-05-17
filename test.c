@@ -656,10 +656,10 @@ static void test_vm_augmented_assignments() {
 
   char test_string1[] =
       "let a = 0;"
-      "a += 10;";
-  // "a -= 5;"
-  // "a *= 4;"
-  // "a /= 2;";
+      "a += 10;"
+      "a -= 5;"
+      "a *= 4;"
+      "a /= 2;";
 
   Vm* vm = run_source_return_vm(test_string1);
   HashMap* variables = &vm->variables;

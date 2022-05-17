@@ -150,12 +150,15 @@ static void gen(Ast* ast) {
           emit_byte(OP_ADD);
           break;
         case TOKEN_MINUS:
+        case TOKEN_MINUS_EQUAL:
           emit_byte(OP_SUBTRACT);
           break;
         case TOKEN_STAR:
+        case TOKEN_STAR_EQUAL:
           emit_byte(OP_MULTIPLY);
           break;
         case TOKEN_SLASH:
+        case TOKEN_SLASH_EQUAL:
           emit_byte(OP_DIVIDE);
           break;
         case TOKEN_EQUAL_EQUAL:
