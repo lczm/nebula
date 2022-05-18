@@ -194,6 +194,24 @@ void run(Vm* vm, OpArray* op_arr, ValueArray* ast_value_arr) {
         }
         break;
       }
+      case OP_GREATER: {
+        Value value1 = pop();
+        Value value2 = pop();
+        double number1 = AS_NUMBER(value1);
+        double number2 = AS_NUMBER(value2);
+        bool greater = number2 > number1;
+        push(BOOLEAN_VAL(greater));
+        break;
+      }
+      case OP_LESS: {
+        Value value1 = pop();
+        Value value2 = pop();
+        double number1 = AS_NUMBER(value1);
+        double number2 = AS_NUMBER(value2);
+        bool greater = number2 < number1;
+        push(BOOLEAN_VAL(greater));
+        break;
+      }
       case OP_NOT: {
         Value value = pop();
         if (AS_BOOLEAN(value) == true) {

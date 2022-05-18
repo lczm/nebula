@@ -168,6 +168,20 @@ static void gen(Ast* ast) {
           emit_byte(OP_EQUAL);
           emit_byte(OP_NOT);
           break;
+        case TOKEN_LESS:
+          emit_byte(OP_LESS);
+          break;
+        case TOKEN_LESS_EQUAL:
+          emit_byte(OP_GREATER);
+          emit_byte(OP_NOT);
+          break;
+        case TOKEN_GREATER:
+          emit_byte(OP_GREATER);
+          break;
+        case TOKEN_GREATER_EQUAL:
+          emit_byte(OP_LESS);
+          emit_byte(OP_NOT);
+          break;
         default:
           break;
       }
@@ -283,6 +297,12 @@ void disassemble_opcode_values(OpArray* op_arr, ValueArray* value_arr) {
         break;
       case OP_NEGATE:
         printf("[%d] [%-20s]\n", i, "OP_NEGATE");
+        break;
+      case OP_GREATER:
+        printf("[%d] [%-20s]\n", i, "OP_GREATER");
+        break;
+      case OP_LESS:
+        printf("[%d] [%-20s]\n", i, "OP_LESS");
         break;
       case OP_NOT:
         printf("[%d] [%-20s]\n", i, "OP_NOT");

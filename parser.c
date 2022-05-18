@@ -305,6 +305,9 @@ static Ast* equality() {
 
   // This will return a binary expression as well
   if (match_either(TOKEN_EQUAL_EQUAL, TOKEN_BANG_EQUAL)) {
+    // TODO : Change the name of this variable to not be operator
+    // as when using operator, clang-format can assume that this is c++ and
+    // not indent the spaces correctly
     Token operator= get_current();
     move();
     Ast* right = comparison();
@@ -320,6 +323,20 @@ static Ast* equality() {
 
 static Ast* comparison() {
   Ast* ast = addition();
+
+  if (match(TOKEN_LESS) || match(TOKEN_LESS_EQUAL) || match(TOKEN_GREATER) ||
+      match(TOKEN_GREATER_EQUAL)) {
+    Token token_operator = get_current();
+    move();
+    Ast* right = addition();
+
+    BinaryExpr* binary_expr = make_binary_expr(ast, right, token_operator);
+    Ast* binary_ast = make_ast();
+    binary_ast->type = AST_BINARY;
+    binary_ast->as = binary_expr;
+    return binary_ast;
+  }
+
   return ast;
 }
 
