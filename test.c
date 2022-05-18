@@ -676,6 +676,34 @@ static void test_vm_augmented_assignments() {
   PASS();
 }
 
+static void test_vm_comparison_operators() {
+  printf("test_vm_comparison_operators\n");
+
+  char test_string1[] =
+      "let e = 0;"
+      "let a = 5;"
+      "if (a > 10) {"
+      "  e = 10;"
+      "}"
+      "if (a < 10) {"
+      "  e = 50;"
+      "}";
+
+  Vm* vm = run_source_return_vm(test_string1);
+  HashMap* variables = &vm->variables;
+
+  ObjString* obj_string_e = make_obj_string_sl("e");
+  Value value_e = get_hashmap(variables, obj_string_e);
+
+  if (!IS_NUMBER(value_e))
+    FAIL();
+
+  if (AS_NUMBER(value_e) != 50.0)
+    FAIL();
+
+  PASS();
+}
+
 static void test_vm_if_conditions() {
   printf("test_vm_if_conditions()\n");
 
@@ -772,6 +800,7 @@ int main(int argc, const char* argv[]) {
   test_vm_global_environment();
   test_vm_order_of_operations();
   test_vm_augmented_assignments();
+  test_vm_comparison_operators();
   test_vm_if_conditions();
   test_vm_while_loops();
 
