@@ -682,23 +682,33 @@ static void test_vm_comparison_operators() {
   char test_string1[] =
       "let e = 0;"
       "let a = 5;"
+      "let f = 0;"
       "if (a > 10) {"
       "  e = 10;"
       "}"
       "if (a < 10) {"
       "  e = 50;"
+      "}"
+      "if (f == 0) {"
+      "  f = 100;"
       "}";
 
   Vm* vm = run_source_return_vm(test_string1);
   HashMap* variables = &vm->variables;
 
   ObjString* obj_string_e = make_obj_string_sl("e");
+  ObjString* obj_string_f = make_obj_string_sl("f");
   Value value_e = get_hashmap(variables, obj_string_e);
+  Value value_f = get_hashmap(variables, obj_string_f);
 
   if (!IS_NUMBER(value_e))
     FAIL();
-
   if (AS_NUMBER(value_e) != 50.0)
+    FAIL();
+
+  if (!IS_NUMBER(value_f))
+    FAIL();
+  if (AS_NUMBER(value_f) != 100.0)
     FAIL();
 
   PASS();
