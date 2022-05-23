@@ -584,6 +584,58 @@ static void test_vm_global_environment() {
   PASS();
 }
 
+static void test_vm_string_concatenation() {
+  printf("test_vm_string_concatenation()\n");
+
+  char test_string1[] =
+      "let a = \"hello\";"
+      "let b = \"there\";"
+      "let c = a + b;";
+
+  Vm* vm = run_source_return_vm(test_string1);
+  HashMap* variables = &vm->variables;
+  if (variables->count != 3)
+    FAIL();
+
+  ObjString* obj_string_a = make_obj_string_sl("a");
+  ObjString* obj_string_b = make_obj_string_sl("b");
+  ObjString* obj_string_c = make_obj_string_sl("c");
+  Value value_a = get_hashmap(variables, obj_string_a);
+  Value value_b = get_hashmap(variables, obj_string_b);
+  Value value_c = get_hashmap(variables, obj_string_c);
+
+  if (!IS_OBJ(value_a) && OBJ_TYPE(value_a) != OBJ_STRING)
+    FAIL();
+  if (!IS_OBJ(value_b) && OBJ_TYPE(value_b) != OBJ_STRING)
+    FAIL();
+  if (!IS_OBJ(value_c) && OBJ_TYPE(value_c) != OBJ_STRING)
+    FAIL();
+
+  ObjString* obj_a = AS_OBJ_STRING(value_a);
+  ObjString* obj_b = AS_OBJ_STRING(value_b);
+  ObjString* obj_c = AS_OBJ_STRING(value_c);
+
+  if (obj_a->length != 5)
+    FAIL();
+  if (obj_b->length != 5)
+    FAIL();
+  if (obj_c->length != obj_a->length + obj_b->length)
+    FAIL();
+
+  // Check the first half of the concatenation
+  for (int i = 0; i < obj_a->length; i++) {
+    if (obj_c->chars[i] != obj_a->chars[i])
+      FAIL();
+  }
+  // Check the second half of the concatenation
+  for (int i = obj_a->length; i < obj_a->length + obj_b->length; i++) {
+    if (obj_c->chars[i] != obj_b->chars[i - obj_b->length])
+      FAIL();
+  }
+
+  PASS();
+}
+
 static void test_vm_order_of_operations() {
   printf("test_vm_order_of_operations()\n");
 
@@ -808,6 +860,7 @@ int main(int argc, const char* argv[]) {
   test_obj_string();
   // vm tests
   test_vm_global_environment();
+  test_vm_string_concatenation();
   test_vm_order_of_operations();
   test_vm_augmented_assignments();
   test_vm_comparison_operators();
