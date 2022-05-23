@@ -85,3 +85,29 @@ bool obj_string_equals(ObjString* obj1, ObjString* obj2) {
   // if the above checks all pass, then it can only be true
   return true;
 }
+
+ObjString* concatenate_obj_string(ObjString* obj1, ObjString* obj2) {
+  ObjString* obj_string = ALLOCATE(ObjString, 1);
+
+  int length = obj1->length + obj2->length;
+
+  // Create a new string
+  char* new_string = ALLOCATE(char, length + 1);
+  // Add the first obj characters
+  for (int i = 0; i < obj1->length; i++) {
+    new_string[i] = obj1->chars[i];
+  }
+  // Add the second obj characters
+  for (int i = obj1->length; i < length; i++) {
+    new_string[i] = obj2->chars[i - obj1->length];
+  }
+  // Add the delimiter
+  new_string[length] = '\0';
+
+  obj_string->obj.type = OBJ_STRING;
+  obj_string->length = length;
+  obj_string->chars = new_string;
+  obj_string->hash = fnv_hash32(new_string, length);
+
+  return obj_string;
+}

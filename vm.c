@@ -148,12 +148,21 @@ void run(Vm* vm, OpArray* op_arr, ValueArray* ast_value_arr) {
         // variables
         Value value1 = pop();
         Value value2 = pop();
-        double number1 = AS_NUMBER(value1);
-        double number2 = AS_NUMBER(value2);
-        // Note that it is 2 + 1, not 1 + 2 as it is poped in
-        // the reverse order from when it is pushed in
-        double number3 = number2 + number1;
-        push(NUMBER_VAL(number3));
+        if (IS_NUMBER(value1) && IS_NUMBER(value2)) {
+          double number1 = AS_NUMBER(value1);
+          double number2 = AS_NUMBER(value2);
+          // Note that it is 2 + 1, not 1 + 2 as it is poped in
+          // the reverse order from when it is pushed in
+          double number3 = number2 + number1;
+          push(NUMBER_VAL(number3));
+        } else if ((IS_OBJ(value1) && ((OBJ_TYPE(value1) == OBJ_STRING))) &&
+                   (IS_OBJ(value2) && ((OBJ_TYPE(value2) == OBJ_STRING)))) {
+          ObjString* obj_string1 = AS_OBJ_STRING(value1);
+          ObjString* obj_string2 = AS_OBJ_STRING(value2);
+          ObjString* obj_string3 =
+              concatenate_obj_string(obj_string2, obj_string1);
+          push(OBJ_VAL(obj_string3));
+        }
         break;
       }
       case OP_SUBTRACT: {
