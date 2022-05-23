@@ -35,3 +35,4 @@ void print_obj_string_without_quotes(ObjString* obj_string);
 bool token_value_equals(Token token, Value value);
 bool obj_string_equals(ObjString* obj1, ObjString* obj2);
 ObjString* concatenate_obj_string(ObjString* obj1, ObjString* obj2);
+
