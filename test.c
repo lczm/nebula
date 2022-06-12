@@ -829,6 +829,29 @@ static void test_vm_while_loops() {
   PASS();
 }
 
+static void test_vm_for_loops() {
+  printf("test_vm_for_loops()\n");
+
+  char test_string1[] =
+      "let a = 0;"
+      "for (let i = 0; i < 10; i++) {"
+      " a += i;"
+      "}";
+
+  Vm* vm = run_source_return_vm(test_string1);
+  HashMap* variables = &vm->variables;
+
+  ObjString* obj_string_a = make_obj_string("a", strlen("a"));
+  Value value_a = get_hashmap(variables, obj_string_a);
+
+  if (!IS_NUMBER(value_a))
+    FAIL();
+  if (AS_NUMBER(value_a) != 55.0)
+    FAIL();
+
+  PASS();
+}
+
 int main(int argc, const char* argv[]) {
   clock_t start = clock();
 
@@ -866,6 +889,7 @@ int main(int argc, const char* argv[]) {
   test_vm_comparison_operators();
   test_vm_if_conditions();
   test_vm_while_loops();
+  test_vm_for_loops();
 
   printf("[-----Tests results-----]\n");
   printf("Pass : %d\n", pass_count);

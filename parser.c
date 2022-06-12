@@ -173,11 +173,47 @@ static Ast* statement() {
     // TODO : In the semantic analysis portion of the block statement here
     // the semanti analyzer can check whether the block statement includes
     // an increment or a return to break out of the loop, in the case
-    // the user includes an infinit eloop that does not go anywhere
+    // the user includes an infinite loop that does not go anywhere
     Ast* block_stmt = statement();
 
     WhileStmt* while_stmt = make_while_stmt(condition_expr, block_stmt);
     Ast* ast_stmt = wrap_ast(while_stmt, AST_WHILE);
+    return ast_stmt;
+  } else if (match_and_move(TOKEN_FOR)) {
+    // Deal with the variable assignment here first
+    // The for (let x =...
+
+    match_and_move(TOKEN_LEFT_PAREN);
+
+    Ast* assignment_stmt = NULL;
+    if (match(TOKEN_LET)) {
+      assignment_stmt = assignment();
+    }
+
+    Ast* condition_expr = expression();
+    if (match(TOKEN_SEMICOLON)) {
+      move();
+    }
+
+    Ast* then_expr = expression();
+    if (match(TOKEN_SEMICOLON)) {
+      move();
+    }
+
+    if (match(TOKEN_RIGHT_PAREN)) {
+      move();
+      printf("moved from token_right_paren\n");
+    }
+    // match_and_move(TOKEN_RIGHT_PAREN);
+
+    if (!match(TOKEN_LEFT_BRACE)) {
+      printf("After a for statement needs to have a left brace\n");
+    }
+    Ast* block_stmt = statement();
+
+    ForStmt* for_stmt =
+        make_for_stmt(assignment_stmt, condition_expr, then_expr, block_stmt);
+    Ast* ast_stmt = wrap_ast(for_stmt, AST_FOR);
     return ast_stmt;
   } else if (match_and_move(TOKEN_IF)) {
     match_and_move(TOKEN_LEFT_PAREN);

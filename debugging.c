@@ -40,6 +40,10 @@ void disassemble_individual_ast(Ast* ast) {
       disassemble_individual_ast(while_stmt->block_stmt);
       break;
     }
+    case AST_FOR: {
+      printf("AST_FOR\n");
+      break;
+    }
     case AST_BLOCK: {
       BlockStmt* block_stmt = (BlockStmt*)ast->as;
       printf("[%-20s]\n", "BLOCK_STMT");
