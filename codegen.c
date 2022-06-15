@@ -112,6 +112,16 @@ static void gen(Ast* ast) {
       break;
     }
     case AST_FOR: {
+      // TODO : For some reason using 'i' as the assignment
+      // and using increment 'a' using 'i' will cause
+      // 'a' and 'i' to be looked at as the same variable.
+      // e.g.
+      // let a = 0;
+      // for (let i = 0; i < 10; i += 1) {
+      //   a = a + i;
+      // }
+      // this will cause it to only loop 5 times, as
+      // incrementing 'a' seems to be incrementing 'i'
       ForStmt* for_stmt = (ForStmt*)ast->as;
 
       // Generate the assignment, assuming it is a completely

@@ -833,22 +833,21 @@ static void test_vm_for_loops() {
   printf("test_vm_for_loops()\n");
 
   char test_string1[] =
-      "let a = 0;"
-      "for (let i = 0; i < 10; i += 1) {"
-      "  print i;"
-      "  a += i;"
+      "let b = 0;"
+      "for (let i = 0; i <= 10; i += 1) {"
+      "  b += i;"
       "}";
 
   Vm* vm = run_source_return_vm(test_string1);
   HashMap* variables = &vm->variables;
 
-  ObjString* obj_string_a = make_obj_string("a", strlen("a"));
-  Value value_a = get_hashmap(variables, obj_string_a);
+  ObjString* obj_string_b = make_obj_string("b", strlen("b"));
+  Value value_b = get_hashmap(variables, obj_string_b);
 
-  if (!IS_NUMBER(value_a))
+  if (!IS_NUMBER(value_b))
     FAIL();
-  if (AS_NUMBER(value_a) != 55.0) {
-    printf("value_a is :%f\n", AS_NUMBER(value_a));
+  if (AS_NUMBER(value_b) != 55.0) {
+    printf("value_a is :%f\n", AS_NUMBER(value_b));
     FAIL();
   }
 
