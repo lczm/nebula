@@ -834,8 +834,9 @@ static void test_vm_for_loops() {
 
   char test_string1[] =
       "let a = 0;"
-      "for (let i = 0; i < 10; i++) {"
-      " a += i;"
+      "for (let i = 0; i < 10; i += 1;) {"
+      "  print i;"
+      "  a += i;"
       "}";
 
   Vm* vm = run_source_return_vm(test_string1);
@@ -846,8 +847,10 @@ static void test_vm_for_loops() {
 
   if (!IS_NUMBER(value_a))
     FAIL();
-  if (AS_NUMBER(value_a) != 55.0)
+  if (AS_NUMBER(value_a) != 55.0) {
+    printf("value_a is :%f\n", AS_NUMBER(value_a));
     FAIL();
+  }
 
   PASS();
 }

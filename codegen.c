@@ -72,9 +72,8 @@ static void gen(Ast* ast) {
 
       emit_byte(OP_POP);
 
-      // TODO : Currently ignores the else branch, this can just gen a op_nil
+      // Generate the else branch
       gen(if_stmt->else_stmt);
-      // emit_byte(OP_NIL);
       break;
     }
     case AST_WHILE: {
@@ -97,6 +96,48 @@ static void gen(Ast* ast) {
 
       // Generate the block statement for the while loop
       gen(while_stmt->block_stmt);
+
+      emit_byte(OP_JUMP);
+      emit_byte((while_start_index >> 8) & 0xff);
+      emit_byte(while_start_index & 0xff);
+
+      // jump to this after it is done
+      int jump_position = op_array->count;
+      // do the byte to integer conversion
+      op_array->ops[jump_if_false_index] = (jump_position >> 8) & 0xff;
+      op_array->ops[jump_if_false_index + 1] = jump_position & 0xff;
+
+      emit_byte(OP_POP);
+
+      break;
+    }
+    case AST_FOR: {
+      ForStmt* for_stmt = (ForStmt*)ast->as;
+
+      // Generate the assignment, assuming it is a completely
+      // new initialization
+      gen(for_stmt->assignment_stmt);
+
+      // Need to keep track of this index, as it will jump back here
+      int while_start_index = op_array->count;
+
+      // Generate the condition for the while loop
+      gen(for_stmt->condition_expr);
+
+      // Create a placeholder for the jump
+      emit_byte(OP_JUMP_IF_FALSE);
+      emit_byte(0xff);
+      emit_byte(0xff);
+
+      // Minus two because the jump position is in two counts
+      int jump_if_false_index = op_array->count - 2;
+      emit_byte(OP_POP);
+
+      // Generate the block statement for the while loop
+      gen(for_stmt->block_stmt);
+
+      // Add the then expression at the end of evaluation
+      gen(for_stmt->then_expr);
 
       emit_byte(OP_JUMP);
       emit_byte((while_start_index >> 8) & 0xff);

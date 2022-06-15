@@ -5,6 +5,7 @@
 
 #include "ast.h"
 #include "macros.h"
+#include "token.h"
 
 // Parser state
 static int parser_index = 0;
@@ -187,24 +188,21 @@ static Ast* statement() {
 
     Ast* assignment_stmt = NULL;
     if (match(TOKEN_LET)) {
-      assignment_stmt = assignment();
+      // TODO : This is only a declaration because it has a let token
+      // at the start. When the case for existing variables to be used
+      // for the for loop, then it will need to be a statement()
+      // use declaration() instead of var_declaration() here
+      // because declaration() eats up the token_let
+      assignment_stmt = declaration();
     }
 
     Ast* condition_expr = expression();
-    if (match(TOKEN_SEMICOLON)) {
-      move();
-    }
+    match_and_move(TOKEN_SEMICOLON);
 
     Ast* then_expr = expression();
-    if (match(TOKEN_SEMICOLON)) {
-      move();
-    }
+    match_and_move(TOKEN_SEMICOLON);
 
-    if (match(TOKEN_RIGHT_PAREN)) {
-      move();
-      printf("moved from token_right_paren\n");
-    }
-    // match_and_move(TOKEN_RIGHT_PAREN);
+    match_and_move(TOKEN_RIGHT_PAREN);
 
     if (!match(TOKEN_LEFT_BRACE)) {
       printf("After a for statement needs to have a left brace\n");
