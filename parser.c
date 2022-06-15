@@ -199,8 +199,8 @@ static Ast* statement() {
     Ast* condition_expr = expression();
     match_and_move(TOKEN_SEMICOLON);
 
+    // Note that there is no need for a semicolon at the end here
     Ast* then_expr = expression();
-    match_and_move(TOKEN_SEMICOLON);
 
     match_and_move(TOKEN_RIGHT_PAREN);
 

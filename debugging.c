@@ -41,7 +41,16 @@ void disassemble_individual_ast(Ast* ast) {
       break;
     }
     case AST_FOR: {
-      printf("AST_FOR\n");
+      ForStmt* for_stmt = (ForStmt*)ast->as;
+      printf("[%-20s]\n", "FOR_STMT");
+      printf("[%-20s]\n", " FOR_STMT [ASSIGNMENT]");
+      disassemble_individual_ast(for_stmt->assignment_stmt);
+      printf("[%-20s]\n", " FOR_STMT [CONDITION]");
+      disassemble_individual_ast(for_stmt->condition_expr);
+      printf("[%-20s]\n", " FOR_STMT [THEN_EXPR]");
+      disassemble_individual_ast(for_stmt->then_expr);
+      printf("[%-20s]\n", " FOR_STMT [BLOCK]");
+      disassemble_individual_ast(for_stmt->block_stmt);
       break;
     }
     case AST_BLOCK: {

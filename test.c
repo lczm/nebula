@@ -834,7 +834,7 @@ static void test_vm_for_loops() {
 
   char test_string1[] =
       "let a = 0;"
-      "for (let i = 0; i < 10; i += 1;) {"
+      "for (let i = 0; i < 10; i += 1) {"
       "  print i;"
       "  a += i;"
       "}";
