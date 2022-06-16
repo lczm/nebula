@@ -271,10 +271,12 @@ void run(Vm* vm, OpArray* op_arr, ValueArray* ast_value_arr) {
 
         Obj* obj = AS_OBJ(ast_value_arr->values[name_constant_index]);
         ObjString* obj_string = (ObjString*)obj;
-        // printf("variable name from OP_GET_GLOBAL\n");
-        // print_obj_string(obj_string);
+        // printf("variable name from OP_GET_GLOBAL : %s | %d \n",
+        //        obj_string->chars, obj_string->hash);
 
         Value value = get_hashmap(&vm->variables, obj_string);
+        // print_value(value);
+
         push(value);
         break;
       }

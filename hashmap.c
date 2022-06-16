@@ -60,7 +60,9 @@ void push_hashmap(HashMap* hashmap, ObjString* key, Value value) {
   // Check if there is a need to adjust_capacity based off
   // the load factor
   if (hashmap->count >= hashmap->capacity * LOAD_FACTOR) {
+    printf("Before adjusting capacity: %d\n", hashmap->capacity);
     adjust_capacity(hashmap);
+    printf("After adjusting capacity: %d\n", hashmap->capacity);
   }
 
   int hash_bucket = key->hash % hashmap->capacity;
@@ -69,6 +71,7 @@ void push_hashmap(HashMap* hashmap, ObjString* key, Value value) {
   // then the count should be incremented
   if (hashmap->entries[hash_bucket].key == NULL)
     hashmap->count++;
+
   // Set the key and value in that hash_bucket
   hashmap->entries[hash_bucket].key = key;
   hashmap->entries[hash_bucket].value = value;
@@ -82,5 +85,10 @@ Value get_hashmap(HashMap* hashmap, ObjString* key) {
 
   int hash_bucket = key->hash % hashmap->capacity;
   Entry* entry = &hashmap->entries[hash_bucket];
+
+  // Debugging whether the key (ObjString) gives the same (Entry) value.
+  printf("get_hashmap: %s | %d | hash_bucket: %d| entry: %p \n", key->chars,
+         key->hash, hash_bucket, entry);
+
   return entry->value;
 }

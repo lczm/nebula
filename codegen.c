@@ -181,6 +181,12 @@ static void gen(Ast* ast) {
 
       ObjString* variable_name = make_obj_string(variable_stmt->name.start,
                                                  variable_stmt->name.length);
+
+      // printf("printing variable name\n");
+      // print_obj_string(variable_name);
+      // printf("hash: %d\n", variable_name->hash);
+      // printf("printing variable name\n");
+
       Value variable_name_value = OBJ_VAL(variable_name);
       make_constant(variable_name_value);
       break;
