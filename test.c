@@ -854,6 +854,43 @@ static void test_vm_for_loops() {
   PASS();
 }
 
+static void test_vm_hashmap_collision_resolution() {
+  printf("test_vm_hashmap_collision_resolution()\n");
+
+  // When building for loops, 'a' and 'i' would collide
+  // and incrementing 'a' would increment 'i'
+  // so this test case serves to check if that case is resolved
+  char test_string1[] =
+      "let a = 1;"
+      "let b = 0;"
+      "for (let i = 0; i <= 10; i += 1) {"
+      "  a += i;"
+      "  b += i;"
+      "}";
+
+  Vm* vm = run_source_return_vm(test_string1);
+  HashMap* variables = &vm->variables;
+
+  ObjString* obj_string_a = make_obj_string("a", strlen("a"));
+  ObjString* obj_string_b = make_obj_string("b", strlen("b"));
+  Value value_a = get_hashmap(variables, obj_string_a);
+  Value value_b = get_hashmap(variables, obj_string_b);
+
+  if (!IS_NUMBER(value_a))
+    FAIL();
+  if (!IS_NUMBER(value_b))
+    FAIL();
+
+  if (AS_NUMBER(value_a) != 56.0) {
+    FAIL();
+  }
+  if (AS_NUMBER(value_b) != 55.0) {
+    FAIL();
+  }
+
+  PASS();
+}
+
 int main(int argc, const char* argv[]) {
   clock_t start = clock();
 
@@ -892,6 +929,8 @@ int main(int argc, const char* argv[]) {
   test_vm_if_conditions();
   test_vm_while_loops();
   test_vm_for_loops();
+  // vm + hashmap test
+  test_vm_hashmap_collision_resolution();
 
   printf("[-----Tests results-----]\n");
   printf("Pass : %d\n", pass_count);
