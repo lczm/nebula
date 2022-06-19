@@ -16,6 +16,7 @@ typedef struct {
 
 void init_hashmap(HashMap* hashmap);
 void push_hashmap(HashMap* hashmap, ObjString* key, Value value);
+void remove_hashmap(HashMap* hashmap, ObjString* key);
 void free_hashmap(HashMap* hashmap);
 
 Value get_hashmap(HashMap* hashmap, ObjString* key);

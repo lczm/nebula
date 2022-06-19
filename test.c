@@ -364,6 +364,18 @@ static void test_hashmap() {
   if (AS_BOOLEAN(get_boolean_value) != true)
     FAIL();
 
+  // Remove a key
+  remove_hashmap(&hashmap, boolean_key);
+
+  // Make sure that after removing a key, the value, if attempted
+  // to retrieve, will return a nil value.
+  // If in the future, this returns a boolean, then we can
+  // use that to check, but otherwise just check that it is
+  // a nil value
+  Value value = get_hashmap(&hashmap, boolean_key);
+  if (!IS_NIL(value))
+    FAIL();
+
   free_hashmap(&hashmap);
   PASS();
 }

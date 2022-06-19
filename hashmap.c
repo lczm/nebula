@@ -21,11 +21,18 @@ static Entry* find_entry(Entry* entries, int capacity, ObjString* key) {
   // printf("find_entry : key : %s | hash : %d | bucket : %d | \n", key->chars,
   //        key->hash, index);
   // return &entries[index];
+  Entry* tombstone = NULL;
 
   for (;;) {
     Entry* entry = &entries[index];
     // Check if the entry is null first
     if (entry->key == NULL) {
+      if (IS_NIL(entry->value)) {
+        return tombstone != NULL ? tombstone : entry;
+      } else {
+        if (tombstone == NULL)
+          tombstone = entry;
+      }
       return entry;
     }
 
@@ -123,17 +130,35 @@ void push_hashmap(HashMap* hashmap, ObjString* key, Value value) {
 
   Entry* entry = find_entry(hashmap->entries, hashmap->capacity, key);
 
-  // the entry is new if there was no previous keys
-  // bool new_key = entry->key == NULL;
-
   // Only if the hashmap entry is null
   // then the count should be incremented
-  if (entry->key == NULL)
+  // the entry is new if there was no previous keys
+  bool new_key = entry->key == NULL;
+  if (new_key && IS_NIL(entry->value))
     hashmap->count++;
+  // if (entry->key == NULL)
+  //   hashmap->count++;
 
   // Set the key and value in that hash_bucket
   entry->key = key;
   entry->value = value;
+}
+
+// TODO : Consider whether to return a boolean
+void remove_hashmap(HashMap* hashmap, ObjString* key) {
+  // If there is nothing to remove, end the function
+  if (hashmap->count == 0)
+    return;
+
+  // Find the entry
+  Entry* entry = find_entry(hashmap->entries, hashmap->capacity, key);
+  if (entry->key == NULL)
+    return;
+
+  // Place a tombstone in the entry
+  // (NULL + true) is considered a tombstone here
+  entry->key = NULL;
+  entry->value = BOOLEAN_VAL(true);
 }
 
 // TODO: Being able to free this will probably free up a lot of the
