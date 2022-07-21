@@ -19,13 +19,13 @@ static void emit_constant(Value value) {
   // Add to value_array
   push_value_array(constants_array, value);
   // Minus 1 of the current count as it is 0-indexed
-  emit_byte(constants_array->count - 1);
+  emit_byte((OpCode)(constants_array->count - 1));
 }
 
 static int make_constant(Value value) {
   push_value_array(constants_array, value);
   int constant_index = constants_array->count - 1;
-  emit_byte(constant_index);
+  emit_byte((OpCode)constant_index);
   return constant_index;
 }
 
@@ -50,8 +50,8 @@ static void gen(Ast* ast) {
       emit_byte(OP_JUMP_IF_FALSE);
       // Placeholder, this placeholder is two bytes, uint16_t
       // This is so that it can jump (65536 - 1) times.
-      emit_byte(0xff);
-      emit_byte(0xff);
+      emit_byte((OpCode)0xff);
+      emit_byte((OpCode)0xff);
       // minus two because the jump position is in two counts, add one
       // becuase this is zero indexed
       int jump_if_false_index = op_array->count - 2;
@@ -67,8 +67,9 @@ static void gen(Ast* ast) {
       // tried setting it to 100 to test if
       int jump_position = op_array->count;
 
-      op_array->ops[jump_if_false_index] = (jump_position >> 8) & 0xff;
-      op_array->ops[jump_if_false_index + 1] = jump_position & 0xff;
+      op_array->ops[jump_if_false_index] =
+          (OpCode)((jump_position >> 8) & 0xff);
+      op_array->ops[jump_if_false_index + 1] = (OpCode)(jump_position & 0xff);
 
       emit_byte(OP_POP);
 
@@ -87,8 +88,8 @@ static void gen(Ast* ast) {
 
       // Create a placeholder for the jump
       emit_byte(OP_JUMP_IF_FALSE);
-      emit_byte(0xff);
-      emit_byte(0xff);
+      emit_byte((OpCode)0xff);
+      emit_byte((OpCode)0xff);
 
       // Minus two because the jump position is in two counts
       int jump_if_false_index = op_array->count - 2;
@@ -98,14 +99,15 @@ static void gen(Ast* ast) {
       gen(while_stmt->block_stmt);
 
       emit_byte(OP_JUMP);
-      emit_byte((while_start_index >> 8) & 0xff);
-      emit_byte(while_start_index & 0xff);
+      emit_byte((OpCode)((while_start_index >> 8) & 0xff));
+      emit_byte((OpCode)(while_start_index & 0xff));
 
       // jump to this after it is done
       int jump_position = op_array->count;
       // do the byte to integer conversion
-      op_array->ops[jump_if_false_index] = (jump_position >> 8) & 0xff;
-      op_array->ops[jump_if_false_index + 1] = jump_position & 0xff;
+      op_array->ops[jump_if_false_index] =
+          (OpCode)((jump_position >> 8) & 0xff);
+      op_array->ops[jump_if_false_index + 1] = (OpCode)(jump_position & 0xff);
 
       emit_byte(OP_POP);
 
@@ -136,8 +138,8 @@ static void gen(Ast* ast) {
 
       // Create a placeholder for the jump
       emit_byte(OP_JUMP_IF_FALSE);
-      emit_byte(0xff);
-      emit_byte(0xff);
+      emit_byte((OpCode)0xff);
+      emit_byte((OpCode)0xff);
 
       // Minus two because the jump position is in two counts
       int jump_if_false_index = op_array->count - 2;
@@ -150,14 +152,15 @@ static void gen(Ast* ast) {
       gen(for_stmt->then_expr);
 
       emit_byte(OP_JUMP);
-      emit_byte((while_start_index >> 8) & 0xff);
-      emit_byte(while_start_index & 0xff);
+      emit_byte((OpCode)((while_start_index >> 8) & 0xff));
+      emit_byte((OpCode)(while_start_index & 0xff));
 
       // jump to this after it is done
       int jump_position = op_array->count;
       // do the byte to integer conversion
-      op_array->ops[jump_if_false_index] = (jump_position >> 8) & 0xff;
-      op_array->ops[jump_if_false_index + 1] = jump_position & 0xff;
+      op_array->ops[jump_if_false_index] =
+          (OpCode)((jump_position >> 8) & 0xff);
+      op_array->ops[jump_if_false_index + 1] = (OpCode)(jump_position & 0xff);
 
       emit_byte(OP_POP);
 
@@ -283,7 +286,7 @@ static void gen(Ast* ast) {
           // ObjString* obj_string = AS_OBJ_STRING(value);
           if (token_value_equals(name, value)) {
             // printf("found variable name at : %d\n", i);
-            emit_byte(i);
+            emit_byte((OpCode)i);
             break;
           }
         }
