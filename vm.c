@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "debugging.h"
 #include "macros.h"
 #include "op.h"
 
@@ -12,11 +13,10 @@ static Vm* vm;
 static OpArray* op_array;
 static ValueArray* ast_value_array;
 
-void init_vm(Vm* v, bool debugging) {
+void init_vm(Vm* v) {
   vm = v;
   v->ip = 0;
   v->stack_top = 0;
-  v->debugging = debugging;
   init_hashmap(&v->variables);
   init_value_array(&v->vm_stack);
 }
@@ -105,16 +105,15 @@ static bool is_falsey(Value value) {
   return false;
 }
 
-void run(Vm* vm, OpArray* op_arr, ValueArray* ast_value_arr) {
+void run(bool arguments[const],
+         Vm* vm,
+         OpArray* op_arr,
+         ValueArray* ast_value_arr) {
   // Set these to the static variables for convenience
   op_array = op_arr;
   ast_value_array = ast_value_arr;
   // Temporary ip pointer
   OpCode instruction;
-
-  // Mostly for debugging purposes
-  if (vm->debugging)
-    printf("--- VM Output --- \n");
 
   for (;;) {
     instruction = op_array->ops[vm->ip];
@@ -237,13 +236,13 @@ void run(Vm* vm, OpArray* op_arr, ValueArray* ast_value_arr) {
         break;
       }
       case OP_RETURN: {
-        if (vm->debugging)
+        if (arguments[VM_OUTPUT])
           printf("op_return %f\n", AS_NUMBER(pop()));
         return;
       }
       case OP_PRINT: {
         // Value value = pop();
-        if (vm->debugging)
+        if (arguments[VM_OUTPUT])
           print_value(peek(0));
         break;
       }

@@ -10,12 +10,6 @@
 #include "parser.h"
 #include "vm.h"
 
-#define TOTAL_FLAGS 3
-
-const int DUMP_TOKEN = 0;
-const int DUMP_AST = 1;
-const int DUMP_CODEGEN = 2;
-
 static void start_repl() {
   printf("Nebula REPL\n");
 }
@@ -88,8 +82,8 @@ static void run_source(bool arguments[const], const char* source) {
     disassemble_opcode_values(&op_array, &ast_constants_array);
 
   Vm vm;
-  init_vm(&vm, true);
-  run(&vm, &op_array, &ast_constants_array);
+  init_vm(&vm);
+  run(arguments, &vm, &op_array, &ast_constants_array);
 
   free_vm(&vm);
   free_op_array(&op_array);
@@ -127,6 +121,9 @@ int main(int argc, const char* argv[]) {
 
   int available_flags_count = 0;
 
+  // By default the -v / --vm flag is turned on
+  arguments[VM_OUTPUT] = true;
+
   // TODO : Need a way to determine whether it is a flag or a neb file
   // This can be done by checking for the .neb extension at the end
 
@@ -144,6 +141,10 @@ int main(int argc, const char* argv[]) {
     } else if (strncmp(argv[i], "-c", 2) == 0 ||
                strncmp(argv[i], "--codegen", 9) == 0) {
       arguments[DUMP_CODEGEN] = true;
+      available_flags_count++;
+    } else if (strncmp(argv[i], "-v", 2) == 0 ||
+               strncmp(argv[i], "--vm", 4) == 0) {
+      arguments[VM_OUTPUT] = true;
       available_flags_count++;
     }
   }
