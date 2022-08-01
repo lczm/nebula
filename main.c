@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-
-#define DEBUGGING
+#include <string.h>
 
 #include "array.h"
 #include "ast.h"
@@ -11,17 +10,20 @@
 #include "parser.h"
 #include "vm.h"
 
+#define TOTAL_FLAGS 3
+
+const int DUMP_TOKEN = 0;
+const int DUMP_AST = 1;
+const int DUMP_CODEGEN = 2;
+
 static void start_repl() {
-  printf("Nebula\n");
+  printf("Nebula REPL\n");
 }
 
 static char* read_file(const char* path) {
+  // Open the file, the file is readable, checked
+  // by file_exists before this
   FILE* file = fopen(path, "rb");
-  // Check if fopen failed to open the file
-  if (file == NULL) {
-    fprintf(stderr, "Could not open file \"%s\".\n", path);
-    exit(74);
-  }
 
   // Seek to the end of the file
   fseek(file, 0L, SEEK_END);
@@ -58,20 +60,20 @@ static char* read_file(const char* path) {
   return buffer;
 }
 
-static void run_source(const char* source) {
+static void run_source(bool arguments[const], const char* source) {
   TokenArray token_array;
   init_token_array(&token_array);
   lex_source(&token_array, source);
-#ifdef DEBUGGING
-  disassemble_token_array(&token_array);
-#endif
+
+  if (arguments[DUMP_TOKEN])
+    disassemble_token_array(&token_array);
 
   AstArray ast_array;
   init_ast_array(&ast_array);
   parse_tokens(&token_array, &ast_array);
-#ifdef DEBUGGING
-  disassemble_ast(&ast_array);
-#endif
+
+  if (arguments[DUMP_AST])
+    disassemble_ast(&ast_array);
 
   OpArray op_array;
   ValueArray ast_constants_array;
@@ -81,9 +83,9 @@ static void run_source(const char* source) {
 
   // Temporary, to get out of the VM loop
   push_op_array(&op_array, OP_RETURN);
-#ifdef DEBUGGING
-  disassemble_opcode_values(&op_array, &ast_constants_array);
-#endif
+
+  if (arguments[DUMP_CODEGEN])
+    disassemble_opcode_values(&op_array, &ast_constants_array);
 
   Vm vm;
   init_vm(&vm, true);
@@ -96,54 +98,80 @@ static void run_source(const char* source) {
   // free(source);
 }
 
-static void run_file(const char* path) {
+static void run_file(bool arguments[const], const char* path) {
   char* source = read_file(path);
-
-  run_source(source);
-
-  //     TokenArray token_array;
-  //     init_token_array(&token_array);
-  //     lex_source(&token_array, source);
-  // #ifdef DEBUGGING
-  //     disassemble_token_array(&token_array);
-  // #endif
-  //
-  //     AstArray ast_array;
-  //     init_ast_array(&ast_array);
-  //     parse_tokens(&token_array, &ast_array);
-  // #ifdef DEBUGGING
-  //     disassemble_ast(&ast_array);
-  // #endif
-  //
-  //     OpArray op_array; ValueArray ast_constants_array;
-  //     init_op_array(&op_array); init_value_array(&ast_constants_array);
-  //     codegen(&op_array, &ast_constants_array, &ast_array);
-  //
-  //     // Temporary, to get out of the VM loop
-  //     push_op_array(&op_array, OP_RETURN);
-  // #ifdef DEBUGGING
-  //     disassemble_opcode_values(&op_array, &ast_constants_array);
-  // #endif
-  //
-  //     Vm vm;
-  //     init_vm(&vm);
-  //     run(&vm, &op_array, &ast_constants_array);
-  //
-  //     free_vm(&vm);
-  //     free_op_array(&op_array);
-  //     free_value_array(&ast_constants_array);
-  //     free_token_array(&token_array);
+  run_source(arguments, source);
   free(source);
 }
 
+static bool file_exists(const char* path) {
+  FILE* file = fopen(path, "rb");
+  // Check if fopen failed to open the file
+  if (file == NULL) {
+    fprintf(stderr, "Could not open file \"%s\".\n", path);
+    return false;
+  }
+
+  return true;
+}
+
+// Flags guide
+// ./nebula { no option } => REPL
+// ./nebula { no option } { file } => Run file
+// ./nebula { flags } => Error
+// ./nebula { flags } { file } => Run file with flags
 int main(int argc, const char* argv[]) {
-  if (argc == 1) {  // start the repl
+  // Create an arguments array for all the total flags,
+  // Set all of them to 0 at the start
+  bool arguments[TOTAL_FLAGS] = {0};
+
+  int available_flags_count = 0;
+
+  // TODO : Need a way to determine whether it is a flag or a neb file
+  // This can be done by checking for the .neb extension at the end
+
+  // Check which arguments match which statement
+  for (int i = 1; i < argc; i++) {
+    // printf("Argument:%d : %s\n", i, argv[i]);
+
+    if (strncmp(argv[i], "-b", 2) == 0 || strncmp(argv[i], "--byte", 6) == 0) {
+      arguments[DUMP_TOKEN] = true;
+      available_flags_count++;
+    } else if (strncmp(argv[i], "-a", 2) == 0 ||
+               strncmp(argv[i], "--ast", 5) == 0) {
+      arguments[DUMP_AST] = true;
+      available_flags_count++;
+    } else if (strncmp(argv[i], "-c", 2) == 0 ||
+               strncmp(argv[i], "--codegen", 9) == 0) {
+      arguments[DUMP_CODEGEN] = true;
+      available_flags_count++;
+    }
+  }
+
+  // printf("Flag count: %d\n", available_flags_count);
+
+  // Just start the REPL
+  if (argc - available_flags_count == 1) {
     start_repl();
-  } else if (argc == 2) {
-    // TODO: will need to support multiple files in the future
-    run_file(argv[1]);
+  }
+  // There are only two flags, check that the file exists first
+  // ./nebula { no option } { file }
+  // Pass it available_flags_count + 1, as {nebula [0]}, {flags[n]}, {file[n+1]}
+  else if (argc - available_flags_count == 2) {
+    if (!file_exists(argv[available_flags_count + 1])) {
+      fprintf(stderr, "File %s does not exist\n",
+              argv[available_flags_count + 1]);
+      exit(74);
+    }
+
+    // File exists, just continue
+    run_file(arguments, argv[available_flags_count + 1]);
+
+    // Exit the program as there is no issue
+    exit(0);
   } else {
-    fprintf(stderr, "Usage: nebula[path]\n");
+    // Only can be an error, if it reaches this point
+    fprintf(stderr, "Usage: nebula [path]\n");
     exit(64);
   }
 
