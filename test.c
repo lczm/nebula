@@ -66,8 +66,11 @@ Vm* run_source_return_vm(const char* source) {
 
   // Vm vm;
   Vm* vm = ALLOCATE(Vm, 1);
-  init_vm(vm, false);
-  run(vm, &op_array, &ast_constants_array);
+  init_vm(vm);
+
+  bool arguments[TOTAL_FLAGS];
+
+  run(arguments, vm, &op_array, &ast_constants_array);
 
   // free_vm(&vm);
   // free_op_array(&op_array);
