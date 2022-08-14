@@ -161,6 +161,8 @@ void run(bool arguments[const],
           ObjString* obj_string3 =
               concatenate_obj_string(obj_string2, obj_string1);
           push(OBJ_VAL(obj_string3));
+        } else {
+          printf("Error: Tried to add two values that cannot be added together\n");
         }
         break;
       }

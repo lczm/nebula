@@ -83,7 +83,7 @@ void init_ast_array(AstArray* arr) {
 void push_ast_array(AstArray* arr, Ast* ast) {
   if (arr->capacity < arr->count + 1) {
     int new_capacity = arr->capacity * 2;
-    arr->ast = (Ast**)realloc(arr->ast, sizeof(Value) * new_capacity);
+    arr->ast = (Ast**)realloc(arr->ast, sizeof(Ast*) * new_capacity);
     arr->capacity = new_capacity;
   }
   arr->ast[arr->count] = ast;
@@ -95,4 +95,26 @@ void free_ast_array(AstArray* arr) {
   arr->capacity = 0;
   // Free the ast array, not the underlying ast values
   free(arr->ast);
+}
+
+void init_error_array(ErrorArray* arr) {
+  arr->count = 0;
+  arr->capacity = 1;
+  arr->errors = ALLOCATE(Error*, 1);
+}
+
+void push_error_array(ErrorArray* arr, Error* error) {
+  if (arr->capacity < arr->count + 1) {
+    int new_capacity = arr->capacity * 2;
+    arr->errors = (Error**)realloc(arr->errors, sizeof(Error*) * new_capacity);
+    arr->capacity = new_capacity;
+  }
+  arr->errors[arr->count] = error;
+  arr->count++;
+}
+
+void free_error_array(ErrorArray* arr) {
+  arr->count = 0;
+  arr->capacity = 0;
+  free(arr->errors);
 }

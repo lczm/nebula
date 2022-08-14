@@ -291,6 +291,8 @@ static void gen(Ast* ast) {
           }
         }
       }
+
+      printf("Error: Could not find token\n");
       break;
     }
     case AST_GROUP: {

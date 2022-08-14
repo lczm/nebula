@@ -177,6 +177,7 @@ Value ast_to_value(Ast* ast) {
       if (IS_NUMBER(left_value) && IS_NUMBER(right_value)) {
         return NUMBER_VAL(AS_NUMBER(left_value) + AS_NUMBER(right_value));
       }
+      break;
     }
     default: {
       return NIL_VAL;

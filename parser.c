@@ -3,7 +3,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "array.h"
 #include "ast.h"
+#include "error.h"
 #include "macros.h"
 #include "token.h"
 
@@ -12,6 +14,7 @@ static int parser_index = 0;
 static int token_array_len = 0;
 static TokenArray* token_array;
 static AstArray* ast_array;
+static ErrorArray* error_array;
 
 static void move() {
   parser_index++;
@@ -68,7 +71,7 @@ static bool eat(TokenType type) {
 
 static void eat_or_error(TokenType type, const char* error) {
   if (!eat(type)) {
-    printf("%s\n", error);
+    printf("Syntax error: %s\n", error);
   }
 }
 
@@ -91,12 +94,15 @@ static Ast* unary();
 static Ast* call();
 static Ast* primary();
 
-void parse_tokens(TokenArray* token_arr, AstArray* ast_arr) {
+void parse_tokens(TokenArray* token_arr,
+                  AstArray* ast_arr,
+                  ErrorArray* error_arr) {
   // Initialize the static variables for convenience
   parser_index = 0;  // Reset to 0 just in case
   token_array = token_arr;
   token_array_len = token_arr->count;
   ast_array = ast_arr;
+  error_array = error_arr;
 
   while (parser_index != token_arr->count) {
     push_ast_array(ast_array, declaration());
@@ -115,7 +121,18 @@ static Ast* declaration() {
 
 static Ast* var_declaration() {
   if (!match(TOKEN_IDENTIFIER)) {
-    printf("var_declaration could not find an identifier after 'let'\n");
+    printf(
+        "Syntax error: var_declaration could not find an identifier after "
+        "'let'\n");
+    int line = 0;
+    int column = 0;
+    char filename[] = "file.neb";
+    char error_message[] =
+        "Syntax error: var_declaration could not find an identifier after "
+        "'let'\n";
+    Error* error =
+        create_error(line, column, filename, error_message, SyntaxError);
+    push_error_array(error_array, error);
   }
 
   // Already previously matched the identifier token
@@ -130,9 +147,15 @@ static Ast* var_declaration() {
 
     Ast* initializer_expr = expression();
     if (!match_and_move(TOKEN_SEMICOLON)) {
-      printf(
-          "Did not have semicolon after variable declaration "
-          "initialization\n");
+      // printf(
+      //     "Syntax error: Did not have semicolon after variable declaration "
+      //     "initialization\n");
+      int line = 0;
+      int column = 0;
+      Error* error = create_error(
+          line, column, "file.neb",
+          "Did not have a semicolon after variable declaration", SyntaxError);
+      push_error_array(error_array, error);
       return NULL;
     }
     VariableStmt* variable_stmt =
@@ -167,7 +190,8 @@ static Ast* statement() {
 
     // Check that it has a left brace, as the block condition
     if (!match(TOKEN_LEFT_BRACE)) {
-      printf("After a while statement needs to have a left brace\n");
+      printf(
+          "Syntax error: After a while statement needs to have a left brace\n");
     }
 
     // Parse the block statement here

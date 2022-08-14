@@ -59,12 +59,26 @@ static void run_source(bool arguments[const], const char* source) {
   init_token_array(&token_array);
   lex_source(&token_array, source);
 
+  // All the errors will get pushed here
+  ErrorArray error_array;
+  init_error_array(&error_array);
+
   if (arguments[DUMP_TOKEN])
     disassemble_token_array(&token_array);
 
   AstArray ast_array;
   init_ast_array(&ast_array);
-  parse_tokens(&token_array, &ast_array);
+
+  parse_tokens(&token_array, &ast_array, &error_array);
+
+  // Print out all the errors
+  if (error_array.count > 0) {
+    for (int i = 0; i < error_array.count; i++) {
+      print_error(error_array.errors[i]);
+    }
+    // End the program
+    return;
+  }
 
   if (arguments[DUMP_AST])
     disassemble_ast(&ast_array);
@@ -89,6 +103,7 @@ static void run_source(bool arguments[const], const char* source) {
   free_op_array(&op_array);
   free_value_array(&ast_constants_array);
   free_token_array(&token_array);
+  free_error_array(&error_array);
   // free(source);
 }
 
@@ -121,7 +136,7 @@ int main(int argc, const char* argv[]) {
 
   int available_flags_count = 0;
 
-  // By default the -v / --vm flag is turned on
+  // Note that by default the -v / --vm flag is turned on
   arguments[VM_OUTPUT] = true;
 
   // TODO : Need a way to determine whether it is a flag or a neb file

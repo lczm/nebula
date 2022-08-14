@@ -3,6 +3,7 @@
 #include "op.h"
 #include "token.h"
 #include "value.h"
+#include "error.h"
 
 // Forward declare the ast type
 // makes array.h tinier, and allows ast.h itself to include array.h
@@ -49,3 +50,13 @@ typedef struct {
 void init_ast_array(AstArray* arr);
 void push_ast_array(AstArray* arr, Ast* ast);
 void free_ast_array(AstArray* arr);
+
+typedef struct {
+  int count;
+  int capacity;
+  Error** errors;
+} ErrorArray;
+
+void init_error_array(ErrorArray* arr);
+void push_error_array(ErrorArray* arr, Error* error);
+void free_error_array(ErrorArray* arr);

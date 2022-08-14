@@ -906,6 +906,12 @@ static void test_vm_hashmap_collision_resolution() {
   PASS();
 }
 
+static void test_vm_error_messages() {
+  printf("test_vm_error_messages()\n");
+
+  PASS();
+}
+
 int main(int argc, const char* argv[]) {
   clock_t start = clock();
 
@@ -946,6 +952,8 @@ int main(int argc, const char* argv[]) {
   test_vm_for_loops();
   // vm + hashmap test
   test_vm_hashmap_collision_resolution();
+  // error messages
+  test_vm_error_messages();
 
   printf("[-----Tests results-----]\n");
   printf("Pass : %d\n", pass_count);
