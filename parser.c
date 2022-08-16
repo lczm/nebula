@@ -69,9 +69,12 @@ static bool eat(TokenType type) {
   return false;
 }
 
-static void eat_or_error(TokenType type, const char* error) {
+static void eat_or_error(TokenType type, const char* error_message) {
   if (!eat(type)) {
-    printf("Syntax error: %s\n", error);
+    // printf("Syntax error: %s\n", error_message);
+    Error* error = create_error(get_current().line, 0, "main.neb",
+                                error_message, SyntaxError);
+    push_error_array(error_array, error);
   }
 }
 
@@ -121,17 +124,10 @@ static Ast* declaration() {
 
 static Ast* var_declaration() {
   if (!match(TOKEN_IDENTIFIER)) {
-    printf(
-        "Syntax error: var_declaration could not find an identifier after "
-        "'let'\n");
-    int line = 0;
-    int column = 0;
-    char filename[] = "file.neb";
-    char error_message[] =
-        "Syntax error: var_declaration could not find an identifier after "
-        "'let'\n";
     Error* error =
-        create_error(line, column, filename, error_message, SyntaxError);
+        create_error(get_current().line, 0, "main.neb",
+                     "var_declaration could not find an identifier after 'let'",
+                     SyntaxError);
     push_error_array(error_array, error);
   }
 
@@ -147,13 +143,8 @@ static Ast* var_declaration() {
 
     Ast* initializer_expr = expression();
     if (!match_and_move(TOKEN_SEMICOLON)) {
-      // printf(
-      //     "Syntax error: Did not have semicolon after variable declaration "
-      //     "initialization\n");
-      int line = 0;
-      int column = 0;
       Error* error = create_error(
-          line, column, "file.neb",
+          get_current().line, 0, "main.neb",
           "Did not have a semicolon after variable declaration", SyntaxError);
       push_error_array(error_array, error);
       return NULL;
@@ -190,8 +181,14 @@ static Ast* statement() {
 
     // Check that it has a left brace, as the block condition
     if (!match(TOKEN_LEFT_BRACE)) {
-      printf(
-          "Syntax error: After a while statement needs to have a left brace\n");
+      // printf(
+      //     "Syntax error: After a while statement needs to have a left
+      //     brace\n");
+      Error* error =
+          create_error(get_current().line, 0, "main.neb",
+                       "After a while statement, there should be a left brace.",
+                       SyntaxError);
+      push_error_array(error_array, error);
     }
 
     // Parse the block statement here
@@ -229,7 +226,12 @@ static Ast* statement() {
     match_and_move(TOKEN_RIGHT_PAREN);
 
     if (!match(TOKEN_LEFT_BRACE)) {
-      printf("After a for statement needs to have a left brace\n");
+      // printf("After a for statement needs to have a left brace\n");
+      Error* error =
+          create_error(get_current().line, 0, "main.neb",
+                       "After a while statement, there should be a left brace.",
+                       SyntaxError);
+      push_error_array(error_array, error);
     }
     Ast* block_stmt = statement();
 
@@ -244,7 +246,11 @@ static Ast* statement() {
 
     // Check that there is a left brace
     if (!match(TOKEN_LEFT_BRACE)) {
-      printf("After if needs to have a left brace\n");
+      // printf("After if needs to have a left brace\n");
+      Error* error = create_error(
+          get_current().line, 0, "main.neb",
+          "After an if statement, there should be a left brace.", SyntaxError);
+      push_error_array(error_array, error);
     }
 
     // Block statement
@@ -257,7 +263,12 @@ static Ast* statement() {
     // If there is an else statement
     if (match_and_move(TOKEN_ELSE)) {
       if (!match(TOKEN_LEFT_BRACE)) {
-        printf("After else needs to have a left brace\n");
+        // printf("After else needs to have a left brace\n");
+        Error* error = create_error(
+            get_current().line, 0, "main.neb",
+            "After an else statement, there should be a left brace.",
+            SyntaxError);
+        push_error_array(error_array, error);
       }
       // Same as above, the block statement will cover eating of the
       // token_left and token_right brace
@@ -289,8 +300,14 @@ static Ast* expression_statement() {
   Ast* ast = expression();
 
   if (!eat(TOKEN_SEMICOLON)) {
-    printf("After an expression_statement, there needs to be a semicolon\n");
-    exit(0);
+    // printf("After an expression_statement, there needs to be a semicolon\n");
+    Error* error = create_error(
+        get_current().line, 0, "main.neb",
+        "After an expression statement, there should be a semicolon.",
+        SyntaxError);
+    push_error_array(error_array, error);
+
+    // exit(0);
     return NULL;
   }
 
@@ -309,7 +326,11 @@ static Ast* assignment() {
   if (match_and_move(TOKEN_EQUAL)) {
     // check that the Ast* ast above is a VariableExpr
     if (ast->type != AST_VARIABLE_EXPR) {
-      printf("assignment parsing tried to assign a non variable\n");
+      // printf("assignment parsing tried to assign a non variable\n");
+      Error* error =
+          create_error(get_current().line, 0, "main.neb",
+                       "Tried to assign data to a non variable.", SyntaxError);
+      push_error_array(error_array, error);
       return NULL;
     }
 
@@ -325,7 +346,11 @@ static Ast* assignment() {
 
     // check that the Ast* ast above is a VariableExpr
     if (ast->type != AST_VARIABLE_EXPR) {
-      printf("assignment parsing tried to assign a non variable\n");
+      // printf("assignment parsing tried to assign a non variable\n");
+      Error* error =
+          create_error(get_current().line, 0, "main.neb",
+                       "Tried to assign data to a non variable.", SyntaxError);
+      push_error_array(error_array, error);
       return NULL;
     }
 
@@ -498,9 +523,11 @@ static Ast* primary() {
     move();
     Ast* expr = expression();
     if (!match_and_move(TOKEN_RIGHT_PAREN)) {
-      printf(
-          "After a '(', followed by an expression, should have a closing "
-          "')'.\n");
+      Error* error = create_error(
+          get_current().line, 0, "main.neb",
+          "After a '(', followed by an expression, should have a closing ')'.",
+          SyntaxError);
+      push_error_array(error_array, error);
       return NULL;
     }
     GroupExpr* group_expr = make_group_expr(expr);

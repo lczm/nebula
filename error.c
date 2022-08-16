@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 Error* create_error(int line,
                     int column,
@@ -11,6 +12,8 @@ Error* create_error(int line,
   Error* error = (Error*)malloc(sizeof(Error));
   error->line = line;
   error->column = column;
+  // Error shall allocate the space for the file_name and
+  // error_message, and when it is clearing up, it will free both
   error->file_name = file_name;
   error->error_message = error_message;
   error->type = type;
@@ -24,7 +27,8 @@ void free_error(Error* error) {}
 
 void print_error(Error* error) {
   if (error->type == SyntaxError) {
-    printf("Syntax Error: %s\n", error->error_message);
+    printf("%s: (%d|%d) Syntax Error: %s\n", error->file_name, error->line,
+           error->column, error->error_message);
   } else if (error->type == RuntimeError) {
     printf("\n");
   } else {
