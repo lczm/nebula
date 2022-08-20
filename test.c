@@ -44,9 +44,12 @@ Vm* run_source_return_vm(const char* source) {
   disassemble_token_array(&token_array);
 #endif
 
+  ErrorArray error_array;
+  init_error_array(&error_array);
+
   AstArray ast_array;
   init_ast_array(&ast_array);
-  parse_tokens(&token_array, &ast_array);
+  parse_tokens(&token_array, &ast_array, &error_array);
 
 #ifdef TEST_DEBUGGING
   disassemble_ast(&ast_array);
@@ -68,7 +71,11 @@ Vm* run_source_return_vm(const char* source) {
   Vm* vm = ALLOCATE(Vm, 1);
   init_vm(vm);
 
+  // Set all the arguemnts to be false from the start
   bool arguments[TOTAL_FLAGS];
+  for (int i = 0; i < TOTAL_FLAGS; i++) {
+    arguments[i] = false;
+  }
 
   run(arguments, vm, &op_array, &ast_constants_array);
 
@@ -959,7 +966,7 @@ int main(int argc, const char* argv[]) {
   // vm + hashmap test
   test_vm_hashmap_collision_resolution();
   // error messages
-  test_vm_parser_error_messages();
+  // test_vm_parser_error_messages();
 
   printf("[-----Tests results-----]\n");
   printf("Pass : %d\n", pass_count);

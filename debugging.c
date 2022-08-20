@@ -1,5 +1,6 @@
 #include "debugging.h"
 
+#include <memory.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -153,4 +154,12 @@ void disassemble_ast(AstArray* ast_array) {
     printf("-----%s-----\n", "Ast Disassembly");
     disassemble_individual_ast(ast_array->ast[i]);
   }
+}
+
+char* get_string_from_token(Token token) {
+  // Allocate a string
+  char* s = malloc((token.length + 1) * sizeof(char));
+  strncpy(s, token.start, token.length);
+  s[token.length] = '\0';
+  return s;
 }

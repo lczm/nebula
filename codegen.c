@@ -1,8 +1,10 @@
 #include "codegen.h"
 
+#include <stdbool.h>
 #include <stdio.h>
 
 #include "ast.h"
+#include "debugging.h"
 #include "object.h"
 #include "op.h"
 
@@ -278,6 +280,8 @@ static void gen(Ast* ast) {
       // printf("Trying to find the constant : %d\n",
       // constants_array->count); 1) obj_string 2) number : 10
       Token name = variable_expr->name;
+      bool found_variable = false;
+
       for (int i = 0; i < constants_array->count; i++) {
         Value value = constants_array->values[i];
         // If it is an object and is an ObjString*
@@ -287,12 +291,15 @@ static void gen(Ast* ast) {
           if (token_value_equals(name, value)) {
             // printf("found variable name at : %d\n", i);
             emit_byte((OpCode)i);
+            found_variable = true;
             break;
           }
         }
       }
 
-      printf("Error: Could not find token\n");
+      // If it did not find the variable
+      if (!found_variable)
+        printf("Error: Could not find token\n");
       break;
     }
     case AST_GROUP: {
