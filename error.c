@@ -27,8 +27,8 @@ void free_error(Error* error) {}
 
 void print_error(Error* error) {
   if (error->type == SyntaxError) {
-    printf("%s: (%d|%d) Syntax Error: %s\n", error->file_name, error->line,
-           error->column, error->error_message);
+    printf("%s:%d | Syntax Error: %s\n", error->file_name, error->line,
+           error->error_message);
   } else if (error->type == RuntimeError) {
     printf("\n");
   } else {

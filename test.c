@@ -906,8 +906,14 @@ static void test_vm_hashmap_collision_resolution() {
   PASS();
 }
 
-static void test_vm_error_messages() {
-  printf("test_vm_error_messages()\n");
+static void test_vm_parser_error_messages() {
+  printf("test_vm_parser_error_messages()\n");
+
+  char test_string1[] =
+      "let a = 1;"
+      "let b = ";
+
+  Vm* vm = run_source_return_vm(test_string1);
 
   PASS();
 }
@@ -953,7 +959,7 @@ int main(int argc, const char* argv[]) {
   // vm + hashmap test
   test_vm_hashmap_collision_resolution();
   // error messages
-  test_vm_error_messages();
+  test_vm_parser_error_messages();
 
   printf("[-----Tests results-----]\n");
   printf("Pass : %d\n", pass_count);

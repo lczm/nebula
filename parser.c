@@ -16,6 +16,17 @@ static TokenArray* token_array;
 static AstArray* ast_array;
 static ErrorArray* error_array;
 
+// TODO
+// Error-reporting on the specific lines are a little wrong
+// i.e.
+// 1) print 1 + 2;
+// 2) print 1 + 2;
+// 3) let a =
+// 4) print 1 + 2;
+// Will report that the error is on line 4.
+// Slightly small ish detail, so it's not that important right now
+// but this needs to be fixed in the future.
+
 static void move() {
   parser_index++;
 }
