@@ -27,8 +27,22 @@ static ErrorArray* error_array;
 // Slightly small ish detail, so it's not that important right now
 // but this needs to be fixed in the future.
 
-static void move() {
-  parser_index++;
+static bool move() {
+  // If it can still continue to increment
+  if (parser_index != token_array->count) {
+    parser_index++;
+    return true;
+  }
+
+  // Otherwise, incrementing it will result it in going out of range
+  return false;
+}
+
+static bool parser_is_at_end() {
+  if (parser_index >= token_array->count) {
+    return true;
+  }
+  return false;
 }
 
 static bool match(TokenType type) {
@@ -494,6 +508,12 @@ static Ast* call() {
 }
 
 static Ast* primary() {
+  // Sanity check at the end before trying to malloc an ast node
+  // endlessly for bad use cases
+  if (parser_is_at_end()) {
+    return NULL;
+  }
+
   Ast* ast = make_ast();
 
   if (match(TOKEN_NUMBER)) {

@@ -22,6 +22,8 @@
 static int pass_count = 0;
 static int fail_count = 0;
 
+static ErrorArray* global_error_array;
+
 static void print_value(Value value) {
   if (value.type == VAL_NUMBER) {
     printf("%f\n", AS_NUMBER(value));
@@ -46,6 +48,11 @@ Vm* run_source_return_vm(const char* source) {
 
   ErrorArray error_array;
   init_error_array(&error_array);
+
+  // Update the global error array everytime this function is ran
+  // This is to so that the latter test functions can access
+  // the ErrorArray to do some levels of checking
+  global_error_array = &error_array;
 
   AstArray ast_array;
   init_ast_array(&ast_array);
@@ -916,11 +923,16 @@ static void test_vm_hashmap_collision_resolution() {
 static void test_vm_parser_error_messages() {
   printf("test_vm_parser_error_messages()\n");
 
-  char test_string1[] =
+  char test_string_endless_loop[] =
       "let a = 1;"
       "let b = ";
 
-  Vm* vm = run_source_return_vm(test_string1);
+  Vm* vm = run_source_return_vm(test_string_endless_loop);
+
+  if (global_error_array->count != 1)
+    FAIL();
+  if (global_error_array->errors[0]->type != SyntaxError)
+    FAIL();
 
   PASS();
 }
@@ -966,7 +978,7 @@ int main(int argc, const char* argv[]) {
   // vm + hashmap test
   test_vm_hashmap_collision_resolution();
   // error messages
-  // test_vm_parser_error_messages();
+  test_vm_parser_error_messages();
 
   printf("[-----Tests results-----]\n");
   printf("Pass : %d\n", pass_count);
