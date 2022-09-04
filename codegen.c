@@ -6,6 +6,7 @@
 
 #include "ast.h"
 #include "debugging.h"
+#include "macros.h"
 #include "object.h"
 #include "op.h"
 
@@ -38,8 +39,7 @@ static bool identifier_equal(Token* a, Token* b) {
   if (a->length != b->length)
     return false;
 
-  if (memcmp(a->start, b->start, a->length) == 0)
-    return true;
+  return memcmp(a->start, b->start, a->length) == 0;
 }
 
 static int resolve_local(Compiler* c, Token* name) {
@@ -212,6 +212,8 @@ static void gen(Ast* ast) {
           }
 
           if (identifier_equal(&name, &local->name)) {
+            PRINT_TOKEN_STRING(local->name);
+            PRINT_TOKEN_STRING(name);
             printf(
                 "There already exists a variable of this name in this scope\n");
             return;

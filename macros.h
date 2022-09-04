@@ -12,8 +12,10 @@
   s[str->name.length] = '\0';                    \
   printf("%s\n", s);
 
-#define PRINT_TOKEN_STRING(token)        \
-  char s[token.length + 1];              \
-  strncpy(s, token.start, token.length); \
-  s[token.length] = '\0';                \
-  printf("%s\n", s)
+#define PRINT_TOKEN_STRING(token)          \
+  do {                                     \
+    char s[token.length + 1];              \
+    strncpy(s, token.start, token.length); \
+    s[token.length] = '\0';                \
+    printf("%s\n", s);                     \
+  } while (0)
