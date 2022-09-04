@@ -5,6 +5,7 @@
 #include "array.h"
 #include "ast.h"
 #include "codegen.h"
+#include "compiler.h"
 #include "debugging.h"
 #include "lexer.h"
 #include "parser.h"
@@ -63,13 +64,17 @@ static void run_source(bool arguments[const], const char* source) {
   ErrorArray error_array;
   init_error_array(&error_array);
 
+  // Create the compiler instance that tracks scope and depth
+  Compiler compiler;
+  init_compiler(&compiler);
+
   if (arguments[DUMP_TOKEN])
     disassemble_token_array(&token_array);
 
   AstArray ast_array;
   init_ast_array(&ast_array);
 
-  parse_tokens(&token_array, &ast_array, &error_array);
+  parse_tokens(&compiler, &token_array, &ast_array, &error_array);
 
   // Print out all the errors
   if (error_array.count > 0) {
@@ -85,9 +90,14 @@ static void run_source(bool arguments[const], const char* source) {
 
   OpArray op_array;
   ValueArray ast_constants_array;
+  LocalArray local_array;
+
   init_op_array(&op_array);
   init_value_array(&ast_constants_array);
-  codegen(&op_array, &ast_constants_array, &ast_array);
+  init_local_array(&local_array);
+  reserve_local_array(&local_array, UINT8_MAX + 1);  // 256
+
+  codegen(&op_array, &ast_constants_array, &ast_array, &local_array, &compiler);
 
   // Temporary, to get out of the VM loop
   push_op_array(&op_array, OP_RETURN);
@@ -102,6 +112,7 @@ static void run_source(bool arguments[const], const char* source) {
   free_vm(&vm);
   free_op_array(&op_array);
   free_value_array(&ast_constants_array);
+  free_local_array(&local_array);
   free_token_array(&token_array);
   free_error_array(&error_array);
   // free(source);

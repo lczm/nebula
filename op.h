@@ -19,6 +19,9 @@ typedef enum {
   // Variable setters and getters
   OP_SET_GLOBAL,
   OP_GET_GLOBAL,
+  // Local variable setters and getters
+  OP_SET_LOCAL,
+  OP_GET_LOCAL,
 
   // Jumps
   OP_JUMP,

@@ -2,6 +2,7 @@
 
 #include <stdbool.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "ast.h"
 #include "debugging.h"
@@ -11,6 +12,8 @@
 static OpArray* op_array;
 static ValueArray* constants_array;
 static AstArray* ast_array;
+static LocalArray* local_array;
+static Compiler* c;
 
 static void emit_byte(OpCode op) {
   push_op_array(op_array, op);
@@ -29,6 +32,24 @@ static int make_constant(Value value) {
   int constant_index = constants_array->count - 1;
   emit_byte((OpCode)constant_index);
   return constant_index;
+}
+
+static bool identifier_equal(Token* a, Token* b) {
+  if (a->length != b->length)
+    return false;
+
+  if (memcmp(a->start, b->start, a->length) == 0)
+    return true;
+}
+
+static int resolve_local(Compiler* c, Token* name) {
+  for (int i = local_array->count - 1; i >= 0; i--) {
+    Local* local = &local_array->locals[i];
+    if (identifier_equal(name, &local->name)) {
+      return i;
+    }
+  }
+  return -1;
 }
 
 static void gen(Ast* ast) {
@@ -169,20 +190,52 @@ static void gen(Ast* ast) {
       break;
     }
     case AST_BLOCK: {
+      begin_scope(c);
       BlockStmt* block_stmt = (BlockStmt*)ast->as;
       // For every statement inside the block, do the codegen
       for (int i = 0; i < block_stmt->ast_array.count; i++) {
         gen(block_stmt->ast_array.ast[i]);
       }
+      close_scope(c);
       break;
     }
     case AST_VARIABLE_STMT: {
       VariableStmt* variable_stmt = (VariableStmt*)ast->as;
+      Token name = variable_stmt->name;
+
+      // If this variable is a local variable
+      if (c->scope_depth != 0) {
+        for (int i = local_array->count - 1; i >= 0; i--) {
+          Local* local = &local_array->locals[i];
+          if (local->depth != -1 && local->depth < c->scope_depth) {
+            break;
+          }
+
+          if (identifier_equal(&name, &local->name)) {
+            printf(
+                "There already exists a variable of this name in this scope\n");
+            return;
+          }
+        }
+
+        if (local_array->count == UINT8_MAX + 1) {
+          printf("Tried to add more than 256 locals while codegen\n");
+          return;
+        }
+
+        // Using the token, add to the local array
+        Local* local = &local_array->locals[local_array->count++];
+        local->name = name;
+        local->depth = c->scope_depth;
+      }
 
       if (variable_stmt->initializer_expr->type != AST_NONE)
         gen(variable_stmt->initializer_expr);
 
-      emit_byte(OP_SET_GLOBAL);
+      if (resolve_local(c, &name) == -1)
+        emit_byte(OP_SET_GLOBAL);
+      else
+        emit_byte(OP_SET_LOCAL);
 
       ObjString* variable_name = make_obj_string(variable_stmt->name.start,
                                                  variable_stmt->name.length);
@@ -275,11 +328,16 @@ static void gen(Ast* ast) {
     }
     case AST_VARIABLE_EXPR: {
       VariableExpr* variable_expr = (VariableExpr*)ast->as;
-      emit_byte(OP_GET_GLOBAL);
+      Token name = variable_expr->name;
+
+      if (resolve_local(c, &name) == -1)
+        emit_byte(OP_GET_GLOBAL);
+      else
+        emit_byte(OP_SET_GLOBAL);
+
       // Find the constant
       // printf("Trying to find the constant : %d\n",
       // constants_array->count); 1) obj_string 2) number : 10
-      Token name = variable_expr->name;
       bool found_variable = false;
 
       for (int i = 0; i < constants_array->count; i++) {
@@ -329,10 +387,16 @@ static void gen(Ast* ast) {
   }
 }
 
-void codegen(OpArray* op_arr, ValueArray* constants_arr, AstArray* ast_arr) {
+void codegen(OpArray* op_arr,
+             ValueArray* constants_arr,
+             AstArray* ast_arr,
+             LocalArray* local_arr,
+             Compiler* compiler) {
   op_array = op_arr;
   constants_array = constants_arr;
   ast_array = ast_arr;
+  local_array = local_arr;
+  c = compiler;
 
   for (int i = 0; i < ast_array->count; i++) {
     gen(ast_array->ast[i]);
@@ -397,10 +461,19 @@ void disassemble_opcode_values(OpArray* op_arr, ValueArray* value_arr) {
         i++;  // name index
         // i++; // value index
         break;
+      case OP_SET_LOCAL:
+        printf("[%d-%d] [%-20s]\n", i, i + 1, "OP_SET_LOCAL");
+        i++;
+        break;
       case OP_GET_GLOBAL:
         i++;  //
         printf("[%d-%d] [%-20s] at constants_array: %d\n", i - 1, i,
                "OP_GET_GLOBAL", op_arr->ops[i]);
+        break;
+      case OP_GET_LOCAL:
+        i++;  //
+        printf("[%d-%d] [%-20s] at constants_array: %d\n", i - 1, i,
+               "OP_GET_LOCAL", op_arr->ops[i]);
         break;
       case OP_JUMP:
         printf("[%d] [%-20s]\n", i, "OP_JUMP");

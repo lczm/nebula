@@ -15,6 +15,7 @@ static int token_array_len = 0;
 static TokenArray* token_array;
 static AstArray* ast_array;
 static ErrorArray* error_array;
+static Compiler* current_compiler;
 
 // TODO
 // Error-reporting on the specific lines are a little wrong
@@ -122,7 +123,13 @@ static Ast* unary();
 static Ast* call();
 static Ast* primary();
 
-void parse_tokens(TokenArray* token_arr,
+// Not part of the parsing precedence
+// Technically just helper functions to help with
+// scoping and locals
+static Ast* block();
+
+void parse_tokens(Compiler* compiler,
+                  TokenArray* token_arr,
                   AstArray* ast_arr,
                   ErrorArray* error_arr) {
   // Initialize the static variables for convenience
@@ -148,6 +155,7 @@ static Ast* declaration() {
 }
 
 static Ast* var_declaration() {
+  // Make sure that there is an identifier for it to assign to
   if (!match(TOKEN_IDENTIFIER)) {
     Error* error =
         create_error(get_current().line, 0, "main.neb",
@@ -305,16 +313,8 @@ static Ast* statement() {
 
     return ast_stmt;
   } else if (match_and_move(TOKEN_LEFT_BRACE)) {
-    BlockStmt* block_stmt = make_block_stmt();
-
-    while (get_current().type != TOKEN_RIGHT_BRACE) {
-      push_ast_array(&block_stmt->ast_array, statement());
-    }
-    // Move past the right brace
-    move();
-
-    Ast* ast_stmt = wrap_ast(block_stmt, AST_BLOCK);
-    return ast_stmt;
+    Ast* block_ast_stmt = block();
+    return block_ast_stmt;
   } else {
     Ast* ast = expression_statement();
     return ast;
@@ -567,4 +567,18 @@ static Ast* primary() {
   }
 
   return ast;
+}
+
+static Ast* block() {
+  BlockStmt* block_stmt = make_block_stmt();
+
+  while (get_current().type != TOKEN_RIGHT_BRACE) {
+    // TODO: Find out why this was pushing statement() instead of declaration()
+    push_ast_array(&block_stmt->ast_array, declaration());
+  }
+  // Move past the right brace
+  move();
+
+  Ast* ast_stmt = wrap_ast(block_stmt, AST_BLOCK);
+  return ast_stmt;
 }

@@ -118,3 +118,31 @@ void free_error_array(ErrorArray* arr) {
   arr->capacity = 0;
   free(arr->errors);
 }
+
+void init_local_array(LocalArray* arr) {
+  arr->count = 0;
+  arr->capacity = 1;
+  arr->locals = (Local*)malloc(sizeof(Local) * 1);
+}
+
+void push_local_array(LocalArray* arr, Local local) {
+  if (arr->capacity < arr->count + 1) {
+    int new_capacity = arr->capacity * 2;
+    arr->locals = (Local*)realloc(arr->locals, sizeof(Local) * new_capacity);
+    arr->capacity = new_capacity;
+  }
+  arr->locals[arr->count] = local;
+  arr->count++;
+}
+
+// As there should only exist a fixed amount of space for locals
+void reserve_local_array(LocalArray* arr, int reserve_size) {
+  arr->locals = (Local*)realloc(arr->locals, sizeof(Local) * reserve_size);
+  arr->capacity = reserve_size;
+}
+
+void free_local_array(LocalArray* arr) {
+  arr->count = 0;
+  arr->capacity = 0;
+  free(arr->locals);
+}

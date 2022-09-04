@@ -162,7 +162,8 @@ void run(bool arguments[const],
               concatenate_obj_string(obj_string2, obj_string1);
           push(OBJ_VAL(obj_string3));
         } else {
-          printf("Error: Tried to add two values that cannot be added together\n");
+          printf(
+              "Error: Tried to add two values that cannot be added together\n");
         }
         break;
       }
@@ -265,6 +266,13 @@ void run(bool arguments[const],
         push_hashmap(&vm->variables, obj_string, value);
         break;
       }
+      case OP_SET_LOCAL: {
+        OpCode index = op_array->ops[vm->ip];
+        vm->ip++;
+        Value value = peek(0);
+        vm->vm_stack.values[index] = value;
+        break;
+      }
       case OP_GET_GLOBAL: {
         // printf("@@@ OP_GET_GLOBAL\n");
         OpCode name_constant_index = op_array->ops[vm->ip];
@@ -279,6 +287,15 @@ void run(bool arguments[const],
         // print_value(value);
 
         push(value);
+        break;
+      }
+      case OP_GET_LOCAL: {
+        // Take the index from the OpCode array
+        // And push it onto the value stack, from
+        // wherever the old local is.
+        OpCode index = op_array->ops[vm->ip];
+        vm->ip++;
+        push(vm->vm_stack.values[index]);
         break;
       }
       case OP_JUMP: {

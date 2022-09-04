@@ -1,9 +1,10 @@
 #pragma once
 
+#include "error.h"
+#include "local.h"
 #include "op.h"
 #include "token.h"
 #include "value.h"
-#include "error.h"
 
 // Forward declare the ast type
 // makes array.h tinier, and allows ast.h itself to include array.h
@@ -60,3 +61,14 @@ typedef struct {
 void init_error_array(ErrorArray* arr);
 void push_error_array(ErrorArray* arr, Error* error);
 void free_error_array(ErrorArray* arr);
+
+typedef struct {
+  int count;
+  int capacity;
+  Local* locals;
+} LocalArray;
+
+void init_local_array(LocalArray* arr);
+void push_local_array(LocalArray* arr, Local local);
+void reserve_local_array(LocalArray* arr, int reserve_size);
+void free_local_array(LocalArray* arr);
