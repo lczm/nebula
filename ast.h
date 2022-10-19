@@ -60,6 +60,7 @@ typedef struct {
 
 typedef struct {
   Token name;
+  bool initialized;
   Ast* initializer_expr;
 } VariableStmt;
 

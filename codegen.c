@@ -82,6 +82,7 @@ static void gen(Ast* ast) {
       // If the condition goes through to the then_expression, it will first
       // run OP_POP to keep the stack clean. This clears the if (condition)
       // codegen
+      printf("emit_pop 1\n");
       emit_byte(OP_POP);
 
       gen(if_stmt->then_stmt);
@@ -94,6 +95,7 @@ static void gen(Ast* ast) {
           (OpCode)((jump_position >> 8) & 0xff);
       op_array->ops[jump_if_false_index + 1] = (OpCode)(jump_position & 0xff);
 
+      printf("emit_pop 2\n");
       emit_byte(OP_POP);
 
       // Generate the else branch
@@ -116,6 +118,7 @@ static void gen(Ast* ast) {
 
       // Minus two because the jump position is in two counts
       int jump_if_false_index = op_array->count - 2;
+      printf("emit_pop 3\n");
       emit_byte(OP_POP);
 
       // Generate the block statement for the while loop
@@ -132,6 +135,7 @@ static void gen(Ast* ast) {
           (OpCode)((jump_position >> 8) & 0xff);
       op_array->ops[jump_if_false_index + 1] = (OpCode)(jump_position & 0xff);
 
+      printf("emit_pop 4\n");
       emit_byte(OP_POP);
 
       break;
@@ -166,6 +170,7 @@ static void gen(Ast* ast) {
 
       // Minus two because the jump position is in two counts
       int jump_if_false_index = op_array->count - 2;
+      printf("emit_pop 5\n");
       emit_byte(OP_POP);
 
       // Generate the block statement for the while loop
@@ -185,6 +190,7 @@ static void gen(Ast* ast) {
           (OpCode)((jump_position >> 8) & 0xff);
       op_array->ops[jump_if_false_index + 1] = (OpCode)(jump_position & 0xff);
 
+      printf("emit_pop 6\n");
       emit_byte(OP_POP);
 
       break;
@@ -234,10 +240,19 @@ static void gen(Ast* ast) {
       if (variable_stmt->initializer_expr->type != AST_NONE)
         gen(variable_stmt->initializer_expr);
 
-      if (resolve_local(c, &name) == -1)
+      if (resolve_local(c, &name) == -1) {
         emit_byte(OP_SET_GLOBAL);
-      else
+      } else if (variable_stmt->initialized) {
+        // only if the variable has been initialized before then it should be set again \
+        // i.e. \
+        // let a = 10; (does not emit OP_SET_LOCAL) \
+        // a = 20;
         emit_byte(OP_SET_LOCAL);
+      }
+
+      if (variable_stmt->initializer_expr->type != AST_NONE &&
+          variable_stmt->initialized == false)
+        variable_stmt->initialized = true;
 
       ObjString* variable_name = make_obj_string(variable_stmt->name.start,
                                                  variable_stmt->name.length);

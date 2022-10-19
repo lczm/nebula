@@ -68,6 +68,7 @@ PrintStmt* make_print_stmt(Ast* expr) {
 
 VariableStmt* make_variable_stmt(Token name, Ast* initializer_expr) {
   VariableStmt* variable_stmt = (VariableStmt*)malloc(sizeof(VariableStmt) * 1);
+  variable_stmt->initialized = false;
   variable_stmt->name = name;
   variable_stmt->initializer_expr = initializer_expr;
   return variable_stmt;
