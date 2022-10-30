@@ -452,16 +452,19 @@ static Ast* addition() {
   Ast* ast = multiplication();  // number_expr
 
   // Add or subtract
-  if (match_either(TOKEN_PLUS, TOKEN_MINUS)) {
+  while (match_either(TOKEN_PLUS, TOKEN_MINUS)) {
     Token token_operator = get_current();
     move();
     Ast* right = multiplication();  // number_expr
     BinaryExpr* binary_expr = make_binary_expr(ast, right, token_operator);
+    ast = make_ast();
+    ast->type = AST_BINARY;
+    ast->as = binary_expr;
     // Create ast wrapper
-    Ast* binary_ast = make_ast();
-    binary_ast->type = AST_BINARY;
-    binary_ast->as = binary_expr;
-    return binary_ast;
+    // Ast* binary_ast = make_ast();
+    // binary_ast->type = AST_BINARY;
+    // binary_ast->as = binary_expr;
+    // return binary_ast;
   }
 
   return ast;
