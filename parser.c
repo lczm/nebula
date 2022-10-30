@@ -416,10 +416,10 @@ static Ast* equality() {
     // TODO : Change the name of this variable to not be operator
     // as when using operator, clang-format can assume that this is c++ and
     // not indent the spaces correctly
-    Token operator= get_current();
+    Token token_operator = get_current();
     move();
     Ast* right = comparison();
-    BinaryExpr* binary_expr = make_binary_expr(ast, right, operator);
+    BinaryExpr* binary_expr = make_binary_expr(ast, right, token_operator);
     Ast* binary_ast = make_ast();
     binary_ast->type = AST_BINARY;
     binary_ast->as = binary_expr;
@@ -453,10 +453,10 @@ static Ast* addition() {
 
   // Add or subtract
   if (match_either(TOKEN_PLUS, TOKEN_MINUS)) {
-    Token operator= get_current();
+    Token token_operator = get_current();
     move();
     Ast* right = multiplication();  // number_expr
-    BinaryExpr* binary_expr = make_binary_expr(ast, right, operator);
+    BinaryExpr* binary_expr = make_binary_expr(ast, right, token_operator);
     // Create ast wrapper
     Ast* binary_ast = make_ast();
     binary_ast->type = AST_BINARY;
@@ -472,10 +472,10 @@ static Ast* multiplication() {
 
   // Multiply or divide
   if (match_either(TOKEN_STAR, TOKEN_SLASH)) {
-    Token operator= get_current();
+    Token token_operator = get_current();
     move();
     Ast* right = unary();
-    BinaryExpr* binary_expr = make_binary_expr(ast, right, operator);
+    BinaryExpr* binary_expr = make_binary_expr(ast, right, token_operator);
     // Create ast wrapper
     Ast* binary_ast = make_ast();
     binary_ast->type = AST_BINARY;
@@ -488,9 +488,9 @@ static Ast* multiplication() {
 
 static Ast* unary() {
   if (match_either(TOKEN_BANG, TOKEN_MINUS)) {
-    Token operator= get_current();
+    Token token_operator = get_current();
     move();
-    UnaryExpr* unary_expr = make_unary_expr(unary(), operator);
+    UnaryExpr* unary_expr = make_unary_expr(unary(), token_operator);
     // Create ast wrapper
     Ast* unary_ast = make_ast();
     unary_ast->type = AST_UNARY;
