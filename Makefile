@@ -1,33 +1,33 @@
-# source and object directories
-SRC := .
-OBJ := .
-
-# Can use clang as well
-CC      = gcc
+CC = gcc
 CCFLAGS = -g -Wall -Wextra -Wpedantic -Wfloat-equal -O0
 
-SRC_FILES := $(wildcard *.c)
-OBJ_FILES := $(patsubst %.c, %.o, $(SRC_FILES))
+SOURCE_DIR := .
+BUILD_DIR := ./build
 
-OBJ_FILES_MAIN := $(filter-out test.o, $(OBJ_FILES))
-OBJ_FILES_TEST := $(filter-out main.o, $(OBJ_FILES))
+HEADERS := $(wildcard $(SOURCE_DIR)/*.h)
+SOURCES := $(wildcard $(SOURCE_DIR)/*.c)
+OBJECTS := $(addprefix $(BUILD_DIR)/, $(notdir $(SOURCES:.c=.o)))
+OBJECTS_NEBULA := $(filter-out $(BUILD_DIR)/test.o, $(OBJECTS))
+OBJECTS_TEST   := $(filter-out $(BUILD_DIR)/main.o, $(OBJECTS))
 
-DEPENDS := $(patsubst %.c,%.d,$(SRC_FILES))
-
-.PHONY: all nebula test clean
+.PHONY: all nebula clean
 
 all: nebula
 
-nebula: $(OBJ_FILES_MAIN)
-	$(CC) -o $@ $^
+# link interpreter
+nebula: $(OBJECTS_NEBULA)
+	@ printf "%8s %-40s %s\n" $(CC) $@ "$(CCFLAGS)"
+	@ $(CC) $(CCFLAGS) $^ -o $@
 
-test: $(OBJ_FILES_TEST)
-	$(CC) -o $@ $^ && ./test
+test: $(OBJECTS_TEST)
+	@ printf "%8s %-40s %s\n" $(CC) $@ "$(CCFLAGS)"
+	@ $(CC) $(CCFLAGS) $^ -o $@
+	@ ./test
 
--include $(DEPENDS)
+$(BUILD_DIR)/%.o: $(SOURCE_DIR)/%.c $(HEADERS)
+	@ printf "%8s %-40s %s\n" $(CC) $< "$(CCFLAGS)"
+	@ mkdir -p $(BUILD_DIR)
+	@ $(CC) $(CCFLAGS) -c $< -o $@
 
-%.o: %.c Makefile
-	$(CC) $(CCFLAGS) -MMD -MP -c $< -o $@
- 
 clean:
-	$(RM) $(DEPENDS) $(OBJ_FILES) nebula test
+	$(RM) -r $(BUILD_DIR) nebula test
