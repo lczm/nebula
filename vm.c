@@ -49,6 +49,12 @@ static void push(Value value) {
     push_value_array(&vm->vm_stack, value);
   }
 
+  // printf("---\n");
+  // for (int i = 0; i < vm->vm_stack.count; i++) {
+  //   print_value(vm->vm_stack.values[i]);
+  // }
+  // printf("---\n");
+
   vm->stack_top++;
 }
 
@@ -294,6 +300,8 @@ void run(bool arguments[const],
         // And push it onto the value stack, from
         // wherever the old local is.
         OpCode index = op_array->ops[vm->ip];
+        // printf("OP_GET_LOCAL index : %d\n", index);
+        // printf("vm->ip : %d\n", vm->ip);
         vm->ip++;
         push(vm->vm_stack.values[index]);
         break;

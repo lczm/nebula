@@ -17,7 +17,13 @@ static LocalArray* local_array;
 static Compiler* c;
 
 static void emit_byte(OpCode op) {
+  // switch (op) {
+  //   case OP_POP:
+  //     printf("[%d] [%-20s]\n", 0, "@@@ OP_POP");
+  //     break;
+  // }
   push_op_array(op_array, op);
+  // printf("Current op_array after pushing : %d\n", op_array->count);
 }
 
 static void emit_constant(Value value) {
@@ -31,6 +37,9 @@ static void emit_constant(Value value) {
 static int make_constant(Value value) {
   push_value_array(constants_array, value);
   int constant_index = constants_array->count - 1;
+  if (constant_index == 1) {
+    printf("### emitting pop from here\n");
+  }
   emit_byte((OpCode)constant_index);
   return constant_index;
 }
@@ -42,6 +51,8 @@ static bool identifier_equal(Token* a, Token* b) {
   return memcmp(a->start, b->start, a->length) == 0;
 }
 
+// Given the token name, and which compiler,
+// look through the local arrays, to see if it exists
 static int resolve_local(Compiler* c, Token* name) {
   for (int i = local_array->count - 1; i >= 0; i--) {
     Local* local = &local_array->locals[i];
@@ -203,6 +214,13 @@ static void gen(Ast* ast) {
         gen(block_stmt->ast_array.ast[i]);
       }
       close_scope(c);
+      while (c->local_array.count > 0 &&
+             c->local_array.locals[c->local_array.count - 1].depth >
+                 c->scope_depth) {
+        // Emit byte OP_POP
+        emit_byte(OP_POP);
+        c->local_array.count--;
+      }
       break;
     }
     case AST_VARIABLE_STMT: {
@@ -210,7 +228,10 @@ static void gen(Ast* ast) {
       Token name = variable_stmt->name;
 
       // If this variable is a local variable
+      // scope_depth 0 is the global scope
       if (c->scope_depth != 0) {
+        // Check whether there is a variable of the same name
+        // in the same local scope
         for (int i = local_array->count - 1; i >= 0; i--) {
           Local* local = &local_array->locals[i];
           if (local->depth != -1 && local->depth < c->scope_depth) {
@@ -235,24 +256,30 @@ static void gen(Ast* ast) {
         Local* local = &local_array->locals[local_array->count++];
         local->name = name;
         local->depth = c->scope_depth;
+        // printf("Creating a local object\n");
       }
 
       if (variable_stmt->initializer_expr->type != AST_NONE)
         gen(variable_stmt->initializer_expr);
 
-      if (resolve_local(c, &name) == -1) {
+      int variable_scope = resolve_local(c, &name);
+      if (variable_scope == -1) {
         emit_byte(OP_SET_GLOBAL);
       } else if (variable_stmt->initialized) {
         // only if the variable has been initialized before then it should be set again \
         // i.e. \
         // let a = 10; (does not emit OP_SET_LOCAL) \
         // a = 20;
+        // printf("emitting op_set_local\n");
         emit_byte(OP_SET_LOCAL);
       }
 
       if (variable_stmt->initializer_expr->type != AST_NONE &&
-          variable_stmt->initialized == false)
+          variable_stmt->initialized == false) {
         variable_stmt->initialized = true;
+        // printf("setting initialized to be true for\n");
+        // PRINT_TOKEN_STRING(variable_stmt->name);
+      }
 
       ObjString* variable_name = make_obj_string(variable_stmt->name.start,
                                                  variable_stmt->name.length);
@@ -262,12 +289,20 @@ static void gen(Ast* ast) {
       // printf("hash: %d\n", variable_name->hash);
       // printf("printing variable name\n");
 
-      Value variable_name_value = OBJ_VAL(variable_name);
-      make_constant(variable_name_value);
+      // TODO : Figure out what this is actually for
+      // works for test-lang/numbers.neb
+      // but will break for test-lang/locals.neb
+
+      // Only make constant for when its in the global scope
+      if (c->scope_depth == 0) {
+        Value variable_name_value = OBJ_VAL(variable_name);
+        make_constant(variable_name_value);
+      }
       break;
     }
     case AST_NUMBER: {  // emit a constant
       NumberExpr* number_expr = (NumberExpr*)ast->as;
+      // printf("emitting number\n");
       emit_constant(NUMBER_VAL(number_expr->value));
       break;
     }
@@ -343,38 +378,53 @@ static void gen(Ast* ast) {
       }
       break;
     }
+      // This retrieves a variable, i.e. print a;
+      // variable_expr == a
     case AST_VARIABLE_EXPR: {
       VariableExpr* variable_expr = (VariableExpr*)ast->as;
       Token name = variable_expr->name;
 
-      if (resolve_local(c, &name) == -1)
+      // Check if this variable is a local or global variable
+      int variable_scope = resolve_local(c, &name);
+      if (variable_scope == -1) {
         emit_byte(OP_GET_GLOBAL);
-      else
-        emit_byte(OP_SET_GLOBAL);
+      } else {
+        // printf("emitting OP_GET_LOCAL from AST_VARIABLE_EXPR\n");
+        emit_byte(OP_GET_LOCAL);
+        // emit_byte((OpCode)0);
+      }
 
       // Find the constant
-      // printf("Trying to find the constant : %d\n",
-      // constants_array->count); 1) obj_string 2) number : 10
-      bool found_variable = false;
-
-      for (int i = 0; i < constants_array->count; i++) {
-        Value value = constants_array->values[i];
-        // If it is an object and is an ObjString*
-        if (IS_OBJ(value) && OBJ_TYPE(value) == OBJ_STRING) {
-          // this obj_string can be used to debug string variables
-          // ObjString* obj_string = AS_OBJ_STRING(value);
-          if (token_value_equals(name, value)) {
-            // printf("found variable name at : %d\n", i);
+      // For global scope
+      if (variable_scope == -1) {
+        bool found_variable = false;
+        for (int i = 0; i < constants_array->count; i++) {
+          Value value = constants_array->values[i];
+          // If it is an object and is an ObjString*
+          if (IS_OBJ(value) && OBJ_TYPE(value) == OBJ_STRING) {
+            // this obj_string can be used to debug string variables
+            // ObjString* obj_string = AS_OBJ_STRING(value);
+            // print_obj_string(obj_string);
+            if (token_value_equals(name, value)) {
+              printf("found variable name at : %d\n", i);
+              emit_byte((OpCode)i);
+              found_variable = true;
+              break;
+            }
+          }
+        }
+        // If it did not find the variable
+        if (!found_variable)
+          printf("Error: Could not find token\n");
+      } else {  // For local scope
+        for (int i = local_array->count - 1; i >= 0; i--) {
+          Local* local = &local_array->locals[i];
+          if (identifier_equal(&name, &local->name)) {
             emit_byte((OpCode)i);
-            found_variable = true;
             break;
           }
         }
       }
-
-      // If it did not find the variable
-      if (!found_variable)
-        printf("Error: Could not find token\n");
       break;
     }
     case AST_GROUP: {
@@ -385,6 +435,7 @@ static void gen(Ast* ast) {
     case AST_ASSIGNMENT_EXPR: {
       AssignmentExpr* assignment_expr = (AssignmentExpr*)ast->as;
       gen(assignment_expr->expr);
+      printf("emitting set_global 2\n");
       emit_byte(OP_SET_GLOBAL);
 
       ObjString* variable_name = make_obj_string(assignment_expr->name.start,
