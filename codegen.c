@@ -37,9 +37,9 @@ static void emit_constant(Value value) {
 static int make_constant(Value value) {
   push_value_array(constants_array, value);
   int constant_index = constants_array->count - 1;
-  if (constant_index == 1) {
-    printf("### emitting pop from here\n");
-  }
+  // if (constant_index == 1) {
+  //   printf("### emitting pop from here\n");
+  // }
   emit_byte((OpCode)constant_index);
   return constant_index;
 }
@@ -93,7 +93,6 @@ static void gen(Ast* ast) {
       // If the condition goes through to the then_expression, it will first
       // run OP_POP to keep the stack clean. This clears the if (condition)
       // codegen
-      printf("emit_pop 1\n");
       emit_byte(OP_POP);
 
       gen(if_stmt->then_stmt);
@@ -106,7 +105,6 @@ static void gen(Ast* ast) {
           (OpCode)((jump_position >> 8) & 0xff);
       op_array->ops[jump_if_false_index + 1] = (OpCode)(jump_position & 0xff);
 
-      printf("emit_pop 2\n");
       emit_byte(OP_POP);
 
       // Generate the else branch
@@ -129,7 +127,6 @@ static void gen(Ast* ast) {
 
       // Minus two because the jump position is in two counts
       int jump_if_false_index = op_array->count - 2;
-      printf("emit_pop 3\n");
       emit_byte(OP_POP);
 
       // Generate the block statement for the while loop
@@ -146,7 +143,6 @@ static void gen(Ast* ast) {
           (OpCode)((jump_position >> 8) & 0xff);
       op_array->ops[jump_if_false_index + 1] = (OpCode)(jump_position & 0xff);
 
-      printf("emit_pop 4\n");
       emit_byte(OP_POP);
 
       break;
@@ -181,7 +177,6 @@ static void gen(Ast* ast) {
 
       // Minus two because the jump position is in two counts
       int jump_if_false_index = op_array->count - 2;
-      printf("emit_pop 5\n");
       emit_byte(OP_POP);
 
       // Generate the block statement for the while loop
@@ -201,7 +196,6 @@ static void gen(Ast* ast) {
           (OpCode)((jump_position >> 8) & 0xff);
       op_array->ops[jump_if_false_index + 1] = (OpCode)(jump_position & 0xff);
 
-      printf("emit_pop 6\n");
       emit_byte(OP_POP);
 
       break;
@@ -406,7 +400,7 @@ static void gen(Ast* ast) {
             // ObjString* obj_string = AS_OBJ_STRING(value);
             // print_obj_string(obj_string);
             if (token_value_equals(name, value)) {
-              printf("found variable name at : %d\n", i);
+              // printf("found variable name at : %d\n", i);
               emit_byte((OpCode)i);
               found_variable = true;
               break;
@@ -435,7 +429,6 @@ static void gen(Ast* ast) {
     case AST_ASSIGNMENT_EXPR: {
       AssignmentExpr* assignment_expr = (AssignmentExpr*)ast->as;
       gen(assignment_expr->expr);
-      printf("emitting set_global 2\n");
       emit_byte(OP_SET_GLOBAL);
 
       ObjString* variable_name = make_obj_string(assignment_expr->name.start,
