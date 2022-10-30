@@ -172,11 +172,24 @@ int main(int argc, const char* argv[]) {
                strncmp(argv[i], "--vm", 4) == 0) {
       arguments[VM_OUTPUT] = true;
       available_flags_count++;
+    } else if (strncmp(argv[i], "-h", 2) == 0 ||
+               strncmp(argv[i], "--help", 6) == 0) {
+      arguments[HELP] = true;
+      available_flags_count++;
     }
   }
 
-  // printf("Flag count: %d\n", available_flags_count);
+  // If the user passed in help at all, don't run anything
+  if (arguments[HELP]) {
+    printf("Nebula flags:\n");
+    printf("-a/--ast: Dump AST\n");
+    printf("-c/--codegen: Dump Bytecode\n");
+    printf("-v/--vm: Show VM output\n");
+    printf("Nebula usage: ./nebula {flags} {file.neb}\n");
+    return 0;
+  }
 
+  // printf("Flag count: %d\n", available_flags_count);
   // Just start the REPL
   if (argc - available_flags_count == 1) {
     start_repl();
