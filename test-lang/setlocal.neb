@@ -1,0 +1,11 @@
+{
+  let a = 10;
+  let b = 20;
+
+  print a + b;
+
+  for (let i = 0; i < 10; i = i + 1) {
+    print i;
+  }
+}
+

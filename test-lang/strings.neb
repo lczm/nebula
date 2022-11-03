@@ -1,0 +1,11 @@
+let a = "hello there";
+print a;
+
+let b = "test world...";
+print b;
+
+let c = "part1~";
+let d = "part2~";
+
+let e = c + d;
+print e;

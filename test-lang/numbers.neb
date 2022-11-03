@@ -1,0 +1,11 @@
+let a = 10;
+let b = 20;
+print a + b;
+
+let c = 50;
+let d = 100;
+let e = 150;
+print c + (d + e);
+
+e = 200;
+print c + (d + e);

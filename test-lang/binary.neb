@@ -1,0 +1,9 @@
+let a = 10;
+let b = 20;
+let c = 30;
+let d = a + b + c;
+
+print d;
+
+let f = 10 + 3 + 2;
+print f;

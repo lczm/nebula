@@ -1,0 +1,14 @@
+{
+    let a = 20;
+    let b = 15;
+    let c = 50;
+    let d = 50;
+
+    print a + b;
+    print b + c;
+    print (b + c) + d;
+
+    d = 100;
+
+    print (b + c) + d;
+}

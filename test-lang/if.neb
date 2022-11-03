@@ -1,0 +1,14 @@
+let a = 100;
+
+if (a == 100) {
+  print "a is 100!";
+  if (a == 100) {
+    print "a is 100 again!";
+  }
+}
+
+if (true) {
+  print "true";
+}
+
+print "hello";

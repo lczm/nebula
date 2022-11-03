@@ -1,9 +1,10 @@
 .tup/
-*.neb
-nebula
+.vscode/
+
 *.o
 *.d
 tags*
-test
-.vscode/
 valgrind*
+
+nebula
+test
