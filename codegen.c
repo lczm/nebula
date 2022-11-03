@@ -290,8 +290,8 @@ static void gen(Ast* ast) {
       if (variable_stmt->initializer_expr->type != AST_NONE &&
           variable_stmt->initialized == false) {
         variable_stmt->initialized = true;
-        printf("setting initialized to be true for\n");
-        PRINT_TOKEN_STRING(variable_stmt->name);
+        // printf("setting initialized to be true for\n");
+        // PRINT_TOKEN_STRING(variable_stmt->name);
       }
 
       ObjString* variable_name = make_obj_string(variable_stmt->name.start,
