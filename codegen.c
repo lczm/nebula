@@ -63,6 +63,16 @@ static int resolve_local(Compiler* c, Token* name) {
   return -1;
 }
 
+static int resolve_local_scope_depth(Compiler* c, Token* name) {
+  for (int i = local_array->count - 1; i >= 0; i--) {
+    Local* local = &local_array->locals[i];
+    if (identifier_equal(name, &local->name)) {
+      return local->depth;
+    }
+  }
+  return -1;
+}
+
 static void gen(Ast* ast) {
   if (ast == NULL)
     return;
@@ -250,29 +260,38 @@ static void gen(Ast* ast) {
         Local* local = &local_array->locals[local_array->count++];
         local->name = name;
         local->depth = c->scope_depth;
-        // printf("Creating a local object\n");
+        // printf("Creating local | scope_depth : %d\n", local->depth);
       }
 
       if (variable_stmt->initializer_expr->type != AST_NONE)
         gen(variable_stmt->initializer_expr);
 
       int variable_scope = resolve_local(c, &name);
+      // Not a local variable
       if (variable_scope == -1) {
         emit_byte(OP_SET_GLOBAL);
-      } else if (variable_stmt->initialized) {
-        // only if the variable has been initialized before then it should be set again \
+      }
+
+      // else if (variable_stmt->initialized) {
+      // only if the variable has been initialized before then it should be set
+      // again \
         // i.e. \
         // let a = 10; (does not emit OP_SET_LOCAL) \
         // a = 20;
-        // printf("emitting op_set_local\n");
-        emit_byte(OP_SET_LOCAL);
-      }
+      // printf("emitting op_set_local\n");
+
+      // TODO : This can be a warning?
+      // TODO : Does it ever get to this?
+      // printf("Warning: variable has already been initialized\n");
+      // emit_byte(OP_SET_LOCAL);
+      // emit_byte(variable_scope);
+      // }
 
       if (variable_stmt->initializer_expr->type != AST_NONE &&
           variable_stmt->initialized == false) {
         variable_stmt->initialized = true;
-        // printf("setting initialized to be true for\n");
-        // PRINT_TOKEN_STRING(variable_stmt->name);
+        printf("setting initialized to be true for\n");
+        PRINT_TOKEN_STRING(variable_stmt->name);
       }
 
       ObjString* variable_name = make_obj_string(variable_stmt->name.start,
@@ -429,12 +448,19 @@ static void gen(Ast* ast) {
     case AST_ASSIGNMENT_EXPR: {
       AssignmentExpr* assignment_expr = (AssignmentExpr*)ast->as;
       gen(assignment_expr->expr);
-      emit_byte(OP_SET_GLOBAL);
 
-      ObjString* variable_name = make_obj_string(assignment_expr->name.start,
-                                                 assignment_expr->name.length);
-      Value variable_name_value = OBJ_VAL(variable_name);
-      make_constant(variable_name_value);
+      int variable_scope = resolve_local(c, &assignment_expr->name);
+      if (variable_scope == -1) {
+        emit_byte(OP_SET_GLOBAL);
+
+        ObjString* variable_name = make_obj_string(
+            assignment_expr->name.start, assignment_expr->name.length);
+        Value variable_name_value = OBJ_VAL(variable_name);
+        make_constant(variable_name_value);
+      } else {
+        emit_byte(OP_SET_LOCAL);
+        emit_byte(variable_scope);
+      }
       break;
     }
     case AST_STRING: {

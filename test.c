@@ -488,7 +488,8 @@ static void test_parse_binary_expressions() {
       "let d = (10 + 2) / 3;"
       "let e = ((10 + 2) / 3) * 2;"
       "let f = 10 + 3 + 2;"
-      "let g = 10 * 3 * 3 * -1;";
+      "let g = 10 * 3 * 3 * -1;"
+      "let h = 10 * 3 / 3 * 5 / 5;";
 
   Vm* vm = run_source_return_vm(test_string);
   HashMap* variables = &vm->variables;
@@ -500,6 +501,7 @@ static void test_parse_binary_expressions() {
   ObjString* obj_string_e = make_obj_string_sl("e");
   ObjString* obj_string_f = make_obj_string_sl("f");
   ObjString* obj_string_g = make_obj_string_sl("g");
+  ObjString* obj_string_h = make_obj_string_sl("h");
 
   Value value_a = get_hashmap(variables, obj_string_a);
   Value value_b = get_hashmap(variables, obj_string_b);
@@ -508,10 +510,11 @@ static void test_parse_binary_expressions() {
   Value value_e = get_hashmap(variables, obj_string_e);
   Value value_f = get_hashmap(variables, obj_string_f);
   Value value_g = get_hashmap(variables, obj_string_g);
+  Value value_h = get_hashmap(variables, obj_string_h);
 
   if (!IS_NUMBER(value_a) || !IS_NUMBER(value_b) || !IS_NUMBER(value_c) ||
       !IS_NUMBER(value_d) || !IS_NUMBER(value_e) || !IS_NUMBER(value_f) ||
-      !IS_NUMBER(value_g))
+      !IS_NUMBER(value_g) || !IS_NUMBER(value_h))
     FAIL();
 
   if (AS_NUMBER(value_a) != 11.0)
@@ -527,6 +530,8 @@ static void test_parse_binary_expressions() {
   if (AS_NUMBER(value_f) != 15.0)
     FAIL();
   if (AS_NUMBER(value_g) != -90.0)
+    FAIL();
+  if (AS_NUMBER(value_h) != 10.0)
     FAIL();
 
   PASS();
