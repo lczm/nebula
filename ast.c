@@ -23,6 +23,7 @@ bool is_stmt(Ast* ast) {
     case AST_WHILE:
     case AST_FOR:
     case AST_BLOCK:
+    case AST_FUNC:
       return true;
   }
   return false;
@@ -37,6 +38,7 @@ bool is_expr(Ast* ast) {
     case AST_WHILE:
     case AST_FOR:
     case AST_BLOCK:
+    case AST_FUNC:
       return false;
     case AST_NUMBER:
     case AST_BINARY:
@@ -105,6 +107,18 @@ BlockStmt* make_block_stmt() {
   BlockStmt* block_stmt = (BlockStmt*)malloc(sizeof(BlockStmt) * 1);
   init_ast_array(&block_stmt->ast_array);
   return block_stmt;
+}
+
+FuncStmt* make_func_stmt(Token name,
+                         Ast* stmt,
+                         TokenArray* parameters,
+                         int arity) {
+  FuncStmt* func_stmt = (FuncStmt*)malloc(sizeof(FuncStmt) * 1);
+  func_stmt->name = name;
+  func_stmt->stmt = stmt;
+  func_stmt->parameters = parameters;
+  func_stmt->arity = arity;
+  return func_stmt;
 }
 
 NumberExpr* make_number_expr(double value) {

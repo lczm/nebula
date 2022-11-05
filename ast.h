@@ -22,6 +22,7 @@ typedef enum {
   AST_GROUP,
   AST_ASSIGNMENT_EXPR,
   AST_STRING,
+  AST_FUNC,
 } AstType;
 
 // Since in array.h it already declares typdef struct Ast to Ast
@@ -107,6 +108,13 @@ typedef struct {
   int length;
 } StringExpr;
 
+typedef struct {
+  Token name;
+  Ast* stmt;
+  TokenArray* parameters;
+  int arity;
+} FuncStmt;
+
 bool is_stmt(Ast* ast);
 bool is_expr(Ast* ast);
 
@@ -122,6 +130,10 @@ ForStmt* make_for_stmt(Ast* assignment_stmt,
                        Ast* then_expr,
                        Ast* block_stmt);
 BlockStmt* make_block_stmt();
+FuncStmt* make_func_stmt(Token name,
+                         Ast* stmt,
+                         TokenArray* parameters,
+                         int arity);
 
 // Expressions
 NumberExpr* make_number_expr(double value);

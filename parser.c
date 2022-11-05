@@ -106,6 +106,7 @@ static void eat_or_error(TokenType type, const char* error_message) {
 
 // Statements
 static Ast* declaration();
+static Ast* func_declaration();
 static Ast* var_declaration();
 static Ast* statement();
 static Ast* expression_statement();
@@ -146,12 +147,103 @@ void parse_tokens(Compiler* compiler,
 }
 
 static Ast* declaration() {
-  if (match(TOKEN_LET)) {
+  if (match(TOKEN_FUNC)) {
+    move();
+    return func_declaration();
+  } else if (match(TOKEN_LET)) {
     move();
     return var_declaration();
   }
 
   return statement();
+}
+
+static Ast* func_declaration() {
+  if (!match(TOKEN_IDENTIFIER)) {
+    Error* error = create_error(
+        get_current().line, 0, "main.neb",
+        "func_declaration could not find an identifier after 'func'",
+        SyntaxError);
+    push_error_array(error_array, error);
+  }
+
+  // Match the function name
+  Token function_name = get_current();
+  move();
+
+  if (!match(TOKEN_LEFT_PAREN)) {
+    Error* error = create_error(
+        get_current().line, 0, "main.neb",
+        "func_declaration could not find a ( after the function identifier",
+        SyntaxError);
+    push_error_array(error_array, error);
+  }
+  // Move past the '('
+  move();
+
+  int arity = 0;
+
+  // Function parameters, stores the identifiers as tokens
+  TokenArray* parameters = (TokenArray*)malloc(sizeof(TokenArray) * 1);
+  init_token_array(parameters);
+
+  while (!match(TOKEN_RIGHT_PAREN)) {
+    if (!match(TOKEN_IDENTIFIER)) {
+      Error* error = create_error(
+          get_current().line, 0, "main.neb",
+          "func_declaration could not find identifiers in the parameter",
+          SyntaxError);
+      push_error_array(error_array, error);
+    }
+
+    Token parameter_identifier = get_current();
+    push_token_array(parameters, parameter_identifier);
+
+    move();
+
+    // If there are multiple parameters
+    if (match(TOKEN_COMMA))
+      move();
+
+    arity++;
+  }
+
+  // Move past right_paren
+  move();
+
+  // printf("arity count : %d | parameter count : %d\n", arity,
+  // parameters->count);
+
+  // sanity check
+  if (arity != parameters->count) {
+    Error* error = create_error(
+        get_current().line, 0, "main.neb",
+        "func_declaration arity and parameter_count does not tally",
+        SyntaxError);
+    push_error_array(error_array, error);
+
+    printf("Something seriously wrong with parsing here\n");
+  }
+
+  if (!match(TOKEN_LEFT_BRACE)) {
+    Error* error =
+        create_error(get_current().line, 0, "main.neb",
+                     "func_declaration does not have a block statement after )",
+                     SyntaxError);
+    push_error_array(error_array, error);
+  }
+  move();
+
+  Ast* block_stmt = block();
+
+  FuncStmt* func_stmt =
+      make_func_stmt(function_name, block_stmt, parameters, arity);
+
+  Ast* ast = make_ast();
+  ast->type = AST_FUNC;
+  ast->as = func_stmt;
+
+  return ast;
 }
 
 static Ast* var_declaration() {

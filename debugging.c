@@ -6,6 +6,7 @@
 #include <string.h>
 
 #include "ast.h"
+#include "macros.h"
 
 void disassemble_individual_ast(Ast* ast) {
   if (ast == NULL) {
@@ -61,6 +62,16 @@ void disassemble_individual_ast(Ast* ast) {
       for (int i = 0; i < block_stmt->ast_array.count; i++) {
         disassemble_individual_ast(block_stmt->ast_array.ast[i]);
       }
+      break;
+    }
+    case AST_FUNC: {
+      FuncStmt* func_stmt = (FuncStmt*)ast->as;
+      printf("[%-20s]\n", "FUNC_STMT");
+      printf("Parameter Count: %d\n", func_stmt->arity);
+      for (int i = 0; i < func_stmt->parameters->count; i++) {
+        PRINT_TOKEN_STRING(func_stmt->parameters->tokens[i]);
+      }
+      disassemble_individual_ast(func_stmt->stmt);
       break;
     }
     case AST_VARIABLE_STMT: {
