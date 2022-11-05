@@ -15,7 +15,7 @@ static int token_array_len = 0;
 static TokenArray* token_array;
 static AstArray* ast_array;
 static ErrorArray* error_array;
-static Compiler* current_compiler;
+// static Compiler* current_compiler;
 
 // TODO
 // Error-reporting on the specific lines are a little wrong
