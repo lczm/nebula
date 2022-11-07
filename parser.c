@@ -47,6 +47,8 @@ static bool parser_is_at_end() {
 }
 
 static bool match(TokenType type) {
+  if (parser_is_at_end())
+    return false;
   if (token_array->tokens[parser_index].type == type)
     return true;
   return false;
@@ -604,8 +606,9 @@ static Ast* call() {
   Ast* ast = primary();
 
   if (match(TOKEN_LEFT_PAREN)) {
+    printf("Somehow?\n");
     move();
-    printf("Reached call() in parser\n");
+    // printf("Reached call() in parser\n");
 
     TokenArray* arguments = (TokenArray*)malloc(sizeof(TokenArray) * 1);
     init_token_array(arguments);
@@ -631,7 +634,8 @@ static Ast* call() {
 
     if (argument_count != arguments->count) {
       printf(
-          "Something went wrong with parsing number of arguments in call()\n");
+          "Something went wrong with parsing number of arguments in "
+          "call()\n");
     }
 
     Ast* call_expr_ast = make_ast();
@@ -690,10 +694,10 @@ static Ast* primary() {
     move();
     Ast* expr = expression();
     if (!match_and_move(TOKEN_RIGHT_PAREN)) {
-      Error* error = create_error(
-          get_current().line, 0, "main.neb",
-          "After a '(', followed by an expression, should have a closing ')'.",
-          SyntaxError);
+      Error* error = create_error(get_current().line, 0, "main.neb",
+                                  "After a '(', followed by an expression, "
+                                  "should have a closing ')'.",
+                                  SyntaxError);
       push_error_array(error_array, error);
       return NULL;
     }
@@ -709,7 +713,8 @@ static Ast* block() {
   BlockStmt* block_stmt = make_block_stmt();
 
   while (get_current().type != TOKEN_RIGHT_BRACE) {
-    // TODO: Find out why this was pushing statement() instead of declaration()
+    // TODO: Find out why this was pushing statement() instead of
+    // declaration()
     push_ast_array(&block_stmt->ast_array, declaration());
   }
   // Move past the right brace

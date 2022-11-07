@@ -68,6 +68,11 @@ void push_value_array(ValueArray* arr, Value value) {
   arr->count++;
 }
 
+void reserve_value_array(ValueArray* arr, int reserve_size) {
+  arr->values = (Value*)realloc(arr->values, sizeof(Value) * reserve_size);
+  arr->capacity = reserve_size;
+}
+
 void free_value_array(ValueArray* arr) {
   arr->count = 0;
   arr->capacity = 0;
@@ -145,4 +150,33 @@ void free_local_array(LocalArray* arr) {
   arr->count = 0;
   arr->capacity = 0;
   free(arr->locals);
+}
+
+void init_callframe_array(CallFrameArray* arr) {
+  arr->count = 0;
+  arr->capacity = 1;
+  arr->callframes = (CallFrame*)malloc(sizeof(CallFrame) * 1);
+}
+
+void push_callframe_array(CallFrameArray* arr, CallFrame callframe) {
+  if (arr->capacity < arr->count + 1) {
+    int new_capacity = arr->capacity * 2;
+    arr->callframes =
+        (CallFrame*)realloc(arr->callframes, sizeof(Local) * new_capacity);
+    arr->capacity = new_capacity;
+  }
+  arr->callframes[arr->count] = callframe;
+  arr->count++;
+}
+
+void reserve_callframe_array(CallFrameArray* arr, int reserve_size) {
+  arr->callframes =
+      (CallFrame*)realloc(arr->callframes, sizeof(CallFrame) * reserve_size);
+  arr->capacity = reserve_size;
+}
+
+void free_callframe_array(CallFrameArray* arr) {
+  arr->count = 0;
+  arr->capacity = 0;
+  free(arr->callframes);
 }

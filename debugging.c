@@ -67,10 +67,11 @@ void disassemble_individual_ast(Ast* ast) {
     case AST_FUNC: {
       FuncStmt* func_stmt = (FuncStmt*)ast->as;
       printf("[%-20s]\n", "FUNC_STMT");
-      printf("Parameter Count: %d\n", func_stmt->arity);
+      printf("  [Parameter Count: %d]\n", func_stmt->arity);
       for (int i = 0; i < func_stmt->parameters->count; i++) {
         PRINT_TOKEN_STRING(func_stmt->parameters->tokens[i]);
       }
+      printf("  ");
       disassemble_individual_ast(func_stmt->stmt);
       break;
     }
@@ -156,6 +157,16 @@ void disassemble_individual_ast(Ast* ast) {
       strncpy(s, string_expr->start, string_expr->length);
       s[string_expr->length] = '\0';
       printf("[%-20s]: %s\n", "STRING", s);
+      break;
+    }
+    case AST_CALL: {
+      CallExpr* call_expr = (CallExpr*)ast->as;
+      printf("CallExpr callee: ");
+      disassemble_individual_ast(call_expr->callee);
+      printf("CallExpr arguments (Count: %d) :\n", call_expr->arguments->count);
+      for (int i = 0; i < call_expr->arguments->count; i++) {
+        PRINT_TOKEN_STRING(call_expr->arguments->tokens[i]);
+      }
       break;
     }
   }

@@ -16,6 +16,9 @@ static AstArray* ast_array;
 static LocalArray* local_array;
 static Compiler* c;
 
+static ObjFunc* func;
+static FunctionType func_type;
+
 static void emit_byte(OpCode op) {
   // switch (op) {
   //   case OP_POP:
@@ -229,7 +232,18 @@ static void gen(Ast* ast) {
     }
     case AST_FUNC: {
       FuncStmt* func_stmt = (FuncStmt*)ast->as;
-      // gen(func_stmt->stmt);
+
+      // Emit byte-code for the block statement
+      gen(func_stmt->stmt);
+
+      ObjString* function_name =
+          make_obj_string(func_stmt->name.start, func_stmt->name.length);
+      ObjFunc* func = make_obj_func(func_stmt->arity, function_name);
+
+      // Wrap the function into a value and push it onto the value stack
+      // as a constant
+      Value func_value = OBJ_VAL(func);
+      emit_constant(func_value);
       break;
     }
     case AST_VARIABLE_STMT: {
@@ -439,6 +453,7 @@ static void gen(Ast* ast) {
           Local* local = &local_array->locals[i];
           if (identifier_equal(&name, &local->name)) {
             emit_byte((OpCode)i);
+            // printf("local_scope emitting :%d\n", i);
             break;
           }
         }
@@ -476,6 +491,11 @@ static void gen(Ast* ast) {
       emit_constant(string_value);
       break;
     }
+    case AST_CALL: {
+      CallExpr* call_expr = (CallExpr*)ast->as;
+      printf("AST_CALL\n");
+      break;
+    }
   }
 }
 
@@ -489,6 +509,19 @@ void codegen(OpArray* op_arr,
   ast_array = ast_arr;
   local_array = local_arr;
   c = compiler;
+
+  func = make_obj_func(0, NULL);
+  func_type = TYPE_SCRIPT;
+
+  // Compiler claims slot 0 for internal usage
+  // Local* local = &local_array->locals[local_array->count++];
+  // local->name.start = "";
+  // local->name.length = 0;
+  // local->depth = 0;
+
+  // Local array will match with constants array,
+  // this is to keep them in parallel and not off indexed
+  // emit_constant(NIL_VAL);
 
   for (int i = 0; i < ast_array->count; i++) {
     gen(ast_array->ast[i]);

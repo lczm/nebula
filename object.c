@@ -112,3 +112,9 @@ ObjString* concatenate_obj_string(ObjString* obj1, ObjString* obj2) {
   return obj_string;
 }
 
+ObjFunc* make_obj_func(int arity, ObjString* name) {
+  ObjFunc* obj_func = ALLOCATE(ObjFunc, 1);
+  obj_func->arity = arity;
+  obj_func->name = name;
+  return obj_func;
+}

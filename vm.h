@@ -9,6 +9,11 @@ typedef struct {
   int ip;
   int stack_top;
   HashMap variables;
+
+  // total amount of frames in use at any moment
+  int frame_count;
+  CallFrameArray frames;
+
   ValueArray vm_stack;
 } Vm;
 

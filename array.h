@@ -1,5 +1,6 @@
 #pragma once
 
+#include "callframe.h"
 #include "error.h"
 #include "local.h"
 #include "op.h"
@@ -40,6 +41,7 @@ typedef struct {
 
 void init_value_array(ValueArray* arr);
 void push_value_array(ValueArray* arr, Value value);
+void reserve_value_array(ValueArray* arr, int reserve_size);
 void free_value_array(ValueArray* arr);
 
 typedef struct {
@@ -72,3 +74,14 @@ void init_local_array(LocalArray* arr);
 void push_local_array(LocalArray* arr, Local local);
 void reserve_local_array(LocalArray* arr, int reserve_size);
 void free_local_array(LocalArray* arr);
+
+typedef struct {
+  int count;
+  int capacity;
+  CallFrame* callframes;
+} CallFrameArray;
+
+void init_callframe_array(CallFrameArray* arr);
+void push_callframe_array(CallFrameArray* arr, CallFrame callframe);
+void reserve_callframe_array(CallFrameArray* arr, int reserve_size);
+void free_callframe_array(CallFrameArray* arr);
