@@ -16,6 +16,7 @@ bool is_stmt(Ast* ast) {
     case AST_GROUP:
     case AST_ASSIGNMENT_EXPR:
     case AST_STRING:
+    case AST_CALL:
       return false;
     case AST_PRINT:
     case AST_VARIABLE_STMT:
@@ -48,6 +49,7 @@ bool is_expr(Ast* ast) {
     case AST_GROUP:
     case AST_ASSIGNMENT_EXPR:
     case AST_STRING:
+    case AST_CALL:
       return true;
   }
   return false;
@@ -173,6 +175,13 @@ StringExpr* make_string_expr(const char* start, int length) {
   string_expr->start = start;
   string_expr->length = length;
   return string_expr;
+}
+
+CallExpr* make_call_expr(Ast* callee, TokenArray* arguments) {
+  CallExpr* call_expr = (CallExpr*)malloc(sizeof(CallExpr) * 1);
+  call_expr->callee = callee;
+  call_expr->arguments = arguments;
+  return call_expr;
 }
 
 Value ast_to_value(Ast* ast) {

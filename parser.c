@@ -602,6 +602,44 @@ static Ast* unary() {
 
 static Ast* call() {
   Ast* ast = primary();
+
+  if (match(TOKEN_LEFT_PAREN)) {
+    move();
+    printf("Reached call() in parser\n");
+
+    TokenArray* arguments = (TokenArray*)malloc(sizeof(TokenArray) * 1);
+    init_token_array(arguments);
+    // Sanity check
+    int argument_count = 0;
+
+    // Parse the arguments
+    CallExpr* call_expr = make_call_expr(ast, arguments);
+
+    while (!match(TOKEN_RIGHT_PAREN)) {
+      Token argument_identifier = get_current();
+      push_token_array(arguments, argument_identifier);
+      argument_count++;
+
+      if (match(TOKEN_COMMA))
+        move();
+
+      move();
+    }
+
+    // Move past right_paren
+    move();
+
+    if (argument_count != arguments->count) {
+      printf(
+          "Something went wrong with parsing number of arguments in call()\n");
+    }
+
+    Ast* call_expr_ast = make_ast();
+    call_expr_ast->as = call_expr;
+    call_expr_ast->type = AST_CALL;
+    return call_expr_ast;
+  }
+
   return ast;
 }
 

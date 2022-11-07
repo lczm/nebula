@@ -1,3 +1,5 @@
-func name(a,b,c) {
+func name() {
   print 1 + 2;
 }
+
+name();

@@ -227,6 +227,11 @@ static void gen(Ast* ast) {
       }
       break;
     }
+    case AST_FUNC: {
+      FuncStmt* func_stmt = (FuncStmt*)ast->as;
+      // gen(func_stmt->stmt);
+      break;
+    }
     case AST_VARIABLE_STMT: {
       VariableStmt* variable_stmt = (VariableStmt*)ast->as;
       Token name = variable_stmt->name;
