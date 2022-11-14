@@ -1,4 +1,11 @@
 func name() {
   print 1 + 2;
   print 2 + 3;
+  print "HELLO THERE";
 }
+
+func test() {
+  print 100 - 50;
+}
+
+name();

@@ -1,5 +1,10 @@
 #pragma once
 
+#include <stdint.h>
+
+#include "array.h"
+#include "value.h"
+
 typedef enum {
   OP_CONSTANT,
   OP_POP,
@@ -26,6 +31,9 @@ typedef enum {
   // Jumps
   OP_JUMP,
   OP_JUMP_IF_FALSE,
+
+  // Functions
+  OP_CALL,
 
   // NIL
   OP_NIL,

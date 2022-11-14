@@ -3,16 +3,20 @@
 #include <stdbool.h>
 
 #include "array.h"
+#include "callframe.h"
 #include "hashmap.h"
 
+#define MAX_FRAMES 64
+#define MAX_STACK (MAX_FRAMES * UINT8_MAX)
+
 typedef struct {
-  int ip;
+  // int ip;
   int stack_top;
   HashMap variables;
 
   // total amount of frames in use at any moment
   int frame_count;
-  CallFrameArray frames;
+  CallFrame frames[MAX_FRAMES];
 
   ValueArray vm_stack;
 } Vm;
@@ -24,5 +28,5 @@ void free_vm(Vm* vm);
 void run(bool arguments[const],
          Vm* vm,
          OpArray* op_arr,
-         ValueArray* ast_value_arr);
-
+         ValueArray* value_arr,
+         ObjFunc* main_func);

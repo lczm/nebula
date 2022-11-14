@@ -49,9 +49,6 @@ Vm* run_source_return_vm(const char* source) {
   ErrorArray error_array;
   init_error_array(&error_array);
 
-  Compiler compiler;
-  init_compiler(&compiler);
-
   // Update the global error array everytime this function is ran
   // This is to so that the latter test functions can access
   // the ErrorArray to do some levels of checking
@@ -59,7 +56,7 @@ Vm* run_source_return_vm(const char* source) {
 
   AstArray ast_array;
   init_ast_array(&ast_array);
-  parse_tokens(&compiler, &token_array, &ast_array, &error_array);
+  parse_tokens(&token_array, &ast_array, &error_array);
 
 #ifdef TEST_DEBUGGING
   disassemble_ast(&ast_array);
@@ -73,7 +70,7 @@ Vm* run_source_return_vm(const char* source) {
   init_value_array(&ast_constants_array);
   init_local_array(&local_array);
   reserve_local_array(&local_array, UINT8_MAX + 1);
-  codegen(&op_array, &ast_constants_array, &ast_array, &local_array, &compiler);
+  codegen(&op_array, &ast_constants_array, &ast_array, &local_array);
 
   // Temporary, to get out of the VM loop
   push_op_array(&op_array, OP_RETURN);
@@ -757,7 +754,7 @@ static void test_vm_order_of_operations() {
 }
 
 static void test_vm_augmented_assignments() {
-  printf("test_vm_augmented_assignments\n");
+  printf("test_vm_augmented_assignments()\n");
 
   char test_string1[] =
       "let a = 0;"
@@ -782,7 +779,7 @@ static void test_vm_augmented_assignments() {
 }
 
 static void test_vm_comparison_operators() {
-  printf("test_vm_comparison_operators\n");
+  printf("test_vm_comparison_operators()\n");
 
   char test_string1[] =
       "let e = 0;"

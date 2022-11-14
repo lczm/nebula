@@ -15,7 +15,6 @@ static int token_array_len = 0;
 static TokenArray* token_array;
 static AstArray* ast_array;
 static ErrorArray* error_array;
-// static Compiler* current_compiler;
 
 // TODO
 // Error-reporting on the specific lines are a little wrong
@@ -131,8 +130,7 @@ static Ast* primary();
 // scoping and locals
 static Ast* block();
 
-void parse_tokens(Compiler* compiler,
-                  TokenArray* token_arr,
+void parse_tokens(TokenArray* token_arr,
                   AstArray* ast_arr,
                   ErrorArray* error_arr) {
   // Initialize the static variables for convenience
@@ -606,7 +604,6 @@ static Ast* call() {
   Ast* ast = primary();
 
   if (match(TOKEN_LEFT_PAREN)) {
-    printf("Somehow?\n");
     move();
     // printf("Reached call() in parser\n");
 

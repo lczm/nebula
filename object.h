@@ -2,6 +2,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "chunk.h"
 #include "token.h"
 #include "value.h"
 
@@ -32,11 +33,17 @@ typedef struct {
 typedef struct {
   Obj obj;
   int arity;
+  Chunk chunk;
   ObjString* name;
 } ObjFunc;
 
+#define IS_STRING(value) (is_obj_type(value, OBJ_STRING))
+#define IS_FUNC(value) (is_obj_type(value, OBJ_FUNC))
+
 #define AS_OBJ_STRING(value) (ObjString*)AS_OBJ(value)
 #define AS_OBJ_FUNC(value) (ObjFunc*)AS_OBJ(value);
+
+bool is_obj_type(Value value, ObjType type);
 
 // Takes a pointer to the character and builds a new string from that
 // converts it into an ObjString
@@ -50,3 +57,4 @@ bool obj_string_equals(ObjString* obj1, ObjString* obj2);
 ObjString* concatenate_obj_string(ObjString* obj1, ObjString* obj2);
 
 ObjFunc* make_obj_func(int arity, ObjString* name);
+void print_function(ObjFunc* func);

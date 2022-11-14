@@ -6,6 +6,10 @@
 #include "hash.h"
 #include "macros.h"
 
+bool is_obj_type(Value value, ObjType type) {
+  return IS_OBJ(value) && AS_OBJ(value)->type == type;
+}
+
 // The length is needed here because for a lot of the program internals
 // there is the start of the characters, 'chars' in this case
 // can refer to a random middle point of a very long string,
@@ -116,5 +120,13 @@ ObjFunc* make_obj_func(int arity, ObjString* name) {
   ObjFunc* obj_func = ALLOCATE(ObjFunc, 1);
   obj_func->arity = arity;
   obj_func->name = name;
+  obj_func->obj.type = OBJ_FUNC;
+  init_chunk(&obj_func->chunk);
   return obj_func;
+}
+
+void print_function(ObjFunc* func) {
+  // TODO : Verify whether this function name is cut off
+  // or if contains the rest of the source
+  printf("<func %s>", func->name->chars);
 }
