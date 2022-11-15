@@ -1,11 +1,15 @@
-func name() {
-  print 1 + 2;
-  print 2 + 3;
-  print "HELLO THERE";
+func a() {
+  print "hello this is from a()";
 }
 
-func test() {
-  print 100 - 50;
+func b() {
+  print "hello this is from b()";
 }
 
-name();
+func c() {
+  print "hello this is from c()";
+}
+
+a();
+c();
+b();

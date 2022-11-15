@@ -51,6 +51,23 @@ ObjString* make_obj_string_sl(const char* chars) {
   return obj_string;
 }
 
+ObjString* make_obj_string_from_token(Token token) {
+  ObjString* obj_string = ALLOCATE(ObjString, 1);
+
+  int length = token.length;
+
+  char* new_string = ALLOCATE(char, length + 1);
+  strncpy(new_string, token.start, length);
+  new_string[length] = '\0';
+
+  obj_string->obj.type = OBJ_STRING;
+  obj_string->length = length;
+  obj_string->chars = new_string;
+  obj_string->hash = fnv_hash32(new_string, length);
+
+  return obj_string;
+}
+
 void print_obj_string(ObjString* obj_string) {
   printf("%s\n", obj_string->chars);
 }

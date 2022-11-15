@@ -50,6 +50,7 @@ bool is_obj_type(Value value, ObjType type);
 // This is basically the init method equilvalent for objs
 ObjString* make_obj_string(const char* chars, int length);
 ObjString* make_obj_string_sl(const char* chars);
+ObjString* make_obj_string_from_token(Token token);
 void print_obj_string(ObjString* obj_string);
 void print_obj_string_without_quotes(ObjString* obj_string);
 bool token_value_equals(Token token, Value value);

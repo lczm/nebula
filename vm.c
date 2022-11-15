@@ -41,6 +41,10 @@ static void print_value(Value value) {
     printf("true\n");
   } else if (IS_BOOLEAN(value) && AS_BOOLEAN(value) == false) {
     printf("false\n");
+  } else if (IS_OBJ(value) && AS_OBJ(value)->type == OBJ_FUNC) {
+    ObjFunc* func = (ObjFunc*)AS_OBJ(value);
+    printf("func arity: %d\n", func->arity);
+    print_obj_string(func->name);
   } else if (IS_OBJ(value) && AS_OBJ(value)->type == OBJ_STRING) {
     print_obj_string((ObjString*)AS_OBJ(value));
   }
@@ -341,6 +345,19 @@ void run(bool arguments[const],
         break;
       }
       case OP_RETURN: {
+        // Value result = pop();
+        // vm->frame_count--;
+        // if (vm->frame_count == 0) {
+        //   pop();
+        //   printf("Done interpreting all code\n");
+        //   return;
+        // }
+
+        // vm->stack_top = frame->slots;
+        // push(result);
+        // frame = &vm->frames[vm->frame_count - 1];
+        // break;
+
         if (arguments[VM_OUTPUT])
           printf("op_return %f\n", AS_NUMBER(pop()));
         return;
@@ -468,11 +485,26 @@ void run(bool arguments[const],
         // int arg_count = READ_BYTE();
         OpCode index = frame->func->chunk.code.ops[*frame->ip];
         *frame->ip = *frame->ip + 1;
-        if (!call_value(peek(index), index)) {
+        OpCode index2 = frame->func->chunk.code.ops[*frame->ip];
+        *frame->ip = *frame->ip + 1;
+
+        Value func_name_obj = frame->func->chunk.constants.values[index2 - 1];
+        ObjString* func_name = AS_OBJ_STRING(func_name_obj);
+
+        Value func_obj = get_hashmap(&vm->variables, func_name);
+
+        // Value p = peek(index);
+        // printf("@@@@@\n");
+        // print_value(p);
+        // printf("@@@@@\n");
+
+        if (!call_value(func_obj, 0)) {
           printf("Error out here\n");
           break;
         }
-        // Update the cached pointer to the current frame
+
+        // call_value() if successful, will push a new callframe
+        // and the current callframe will need to be updated to it
         frame = &vm->frames[vm->frame_count - 1];
         break;
       }

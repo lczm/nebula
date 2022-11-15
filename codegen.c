@@ -73,6 +73,7 @@ static void emit_constant(Value value) {
   // Minus 1 of the current count as it is 0-indexed
   // emit_byte((OpCode)(constants_array->count - 1));
   emit_byte((OpCode)(current_chunk()->constants.count));
+  printf("emit_constant number: %d\n", current_chunk()->constants.count);
 }
 
 static int make_constant(Value value) {
@@ -137,7 +138,9 @@ static int resolve_local_scope_depth(Compiler* c, Token* name) {
   return -1;
 }
 
-static void init_compiler(Compiler* compiler, FunctionType func_type) {
+static void init_compiler(Compiler* compiler,
+                          FunctionType func_type,
+                          Token name) {
   init_local_array(&compiler->local_array);
 
   compiler->enclosing = current_compiler;
@@ -152,7 +155,10 @@ static void init_compiler(Compiler* compiler, FunctionType func_type) {
   current_compiler = compiler;
 
   if (func_type != TYPE_SCRIPT) {
-    current_compiler->func->name = "TYPE_FUNC";
+    ObjString* obj_string = make_obj_string_from_token(name);
+    print_obj_string(obj_string);
+    current_compiler->func->name = obj_string;
+    // current_compiler->func->name = make_obj_string_sl("PLACEHOLDER TEST");
   }
 
   // Compiler implicitly claims stack slot 0
@@ -348,15 +354,32 @@ static void gen(Ast* ast) {
 
       // Initialize another compiler instance
       Compiler compiler;
-      init_compiler(&compiler, TYPE_FUNCTION);
+      init_compiler(&compiler, TYPE_FUNCTION, func_stmt->name);
+
+      // TODO : Generate parameters as constants here
 
       // Emit byte-code for the block statement
       gen(func_stmt->stmt);
 
       ObjFunc* func = end_compiler(current_compiler);
+      func->arity = func_stmt->arity;
 
       Value func_value = OBJ_VAL(func);
+
+      // Make the constant function value
       emit_constant(func_value);
+      // int constant_index = make_constant(func_value);
+      // emit_byte(OP_CONSTANT);
+      // emit_byte(constant_index);
+
+      // TODO : Temporary! Set the function to be a global variable
+      emit_byte(OP_SET_GLOBAL);
+      ObjString* func_name = make_obj_string_from_token(func_stmt->name);
+      Value func_name_value = OBJ_VAL(func_name);
+      make_constant(func_name_value);
+      // emit_byte(func_name);
+
+      printf("Set function to global variables with OP_SET_GLOBAL\n");
 
       // emitBytes(OP_CONSTANT, makeConstant(OBJ_VAL(function)));
 
@@ -632,7 +655,24 @@ static void gen(Ast* ast) {
       CallExpr* call_expr = (CallExpr*)ast->as;
       printf("AST_CALL\n");
       emit_byte(OP_CALL);
-      emit_byte(call_expr->arguments->count);
+
+      VariableExpr* variable_expr = (VariableExpr*)call_expr->callee->as;
+      // printf("Variable_expr length: %d\n", variable_expr->name.length);
+      // char s[variable_expr->name.length + 1];
+      // strncpy(s, variable_expr->name.start, variable_expr->name.length);
+      // s[variable_expr->name.length] = '\0';
+      // printf("[%-20s]: %s\n", "AST_VARIABLE_EXPR", s);
+      // gen(call_expr->callee);
+
+      ObjString* token_string = make_obj_string_from_token(variable_expr->name);
+      printf("FROM AST_CALL\n");
+      print_obj_string(token_string);
+      printf("FROM AST_CALL\n");
+      Value token_string_value = OBJ_VAL(token_string);
+      emit_constant(token_string_value);
+      // make_constant(token_string_value);
+
+      // emit_byte(call_expr->arguments->count);
       break;
     }
   }
@@ -649,7 +689,8 @@ ObjFunc* codegen(OpArray* op_arr,
 
   // Create the compiler instance that tracks scope and depth
   Compiler compiler;
-  init_compiler(&compiler, TYPE_SCRIPT);
+  Token null_token;
+  init_compiler(&compiler, TYPE_SCRIPT, null_token);
 
   // printf("initial compiler func chunk constants count: %d\n",
   //        compiler.func->chunk.constants.count);
