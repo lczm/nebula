@@ -188,11 +188,11 @@ void run(bool arguments[const],
   // }
   // printf("LISTING OUT ALL CHUNK CONSTANTS VALUE -- END\n");
 
-  // printf("LISTING OUT ALL CHUNK OP_CODE -- START\n");
-  // for (int i = 0; i < frame->func->chunk.code.count; i++) {
-  //   printf("OP %d : %d\n", i, frame->func->chunk.code.ops[i]);
-  // }
-  // printf("LISTING OUT ALL CHUNK OP_CODE -- END\n");
+  printf("LISTING OUT ALL CHUNK OP_CODE -- START\n");
+  for (int i = 0; i < frame->func->chunk.code.count; i++) {
+    printf("OP %d : %d\n", i, frame->func->chunk.code.ops[i]);
+  }
+  printf("LISTING OUT ALL CHUNK OP_CODE -- END\n");
 
   // printf("LISTING OUT ALL CHUNK OP_CODE2 -- START\n");
   // for (int i = 0; i < frame->func->chunk.code.count; i++) {
@@ -363,8 +363,8 @@ void run(bool arguments[const],
       case OP_PRINT: {
         // Value value = pop();
         if (arguments[VM_OUTPUT]) {
-          print_value(pop());
-          // print_value(peek(0));
+          // print_value(pop());
+          print_value(peek(0));
         }
         break;
       }
@@ -503,6 +503,13 @@ void run(bool arguments[const],
         // call_value() if successful, will push a new callframe
         // and the current callframe will need to be updated to it
         frame = &vm->frames[vm->frame_count - 1];
+
+        printf("LISTING OUT ALL CHUNK OP_CODE -- START\n");
+        for (int i = 0; i < frame->func->chunk.code.count; i++) {
+          printf("OP %d : %d\n", i, frame->func->chunk.code.ops[i]);
+        }
+        printf("LISTING OUT ALL CHUNK OP_CODE -- END\n");
+
         break;
       }
       case OP_NIL: {

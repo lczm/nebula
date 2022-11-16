@@ -23,6 +23,7 @@ typedef enum {
   AST_ASSIGNMENT_EXPR,
   AST_STRING,
   AST_FUNC,
+  AST_RETURN,
   AST_CALL,
 } AstType;
 
@@ -72,6 +73,10 @@ typedef struct {
   bool initialized;
   Ast* initializer_expr;
 } VariableStmt;
+
+typedef struct {
+  Ast* value_expr;
+} ReturnStmt;
 
 typedef struct {
   double value;
@@ -140,6 +145,7 @@ FuncStmt* make_func_stmt(Token name,
                          Ast* stmt,
                          TokenArray* parameters,
                          int arity);
+ReturnStmt* make_return_stmt(Ast* value_expr);
 
 // Expressions
 NumberExpr* make_number_expr(double value);

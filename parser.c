@@ -108,6 +108,7 @@ static void eat_or_error(TokenType type, const char* error_message) {
 // Statements
 static Ast* declaration();
 static Ast* func_declaration();
+static Ast* return_statement();
 static Ast* var_declaration();
 static Ast* statement();
 static Ast* expression_statement();
@@ -150,6 +151,9 @@ static Ast* declaration() {
   if (match(TOKEN_FUNC)) {
     move();
     return func_declaration();
+  } else if (match(TOKEN_RETURN)) {
+    move();
+    return return_statement();
   } else if (match(TOKEN_LET)) {
     move();
     return var_declaration();
@@ -242,6 +246,17 @@ static Ast* func_declaration() {
   Ast* ast = make_ast();
   ast->type = AST_FUNC;
   ast->as = func_stmt;
+
+  return ast;
+}
+
+static Ast* return_statement() {
+  Ast* value_expression = expression();
+
+  ReturnStmt* return_stmt = make_return_stmt(value_expression);
+  Ast* ast = make_ast();
+  ast->type = AST_RETURN;
+  ast->as = return_stmt;
 
   return ast;
 }

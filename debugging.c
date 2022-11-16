@@ -169,6 +169,12 @@ void disassemble_individual_ast(Ast* ast) {
       }
       break;
     }
+    case AST_RETURN: {
+      ReturnStmt* return_stmt = (ReturnStmt*)ast->as;
+      printf("Return Stmt: ");
+      disassemble_individual_ast(return_stmt->value_expr);
+      break;
+    }
   }
 }
 
