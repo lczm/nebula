@@ -142,9 +142,7 @@ static bool call_value(Value callee, int argument_count) {
   if (IS_OBJ(callee)) {
     switch (OBJ_TYPE(callee)) {
       case OBJ_FUNC: {
-        // TODO : AS_FUNC not working here
-        // return call(AS_OBJ_FUNC(callee), argument_count);
-        return call((ObjFunc*)AS_OBJ(callee), argument_count);
+        return call(AS_OBJ_FUNC(callee), argument_count);
       }
       default: {
         break;
@@ -190,11 +188,11 @@ void run(bool arguments[const],
   // }
   // printf("LISTING OUT ALL CHUNK CONSTANTS VALUE -- END\n");
 
-  printf("LISTING OUT ALL CHUNK OP_CODE -- START\n");
-  for (int i = 0; i < frame->func->chunk.code.count; i++) {
-    printf("OP %d : %d\n", i, frame->func->chunk.code.ops[i]);
-  }
-  printf("LISTING OUT ALL CHUNK OP_CODE -- END\n");
+  // printf("LISTING OUT ALL CHUNK OP_CODE -- START\n");
+  // for (int i = 0; i < frame->func->chunk.code.count; i++) {
+  //   printf("OP %d : %d\n", i, frame->func->chunk.code.ops[i]);
+  // }
+  // printf("LISTING OUT ALL CHUNK OP_CODE -- END\n");
 
   // printf("LISTING OUT ALL CHUNK OP_CODE2 -- START\n");
   // for (int i = 0; i < frame->func->chunk.code.count; i++) {
@@ -345,27 +343,29 @@ void run(bool arguments[const],
         break;
       }
       case OP_RETURN: {
-        // Value result = pop();
-        // vm->frame_count--;
-        // if (vm->frame_count == 0) {
-        //   pop();
-        //   printf("Done interpreting all code\n");
-        //   return;
-        // }
+        Value result = pop();
+        vm->frame_count--;
+        if (vm->frame_count == 0) {
+          pop();
+          printf("Done interpreting all code\n");
+          return;
+        }
 
-        // vm->stack_top = frame->slots;
-        // push(result);
-        // frame = &vm->frames[vm->frame_count - 1];
-        // break;
+        vm->stack_top = frame->slots;
+        push(result);
+        frame = &vm->frames[vm->frame_count - 1];
+        break;
 
-        if (arguments[VM_OUTPUT])
-          printf("op_return %f\n", AS_NUMBER(pop()));
-        return;
+        // if (arguments[VM_OUTPUT])
+        //   printf("op_return %f\n", AS_NUMBER(pop()));
+        // return;
       }
       case OP_PRINT: {
         // Value value = pop();
-        if (arguments[VM_OUTPUT])
-          print_value(peek(0));
+        if (arguments[VM_OUTPUT]) {
+          print_value(pop());
+          // print_value(peek(0));
+        }
         break;
       }
       case OP_SET_GLOBAL: {
@@ -483,20 +483,17 @@ void run(bool arguments[const],
       case OP_CALL: {
         printf("OP_CALL\n");
         // int arg_count = READ_BYTE();
+
+        // OP_CONSTANT
         OpCode index = frame->func->chunk.code.ops[*frame->ip];
         *frame->ip = *frame->ip + 1;
+        // OP_CONSTANT index
         OpCode index2 = frame->func->chunk.code.ops[*frame->ip];
         *frame->ip = *frame->ip + 1;
 
         Value func_name_obj = frame->func->chunk.constants.values[index2 - 1];
         ObjString* func_name = AS_OBJ_STRING(func_name_obj);
-
         Value func_obj = get_hashmap(&vm->variables, func_name);
-
-        // Value p = peek(index);
-        // printf("@@@@@\n");
-        // print_value(p);
-        // printf("@@@@@\n");
 
         if (!call_value(func_obj, 0)) {
           printf("Error out here\n");

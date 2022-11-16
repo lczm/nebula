@@ -41,7 +41,7 @@ typedef struct {
 #define IS_FUNC(value) (is_obj_type(value, OBJ_FUNC))
 
 #define AS_OBJ_STRING(value) (ObjString*)AS_OBJ(value)
-#define AS_OBJ_FUNC(value) (ObjFunc*)AS_OBJ(value);
+#define AS_OBJ_FUNC(value) (ObjFunc*)AS_OBJ(value)
 
 bool is_obj_type(Value value, ObjType type);
 
