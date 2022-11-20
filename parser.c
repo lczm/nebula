@@ -251,7 +251,13 @@ static Ast* func_declaration() {
 }
 
 static Ast* return_statement() {
-  Ast* value_expression = expression();
+  Ast* value_expression;
+  if (match(TOKEN_SEMICOLON)) {
+    value_expression = make_ast();
+  } else {
+    value_expression = expression();
+    match_and_move(TOKEN_SEMICOLON);
+  }
 
   ReturnStmt* return_stmt = make_return_stmt(value_expression);
   Ast* ast = make_ast();

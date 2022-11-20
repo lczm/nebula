@@ -102,7 +102,7 @@ static void run_source(bool arguments[const], const char* source) {
   push_value_array(&value_array, OBJ_VAL(main_func));
 
   // Temporary, to get out of the VM loop
-  push_op_array(&op_array, OP_RETURN);
+  // push_op_array(&op_array, OP_RETURN);
 
   if (arguments[DUMP_CODEGEN])
     disassemble_opcode_values(&op_array, &value_array);

@@ -6,5 +6,12 @@ func b() {
   print "hello this is from b()";
 }
 
+func c() {
+  print "hello this is from c()";
+}
+
+print "FROM MAIN";
+
 a();
 b();
+c();

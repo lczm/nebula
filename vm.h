@@ -11,13 +11,14 @@
 
 typedef struct {
   // int ip;
-  int stack_top;
   HashMap variables;
 
   // total amount of frames in use at any moment
   int frame_count;
   CallFrame frames[MAX_FRAMES];
 
+  // int stack_top;
+  Value* stack_top;
   ValueArray vm_stack;
 } Vm;
 

@@ -176,7 +176,15 @@ static void init_compiler(Compiler* compiler,
 }
 
 static ObjFunc* end_compiler(Compiler* compiler) {
+  // This is for the case when the function does not have a return at all, then
+  // it will "return" out of the function from here.
+  // If in the case the function has a return, this will still push, but be
+  // i.e. return;
+  // OP_NIL | OP_RETURN | OP_NIL | OP_RETURN
+  // which will just pop off the function on the first return
+  emit_byte(OP_NIL);
   emit_byte(OP_RETURN);
+
   ObjFunc* func = current_compiler->func;
   current_compiler = current_compiler->enclosing;
   return func;
@@ -653,7 +661,6 @@ static void gen(Ast* ast) {
     }
     case AST_CALL: {
       CallExpr* call_expr = (CallExpr*)ast->as;
-      printf("AST_CALL\n");
       emit_byte(OP_CALL);
 
       VariableExpr* variable_expr = (VariableExpr*)call_expr->callee->as;
@@ -673,6 +680,27 @@ static void gen(Ast* ast) {
       // make_constant(token_string_value);
 
       // emit_byte(call_expr->arguments->count);
+      break;
+    }
+    case AST_RETURN: {
+      ReturnStmt* return_stmt = (ReturnStmt*)ast->as;
+
+      // TODO : Need to check the for when the user
+      // tries to return from the top level function body
+      if (current_compiler->func_type == TYPE_SCRIPT) {
+        printf("Cannot return from top level function body\n");
+        return;
+      }
+
+      // If user writes return; in the function body
+      // it will return nil by default
+      if (return_stmt->value_expr->type == AST_NONE) {
+        emit_byte(OP_NIL);
+      } else {
+        gen(return_stmt->value_expr);
+      }
+
+      emit_byte(OP_RETURN);
       break;
     }
   }
