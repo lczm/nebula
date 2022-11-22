@@ -21,14 +21,11 @@ typedef struct {
   int scope_depth;
 } Compiler;
 
-static OpArray* op_array;
-static ValueArray* constants_array;
-static AstArray* ast_array;
-static LocalArray* local_array;
+// static OpArray* op_array;
+// static ValueArray* constants_array;
+// static AstArray* ast_array;
+// static LocalArray* local_array;
 static Compiler* current_compiler;
-
-static ObjFunc* func;
-static FunctionType func_type;
 
 static Chunk* current_chunk() {
   return &current_compiler->func->chunk;
@@ -64,7 +61,7 @@ static void emit_constant(Value value) {
   emit_byte(OP_CONSTANT);
   // Add to value_array
   // push_value_array(constants_array, value);
-  push_value_array(&(current_chunk()->constants), value);
+  push_value_array(&current_chunk()->constants, value);
 
   printf("push to constants from value_array, count is :%d | value is: \n",
          current_chunk()->constants.count);
@@ -73,7 +70,7 @@ static void emit_constant(Value value) {
   // Minus 1 of the current count as it is 0-indexed
   // emit_byte((OpCode)(constants_array->count - 1));
   emit_byte((OpCode)(current_chunk()->constants.count));
-  printf("emit_constant number: %d\n", current_chunk()->constants.count);
+  printf("emit_constant number: %d\n", current_chunk()->constants.count - 1);
 }
 
 static int make_constant(Value value) {
@@ -98,12 +95,19 @@ static bool identifier_equal(Token* a, Token* b) {
 // Given the token name, and which compiler,
 // look through the local arrays, to see if it exists
 static int resolve_local(Compiler* c, Token* name) {
-  for (int i = current_chunk()->constants.count - 1; i >= 0; i--) {
-    Local* local = &current_chunk()->constants.values[i];
+  for (int i = current_compiler->local_array.count - 1; i >= 0; i--) {
+    Local* local = &current_compiler->local_array.locals[i];
     if (identifier_equal(name, &local->name)) {
       return i;
     }
   }
+
+  // for (int i = current_chunk()->constants.count - 1; i >= 0; i--) {
+  //   Local* local = &current_chunk()->constants.values[i];
+  //   if (identifier_equal(name, &local->name)) {
+  //     return i;
+  //   }
+  // }
 
   // printf("current chunk constants count : %d\n",
   //        current_chunk()->constants.count);
@@ -128,20 +132,21 @@ static int resolve_local(Compiler* c, Token* name) {
   return -1;
 }
 
-static int resolve_local_scope_depth(Compiler* c, Token* name) {
-  for (int i = local_array->count - 1; i >= 0; i--) {
-    Local* local = &local_array->locals[i];
-    if (identifier_equal(name, &local->name)) {
-      return local->depth;
-    }
-  }
-  return -1;
-}
+// static int resolve_local_scope_depth(Compiler* c, Token* name) {
+//   for (int i = local_array->count - 1; i >= 0; i--) {
+//     Local* local = &local_array->locals[i];
+//     if (identifier_equal(name, &local->name)) {
+//       return local->depth;
+//     }
+//   }
+//   return -1;
+// }
 
 static void init_compiler(Compiler* compiler,
                           FunctionType func_type,
                           Token name) {
   init_local_array(&compiler->local_array);
+  reserve_local_array(&compiler->local_array, UINT8_MAX + 1);  // 256
 
   compiler->enclosing = current_compiler;
   compiler->func = NULL;
@@ -227,7 +232,9 @@ static void gen(Ast* ast) {
       emit_byte((OpCode)0xff);
       // minus two because the jump position is in two counts, add one
       // becuase this is zero indexed
-      int jump_if_false_index = op_array->count - 2;
+      // int jump_if_false_index = op_array->count - 2;
+      int jump_if_false_index = current_chunk()->code.count - 2;
+      // int jump_if_false_index = op_array->count - 2;
 
       // If the condition goes through to the then_expression, it will first
       // run OP_POP to keep the stack clean. This clears the if (condition)
@@ -238,11 +245,17 @@ static void gen(Ast* ast) {
       // patch the jump index
       // minus one because this is zero indexed
       // tried setting it to 100 to test if
-      int jump_position = op_array->count;
+      // int jump_position = op_array->count;
+      int jump_position = current_chunk()->code.count;
 
-      op_array->ops[jump_if_false_index] =
+      // op_array->ops[jump_if_false_index] =
+      //     (OpCode)((jump_position >> 8) & 0xff);
+      // op_array->ops[jump_if_false_index + 1] = (OpCode)(jump_position &
+      // 0xff);
+      current_chunk()->code.ops[jump_if_false_index] =
           (OpCode)((jump_position >> 8) & 0xff);
-      op_array->ops[jump_if_false_index + 1] = (OpCode)(jump_position & 0xff);
+      current_chunk()->code.ops[jump_if_false_index + 1] =
+          (OpCode)(jump_position & 0xff);
 
       emit_byte(OP_POP);
 
@@ -254,7 +267,8 @@ static void gen(Ast* ast) {
       WhileStmt* while_stmt = (WhileStmt*)ast->as;
 
       // Need to keep track of this index, as it will jump back here
-      int while_start_index = op_array->count;
+      // int while_start_index = op_array->count;
+      int while_start_index = current_chunk()->code.count;
 
       // Generate the condition for the while loop
       gen(while_stmt->condition_expr);
@@ -265,7 +279,8 @@ static void gen(Ast* ast) {
       emit_byte((OpCode)0xff);
 
       // Minus two because the jump position is in two counts
-      int jump_if_false_index = op_array->count - 2;
+      // int jump_if_false_index = op_array->count - 2;
+      int jump_if_false_index = current_chunk()->code.count - 2;
       emit_byte(OP_POP);
 
       // Generate the block statement for the while loop
@@ -276,11 +291,17 @@ static void gen(Ast* ast) {
       emit_byte((OpCode)(while_start_index & 0xff));
 
       // jump to this after it is done
-      int jump_position = op_array->count;
+      // int jump_position = op_array->count;
+      int jump_position = current_chunk()->code.count;
       // do the byte to integer conversion
-      op_array->ops[jump_if_false_index] =
+      // op_array->ops[jump_if_false_index] =
+      //     (OpCode)((jump_position >> 8) & 0xff);
+      // op_array->ops[jump_if_false_index + 1] = (OpCode)(jump_position &
+      // 0xff);
+      current_chunk()->code.ops[jump_if_false_index] =
           (OpCode)((jump_position >> 8) & 0xff);
-      op_array->ops[jump_if_false_index + 1] = (OpCode)(jump_position & 0xff);
+      current_chunk()->code.ops[jump_if_false_index + 1] =
+          (OpCode)(jump_position & 0xff);
 
       emit_byte(OP_POP);
 
@@ -304,7 +325,8 @@ static void gen(Ast* ast) {
       gen(for_stmt->assignment_stmt);
 
       // Need to keep track of this index, as it will jump back here
-      int while_start_index = op_array->count;
+      // int while_start_index = op_array->count;
+      int while_start_index = current_chunk()->code.count;
 
       // Generate the condition for the while loop
       gen(for_stmt->condition_expr);
@@ -315,7 +337,8 @@ static void gen(Ast* ast) {
       emit_byte((OpCode)0xff);
 
       // Minus two because the jump position is in two counts
-      int jump_if_false_index = op_array->count - 2;
+      // int jump_if_false_index = op_array->count - 2;
+      int jump_if_false_index = current_chunk()->code.count - 2;
       emit_byte(OP_POP);
 
       // Generate the block statement for the while loop
@@ -329,29 +352,36 @@ static void gen(Ast* ast) {
       emit_byte((OpCode)(while_start_index & 0xff));
 
       // jump to this after it is done
-      int jump_position = op_array->count;
+      // int jump_position = op_array->count;
+      int jump_position = current_chunk()->code.count;
       // do the byte to integer conversion
-      op_array->ops[jump_if_false_index] =
+      // op_array->ops[jump_if_false_index] =
+      //     (OpCode)((jump_position >> 8) & 0xff);
+      // op_array->ops[jump_if_false_index + 1] = (OpCode)(jump_position &
+      // 0xff);
+      current_chunk()->code.ops[jump_if_false_index] =
           (OpCode)((jump_position >> 8) & 0xff);
-      op_array->ops[jump_if_false_index + 1] = (OpCode)(jump_position & 0xff);
+      current_chunk()->code.ops[jump_if_false_index + 1] =
+          (OpCode)(jump_position & 0xff);
 
       emit_byte(OP_POP);
 
       break;
     }
     case AST_BLOCK: {
-      begin_scope(current_compiler);
       BlockStmt* block_stmt = (BlockStmt*)ast->as;
+      // begin_scope(current_compiler);
+      current_compiler->scope_depth++;
       // For every statement inside the block, do the codegen
       for (int i = 0; i < block_stmt->ast_array.count; i++) {
         gen(block_stmt->ast_array.ast[i]);
       }
-      close_scope(current_compiler);
+      // close_scope(current_compiler);
+      current_compiler->scope_depth--;
       while (current_compiler->local_array.count > 0 &&
              current_compiler->local_array
                      .locals[current_compiler->local_array.count - 1]
                      .depth > current_compiler->scope_depth) {
-        // Emit byte OP_POP
         emit_byte(OP_POP);
         current_compiler->local_array.count--;
       }
@@ -405,15 +435,17 @@ static void gen(Ast* ast) {
       VariableStmt* variable_stmt = (VariableStmt*)ast->as;
       Token name = variable_stmt->name;
 
+      // Note that scope_depth 0 is the global scope
       // If this variable is a local variable
-      // scope_depth 0 is the global scope
       if (current_compiler->scope_depth != 0) {
         // Check whether there is a variable of the same name
         // in the same local scope
 
-        for (int i = current_chunk()->constants.count - 1; i >= 0; i--) {
+        for (int i = current_compiler->local_array.count - 1; i >= 0; i--) {
+          // for (int i = current_chunk()->constants.count - 1; i >= 0; i--) {
           // for (int i = local_array->count - 1; i >= 0; i--) {
-          Local* local = &current_chunk()->constants.values[i];
+          // Local* local = &current_chunk()->constants.values[i];
+          Local* local = &current_compiler->local_array.locals[i];
           // Local* local = &local_array->locals[i];
           if (local->depth != -1 &&
               local->depth < current_compiler->scope_depth) {
@@ -429,7 +461,8 @@ static void gen(Ast* ast) {
           }
         }
 
-        if (current_chunk()->constants.count == UINT8_MAX + 1) {
+        if (current_compiler->local_array.count == UINT8_MAX + 1) {
+          // if (current_chunk()->constants.count == UINT8_MAX + 1) {
           // if (local_array->count == UINT8_MAX + 1) {
           printf("Tried to add more than 256 locals while codegen\n");
           return;
@@ -437,9 +470,12 @@ static void gen(Ast* ast) {
 
         // Using the token, add to the local array
         // Local* local = &local_array->locals[local_array->count++];
-        Local* local =
-            &current_chunk()
-                 ->constants.values[current_chunk()->constants.count++];
+        printf("local_array count: %d\n", current_compiler->local_array.count);
+        Local* local = &current_compiler->local_array
+                            .locals[current_compiler->local_array.count++];
+        // Local* local =
+        //     &current_chunk()
+        //          ->constants.values[current_chunk()->constants.count++];
         local->name = name;
         local->depth = current_compiler->scope_depth;
         // printf("Creating local | scope_depth : %d\n", local->depth);
@@ -449,7 +485,7 @@ static void gen(Ast* ast) {
         gen(variable_stmt->initializer_expr);
 
       int variable_scope = resolve_local(current_compiler, &name);
-      printf("Reached here for :%s\n", name.start);
+      // printf("Reached here for :%s\n", name.start);
       // Not a local variable
       if (variable_scope == -1) {
         emit_byte(OP_SET_GLOBAL);
@@ -615,10 +651,8 @@ static void gen(Ast* ast) {
         if (!found_variable)
           printf("Error: Could not find token\n");
       } else {  // For local scope
-        for (int i = current_chunk()->constants.count - 1; i >= 0; i--) {
-          // for (int i = local_array->count - 1; i >= 0; i--) {
-          // Local* local = &local_array->locals[i];
-          Local* local = &current_chunk()->constants.values[i];
+        for (int i = current_compiler->local_array.count - 1; i >= 0; i--) {
+          Local* local = &current_compiler->local_array.locals[i];
           if (identifier_equal(&name, &local->name)) {
             emit_byte((OpCode)i);
             break;
@@ -710,10 +744,10 @@ ObjFunc* codegen(OpArray* op_arr,
                  ValueArray* constants_arr,
                  AstArray* ast_arr,
                  LocalArray* local_arr) {
-  op_array = op_arr;
-  constants_array = constants_arr;
-  ast_array = ast_arr;
-  local_array = local_arr;
+  // op_array = op_arr;
+  // constants_array = constants_arr;
+  // ast_array = ast_arr;
+  // local_array = local_arr;
 
   // Create the compiler instance that tracks scope and depth
   Compiler compiler;
@@ -735,8 +769,8 @@ ObjFunc* codegen(OpArray* op_arr,
 
   printf("Before compiler gen\n");
 
-  for (int i = 0; i < ast_array->count; i++) {
-    gen(ast_array->ast[i]);
+  for (int i = 0; i < ast_arr->count; i++) {
+    gen(ast_arr->ast[i]);
   }
 
   printf("Reached to the end of compiler gen\n");

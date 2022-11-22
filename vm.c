@@ -497,7 +497,7 @@ void run(bool arguments[const],
         OpCode index = frame->func->chunk.code.ops[*frame->ip];
         *frame->ip = *frame->ip + 1;
 
-        printf("index is :%d\n", index);
+        printf("OP_GET_LOCAL index is :%d\n", index);
 
         push(frame->slots[index]);
         // push(frame->slots->values[index]);
