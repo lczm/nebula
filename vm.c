@@ -511,6 +511,10 @@ void run(bool arguments[const],
         uint16_t offset = READ_SHORT();
         // Jump to the jump_index
         // vm->ip = jump_index;
+
+        // FIXME: The fix here is that frame->ip is a OpCode*
+        // whereas, vm->ip used to be a int
+        // this cannot directly translate
         frame->ip = offset;
         break;
       }
