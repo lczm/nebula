@@ -31,10 +31,11 @@ typedef enum {
   // Jumps
   OP_JUMP,           // 19
   OP_JUMP_IF_FALSE,  // 20
+  OP_LOOP,           // 21
 
   // Functions
-  OP_CALL,  // 21
+  OP_CALL,  // 22
 
   // NIL
-  OP_NIL,  // 22
+  OP_NIL,  // 23
 } OpCode;

@@ -537,6 +537,11 @@ void run(bool arguments[const],
 
         break;
       }
+      case OP_LOOP: {
+        uint16_t offset = READ_SHORT();
+        frame->ip -= offset;
+        break;
+      }
       case OP_CALL: {
         // printf("OP_CALL\n");
         // OP_CONSTANT, just move it over the OP_CONSTANT

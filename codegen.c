@@ -214,6 +214,17 @@ static int emit_jump(uint8_t instruction) {
   return current_chunk()->count - 2;
 }
 
+static void emit_loop(int loop_start) {
+  emit_byte(OP_LOOP);
+
+  int offset = current_chunk()->count - loop_start + 2;
+  if (offset > UINT16_MAX)
+    printf("loop body too large\n");
+
+  emit_byte((offset >> 8) & 0xff);
+  emit_byte(offset & 0xff);
+}
+
 static void patch_jump(int start) {
   int jump = current_chunk()->count - start - 2;
   if (jump > UINT16_MAX) {
@@ -395,46 +406,30 @@ static void gen(Ast* ast) {
       // new initialization
       gen(for_stmt->assignment_stmt);
 
-      // Need to keep track of this index, as it will jump back here
-      // int while_start_index = op_array->count;
-      int while_start_index = current_chunk()->code.count;
+      int loop_start = current_chunk()->count;
 
-      // Generate the condition for the while loop
+      // Generate the condition expression
       gen(for_stmt->condition_expr);
 
-      // Create a placeholder for the jump
-      emit_byte(OP_JUMP_IF_FALSE);
-      emit_byte((OpCode)0xff);
-      emit_byte((OpCode)0xff);
-
-      // Minus two because the jump position is in two counts
-      // int jump_if_false_index = op_array->count - 2;
-      int jump_if_false_index = current_chunk()->code.count - 2;
+      int exit_jump = emit_jump(OP_JUMP_IF_FALSE);
       emit_byte(OP_POP);
 
-      // Generate the block statement for the while loop
-      gen(for_stmt->block_stmt);
+      int body_jump = emit_jump(OP_JUMP);
+      int increment_start = current_chunk()->count;
 
-      // Add the then expression at the end of evaluation
+      // Generate the then expression
       gen(for_stmt->then_expr);
+      emit_byte(OP_POP);
 
-      emit_byte(OP_JUMP);
-      emit_byte((OpCode)((while_start_index >> 8) & 0xff));
-      emit_byte((OpCode)(while_start_index & 0xff));
+      emit_loop(loop_start);
+      loop_start = increment_start;
+      patch_jump(body_jump);
 
-      // jump to this after it is done
-      // int jump_position = op_array->count;
-      int jump_position = current_chunk()->code.count;
-      // do the byte to integer conversion
-      // op_array->ops[jump_if_false_index] =
-      //     (OpCode)((jump_position >> 8) & 0xff);
-      // op_array->ops[jump_if_false_index + 1] = (OpCode)(jump_position &
-      // 0xff);
-      current_chunk()->code.ops[jump_if_false_index] =
-          (OpCode)((jump_position >> 8) & 0xff);
-      current_chunk()->code.ops[jump_if_false_index + 1] =
-          (OpCode)(jump_position & 0xff);
+      // Generate main function body
+      gen(for_stmt->block_stmt);
+      emit_loop(loop_start);
 
+      patch_jump(exit_jump);
       emit_byte(OP_POP);
 
       break;
