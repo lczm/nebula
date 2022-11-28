@@ -393,7 +393,7 @@ void run(bool arguments[const],
         vm->frame_count--;
         if (vm->frame_count == 0) {
           pop();
-          printf("Done interpreting all code\n");
+          // printf("Done interpreting all code\n");
           return;
         }
 

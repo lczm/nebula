@@ -190,16 +190,8 @@ static void patch_jump(int start) {
     printf("Too much code to jump over\n");
   }
 
-  printf("Patch jump : %d\n", jump);
-
   current_chunk()->code.ops[start] = (jump >> 8) & 0xff;
   current_chunk()->code.ops[start + 1] = jump & 0xff;
-
-  // OpCode* a = current_chunk()->code.ops;
-  // #define READ_SHORT() (a += 2, (uint16_t)((a[-2] << 8 | a[-1])))
-  // a += start;
-  // uint16_t b = READ_SHORT();
-  // printf("read_short :%d\n", b);
 }
 
 static void gen(Ast* ast) {
@@ -669,6 +661,7 @@ ObjFunc* codegen(OpArray* op_arr,
 
   ObjFunc* main_func = end_compiler(&current_compiler);
 
+#ifdef TEST_DEBUGGING
   for (int i = 0; i < main_func->chunk.code.count; i++) {
     // printf("OP %d : %d\n", i, main_func->chunk.code.ops[i]);
     switch (main_func->chunk.code.ops[i]) {
@@ -764,6 +757,7 @@ ObjFunc* codegen(OpArray* op_arr,
         break;
     }
   }
+#endif
 
   return main_func;
 }
