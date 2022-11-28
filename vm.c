@@ -228,11 +228,11 @@ void run(bool arguments[const],
   // }
   // printf("LISTING OUT ALL CHUNK CONSTANTS VALUE -- END\n");
 
-  printf("LISTING OUT ALL CHUNK OP_CODE -- START\n");
-  for (int i = 0; i < frame->func->chunk.code.count; i++) {
-    printf("OP %d : %d\n", i, frame->func->chunk.code.ops[i]);
-  }
-  printf("LISTING OUT ALL CHUNK OP_CODE -- END\n");
+  // printf("LISTING OUT ALL CHUNK OP_CODE -- START\n");
+  // for (int i = 0; i < frame->func->chunk.code.count; i++) {
+  //   printf("OP %d : %d\n", i, frame->func->chunk.code.ops[i]);
+  // }
+  // printf("LISTING OUT ALL CHUNK OP_CODE -- END\n");
 
   // printf("LISTING OUT ALL CHUNK OP_CODE2 -- START\n");
   // for (int i = 0; i < frame->func->chunk.code.count; i++) {

@@ -63,14 +63,14 @@ static void emit_constant(Value value) {
   // push_value_array(constants_array, value);
   push_value_array(&current_chunk()->constants, value);
 
-  printf("push to constants from value_array, count is :%d | value is: \n",
-         current_chunk()->constants.count);
-  print_value(value);
+  // printf("push to constants from value_array, count is :%d | value is: \n",
+  //        current_chunk()->constants.count);
+  // print_value(value);
 
   // Minus 1 of the current count as it is 0-indexed
   // emit_byte((OpCode)(constants_array->count - 1));
   emit_byte((OpCode)(current_chunk()->constants.count));
-  printf("emit_constant number: %d\n", current_chunk()->constants.count - 1);
+  // printf("emit_constant number: %d\n", current_chunk()->constants.count - 1);
 }
 
 static int make_constant(Value value) {
@@ -488,7 +488,7 @@ static void gen(Ast* ast) {
       make_constant(func_name_value);
       // emit_byte(func_name);
 
-      printf("Set function to global variables with OP_SET_GLOBAL\n");
+      // printf("Set function to global variables with OP_SET_GLOBAL\n");
 
       // emitBytes(OP_CONSTANT, makeConstant(OBJ_VAL(function)));
 
@@ -769,20 +769,12 @@ static void gen(Ast* ast) {
       emit_byte(OP_CALL);
 
       VariableExpr* variable_expr = (VariableExpr*)call_expr->callee->as;
-      // printf("Variable_expr length: %d\n", variable_expr->name.length);
-      // char s[variable_expr->name.length + 1];
-      // strncpy(s, variable_expr->name.start, variable_expr->name.length);
-      // s[variable_expr->name.length] = '\0';
-      // printf("[%-20s]: %s\n", "AST_VARIABLE_EXPR", s);
-      // gen(call_expr->callee);
-
       ObjString* token_string = make_obj_string_from_token(variable_expr->name);
-      printf("FROM AST_CALL\n");
-      print_obj_string(token_string);
-      printf("FROM AST_CALL\n");
+      // printf("FROM AST_CALL\n");
+      // print_obj_string(token_string);
+      // printf("FROM AST_CALL\n");
       Value token_string_value = OBJ_VAL(token_string);
       emit_constant(token_string_value);
-      // make_constant(token_string_value);
 
       // emit_byte(call_expr->arguments->count);
       break;
@@ -838,13 +830,13 @@ ObjFunc* codegen(OpArray* op_arr,
   // this is to keep them in parallel and not off indexed
   // emit_constant(NIL_VAL);
 
-  printf("Before compiler gen\n");
+  // printf("Before compiler gen\n");
 
   for (int i = 0; i < ast_arr->count; i++) {
     gen(ast_arr->ast[i]);
   }
 
-  printf("Reached to the end of compiler gen\n");
+  // printf("Reached to the end of compiler gen\n");
 
   ObjFunc* main_func = end_compiler(&current_compiler);
 
