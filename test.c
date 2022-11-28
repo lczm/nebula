@@ -63,17 +63,18 @@ Vm* run_source_return_vm(const char* source) {
 #endif
 
   OpArray op_array;
-  ValueArray ast_constants_array;
+  ValueArray value_array;
   LocalArray local_array;
 
   init_op_array(&op_array);
-  init_value_array(&ast_constants_array);
+  init_value_array(&value_array);
   init_local_array(&local_array);
   reserve_local_array(&local_array, UINT8_MAX + 1);
-  codegen(&op_array, &ast_constants_array, &ast_array, &local_array);
+  ObjFunc* main_func =
+      codegen(&op_array, &value_array, &ast_array, &local_array);
 
-  // Temporary, to get out of the VM loop
-  push_op_array(&op_array, OP_RETURN);
+  push_value_array(&value_array, OBJ_VAL(main_func));
+
 #ifdef TEST_DEBUGGING
   disassemble_opcode_values(&op_array, &ast_constants_array);
 #endif
@@ -88,7 +89,7 @@ Vm* run_source_return_vm(const char* source) {
     arguments[i] = false;
   }
 
-  run(arguments, vm, &op_array, &ast_constants_array);
+  run(arguments, vm, &op_array, &value_array, main_func);
 
   // free_vm(&vm);
   // free_op_array(&op_array);
@@ -983,23 +984,23 @@ int main(int argc, const char* argv[]) {
   test_parse_binary_expressions();
   test_parse_unary_expressions();
   // codegen to ast tests
-  test_codegen_numbers();
-  test_codegen_binary_numbers();
+  // test_codegen_numbers();
+  // test_codegen_binary_numbers();
   // obj tests
-  test_obj_string();
+  // test_obj_string();
   // vm tests
-  test_vm_global_environment();
-  test_vm_string_concatenation();
-  test_vm_order_of_operations();
-  test_vm_augmented_assignments();
-  test_vm_comparison_operators();
-  test_vm_if_conditions();
-  test_vm_while_loops();
-  test_vm_for_loops();
+  // test_vm_global_environment();
+  // test_vm_string_concatenation();
+  // test_vm_order_of_operations();
+  // test_vm_augmented_assignments();
+  // test_vm_comparison_operators();
+  // test_vm_if_conditions();
+  // test_vm_while_loops();
+  // test_vm_for_loops();
   // vm + hashmap test
-  test_vm_hashmap_collision_resolution();
+  // test_vm_hashmap_collision_resolution();
   // error messages
-  test_vm_parser_error_messages();
+  // test_vm_parser_error_messages();
 
   printf("[-----Tests results-----]\n");
   printf("Pass : %d\n", pass_count);
