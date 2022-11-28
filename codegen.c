@@ -348,43 +348,18 @@ static void gen(Ast* ast) {
     case AST_WHILE: {
       WhileStmt* while_stmt = (WhileStmt*)ast->as;
 
-      // Need to keep track of this index, as it will jump back here
-      // int while_start_index = op_array->count;
-      int while_start_index = current_chunk()->code.count;
+      int loop_start = current_chunk()->count;
 
-      // Generate the condition for the while loop
+      // Generate the condition expr
       gen(while_stmt->condition_expr);
 
-      // Create a placeholder for the jump
-      emit_byte(OP_JUMP_IF_FALSE);
-      emit_byte((OpCode)0xff);
-      emit_byte((OpCode)0xff);
-
-      // Minus two because the jump position is in two counts
-      // int jump_if_false_index = op_array->count - 2;
-      int jump_if_false_index = current_chunk()->code.count - 2;
+      int exit_jump = emit_jump(OP_JUMP_IF_FALSE);
       emit_byte(OP_POP);
 
-      // Generate the block statement for the while loop
       gen(while_stmt->block_stmt);
+      emit_loop(loop_start);
 
-      emit_byte(OP_JUMP);
-      emit_byte((OpCode)((while_start_index >> 8) & 0xff));
-      emit_byte((OpCode)(while_start_index & 0xff));
-
-      // jump to this after it is done
-      // int jump_position = op_array->count;
-      int jump_position = current_chunk()->code.count;
-      // do the byte to integer conversion
-      // op_array->ops[jump_if_false_index] =
-      //     (OpCode)((jump_position >> 8) & 0xff);
-      // op_array->ops[jump_if_false_index + 1] = (OpCode)(jump_position &
-      // 0xff);
-      current_chunk()->code.ops[jump_if_false_index] =
-          (OpCode)((jump_position >> 8) & 0xff);
-      current_chunk()->code.ops[jump_if_false_index + 1] =
-          (OpCode)(jump_position & 0xff);
-
+      patch_jump(exit_jump);
       emit_byte(OP_POP);
 
       break;
