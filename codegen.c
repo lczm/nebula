@@ -697,36 +697,17 @@ ObjFunc* codegen(OpArray* op_arr,
                  ValueArray* constants_arr,
                  AstArray* ast_arr,
                  LocalArray* local_arr) {
-  // op_array = op_arr;
-  // constants_array = constants_arr;
-  // ast_array = ast_arr;
-  // local_array = local_arr;
-
   // Create the compiler instance that tracks scope and depth
   Compiler compiler;
   Token null_token;
   init_compiler(&compiler, TYPE_SCRIPT, null_token);
 
-  // printf("initial compiler func chunk constants count: %d\n",
-  //        compiler.func->chunk.constants.count);
-
   // Track which compiler is being used
   current_compiler = &compiler;
-
-  // printf("initial compiler func chunk constants count2: %d\n",
-  //        current_chunk()->constants.count);
-
-  // Local array will match with constants array,
-  // this is to keep them in parallel and not off indexed
-  // emit_constant(NIL_VAL);
-
-  // printf("Before compiler gen\n");
 
   for (int i = 0; i < ast_arr->count; i++) {
     gen(ast_arr->ast[i]);
   }
-
-  // printf("Reached to the end of compiler gen\n");
 
   ObjFunc* main_func = end_compiler(&current_compiler);
 
@@ -771,20 +752,6 @@ ObjFunc* codegen(OpArray* op_arr,
         break;
       case OP_CONSTANT: {
         i++;
-
-        // printf("OP_CONSTANTS\n");
-        // for (int i = 0; i < main_func->chunk.constants.count; i++) {
-        //   print_value(main_func->chunk.constants.values[i]);
-        // }
-        // printf("OP_CONSTANTS\n");
-
-        // OpCode a = main_func->chunk.code.ops[i];
-        // printf("alksdjalksdjlaksjd :%d\n", a - 1);
-
-        // Value value = main_func->chunk.constants.values[a - 1];
-        // printf("@@@\n");
-        // print_value(value);
-        // printf("@@@\n");
 
         printf("[%d-%d] [%-20s] at %d: %f\n", i - 1, i, "OP_CONSTANT", i,
                AS_NUMBER(main_func->chunk.constants
