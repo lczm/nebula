@@ -11,26 +11,16 @@
 #include "op.h"
 
 static Vm* vm;
-static OpArray* op_array;
-static ValueArray* value_array;
 
 void init_vm(Vm* v) {
   vm = v;
-  // v->ip = 0;
-  // v->stack_top = 0;
-
   init_hashmap(&v->variables);
-
-  // init_callframe_array(&vm->frames);
-  // reserve_callframe_array(&vm->frames, MAX_FRAMES);
-
   init_value_array(&v->vm_stack);
   reserve_value_array(&vm->vm_stack, MAX_STACK);
   v->stack_top = &v->vm_stack.values[0];
 }
 
 void free_vm(Vm* v) {
-  // v->ip = 0;
   v->stack_top = 0;
   free_hashmap(&v->variables);
   free_value_array(&v->vm_stack);

@@ -21,10 +21,6 @@ typedef struct {
   int scope_depth;
 } Compiler;
 
-// static OpArray* op_array;
-// static ValueArray* constants_array;
-// static AstArray* ast_array;
-// static LocalArray* local_array;
 static Compiler* current_compiler;
 
 static Chunk* current_chunk() {
