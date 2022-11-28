@@ -454,7 +454,6 @@ static void gen(Ast* ast) {
     }
     case AST_NUMBER: {  // emit a constant
       NumberExpr* number_expr = (NumberExpr*)ast->as;
-      printf("Emitting number: %f\n", number_expr->value);
       emit_constant(NUMBER_VAL(number_expr->value));
       break;
     }
