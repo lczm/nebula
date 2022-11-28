@@ -171,7 +171,7 @@ static bool call(ObjFunc* func, int argument_count) {
   // frame->slots = &vm->vm_stack.values[vm->stack_top];
   frame->slots = vm->stack_top;
 
-  Value value = func->chunk.constants.values[0];
+  // Value value = func->chunk.constants.values[0];
   // printf("From call START\n");
   // print_value(value);
   // printf("From call END\n");
@@ -242,12 +242,25 @@ void run(bool arguments[const],
   // }
   // printf("LISTING OUT ALL CHUNK OP_CODE2 -- END\n");
 
+  // OpCode* t = frame->func->chunk.code.ops;
+
+  // for (int i = 0; i < frame->func->chunk.count; i++) {
+  //   OpCode a = *t++;
+  //   OpCode b = READ_BYTE();
+  //   printf("%d\n", a);
+  // }
+
+  // printf("%d\n", a);
+  // printf("%d\n", b);
+  // printf("%d\n", c);
+
   OpCode instruction;
   for (;;) {
     // instruction = op_array->ops[vm->ip];
     // vm->ip++;
-    instruction = frame->func->chunk.code.ops[*frame->ip];
-    *frame->ip = *frame->ip + 1;
+    // instruction = frame->func->chunk.code.ops[*frame->ip++];
+    instruction = READ_BYTE();
+    // *frame->ip = *frame->ip + 1;
     switch (instruction) {
       case OP_CONSTANT: {
         // Get the constant_index, and take the number from the
@@ -262,8 +275,11 @@ void run(bool arguments[const],
         // printf("instruction index: %d\n", instruction2);
         // return;
 
-        OpCode constant_index = frame->func->chunk.code.ops[*frame->ip];
-        *frame->ip = *frame->ip + 1;
+        // OpCode constant_index = frame->func->chunk.code.ops[*frame->ip];
+        // *frame->ip = *frame->ip + 1;
+
+        // OpCode constant_index = frame->func->chunk.code.ops[*frame->ip++];
+        OpCode constant_index = READ_BYTE();
 
         Value constant =
             frame->func->chunk.constants.values[constant_index - 1];
@@ -427,8 +443,11 @@ void run(bool arguments[const],
         // The variable_name representation is an ObjString*
         // ObjString* obj_string = (ObjString*)obj;
 
-        OpCode name_constant_index = frame->func->chunk.code.ops[*frame->ip];
-        *frame->ip = *frame->ip + 1;
+        // OpCode name_constant_index = frame->func->chunk.code.ops[*frame->ip];
+        // *frame->ip = *frame->ip + 1;
+        // OpCode name_constant_index =
+        // frame->func->chunk.code.ops[*frame->ip++];
+        OpCode name_constant_index = READ_BYTE();
 
         Obj* obj =
             AS_OBJ(frame->func->chunk.constants.values[name_constant_index]);
@@ -449,8 +468,10 @@ void run(bool arguments[const],
         // Value value = peek(0);
         // vm->vm_stack.values[index] = value;
 
-        OpCode index = frame->func->chunk.code.ops[*frame->ip];
-        *frame->ip = *frame->ip + 1;
+        // OpCode index = frame->func->chunk.code.ops[*frame->ip];
+        // *frame->ip = *frame->ip + 1;
+        // OpCode index = frame->func->chunk.code.ops[*frame->ip++];
+        OpCode index = READ_BYTE();
 
         Value value = peek(0);
         // frame->slots->values[index] = value;
@@ -467,8 +488,11 @@ void run(bool arguments[const],
         // Obj* obj = AS_OBJ(value_arr->values[name_constant_index]);
         // ObjString* obj_string = (ObjString*)obj;
 
-        OpCode name_constant_index = frame->func->chunk.code.ops[*frame->ip];
-        *frame->ip = *frame->ip + 1;
+        // OpCode name_constant_index = frame->func->chunk.code.ops[*frame->ip];
+        // *frame->ip = *frame->ip + 1;
+        // OpCode name_constant_index =
+        // frame->func->chunk.code.ops[*frame->ip++];
+        OpCode name_constant_index = READ_BYTE();
 
         // Obj* obj =
         //     AS_OBJ(frame->func->chunk.constants.values[name_constant_index]);
@@ -488,70 +512,41 @@ void run(bool arguments[const],
         // Take the index from the OpCode array
         // And push it onto the value stack, from
         // wherever the old local is.
-        // OpCode index = op_array->ops[vm->ip];
-        // printf("OP_GET_LOCAL index : %d\n", index);
-        // printf("vm->ip : %d\n", vm->ip);
-        // vm->ip++;
-        // push(vm->vm_stack.values[index]);
+        OpCode index = READ_BYTE();
 
-        OpCode index = frame->func->chunk.code.ops[*frame->ip];
-        *frame->ip = *frame->ip + 1;
-
-        printf("OP_GET_LOCAL index is :%d\n", index);
-
+        // printf("OP_GET_LOCAL index is :%d\n", index);
         push(frame->slots[index]);
-        // push(frame->slots->values[index]);
-
-        // uint8_t slot = READ_BYTE();
-        // push(frame->slots->values[slot]);
         break;
       }
       case OP_JUMP: {
-        // uint16_t offset = read_short();
+        // printf("OP_JUMP\n");
         uint16_t offset = READ_SHORT();
-        // Jump to the jump_index
-        // vm->ip = jump_index;
-
-        // FIXME: The fix here is that frame->ip is a OpCode*
-        // whereas, vm->ip used to be a int
-        // this cannot directly translate
-        frame->ip = offset;
+        frame->ip += offset;
         break;
       }
       case OP_JUMP_IF_FALSE: {
-        // uint16_t jump_index_if_false = read_short();
+        // printf("OP_JUMP_IF_FALSE\n");
         uint16_t jump_index_if_false = READ_SHORT();
-        // printf("jump index: %d\n", jump_index_if_false);
 
         Value condition_expr = peek(0);
         // if false, jump to the jump_index, otherwise, continue
         // executing the program.
         if (is_falsey(condition_expr)) {
-          // vm->ip = jump_index_if_false;
-          frame->ip = jump_index_if_false;
+          frame->ip += jump_index_if_false;
         }
 
         break;
       }
       case OP_CALL: {
         // printf("OP_CALL\n");
-        // int arg_count = READ_BYTE();
-
-        // OP_CONSTANT
-        OpCode index = frame->func->chunk.code.ops[*frame->ip];
-        *frame->ip = *frame->ip + 1;
-
-        // OP_CONSTANT index
-        OpCode index2 = frame->func->chunk.code.ops[*frame->ip];
-        *frame->ip = *frame->ip + 1;
+        // OP_CONSTANT, just move it over the OP_CONSTANT
+        READ_BYTE();
+        // OP_CONSTANT INDEX
+        OpCode index2 = READ_BYTE();
 
         Value func_name_obj = frame->func->chunk.constants.values[index2 - 1];
         ObjString* func_name = AS_OBJ_STRING(func_name_obj);
         Value func_obj = get_hashmap(&vm->variables, func_name);
-
-        // printf("@@@\n");
-        // print_value(func_obj);
-        // printf("@@@\n");
 
         if (!call_value(func_obj, 0)) {
           printf("Error out here\n");
@@ -561,18 +556,6 @@ void run(bool arguments[const],
         // call_value() if successful, will push a new callframe
         // and the current callframe will need to be updated to it
         frame = &vm->frames[vm->frame_count - 1];
-
-        // printf("LISTING OUT ALL CHUNK OP_CODE -- START\n");
-        // for (int i = 0; i < frame->func->chunk.code.count; i++) {
-        //   printf("OP %d : %d\n", i, frame->func->chunk.code.ops[i]);
-        //   if (frame->func->chunk.code.ops[i] == 0) {  // OP_CONSTANT
-        //     OpCode op_index = frame->func->chunk.code.ops[i + 1];
-        //     Value value = frame->func->chunk.constants.values[op_index - 1];
-        //     print_value(value);
-        //   }
-        // }
-        // printf("LISTING OUT ALL CHUNK OP_CODE -- END\n");
-
         break;
       }
       case OP_NIL: {

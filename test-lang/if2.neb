@@ -1,5 +1,11 @@
 let a = 0;
 
-if (a != 10) {
-  print "a not 1!";
+if (a == 10) {
+  print "a is equals to 10!";
+} else {
+  print "a is not equals to 10!";
+}
+
+if (a == 0){
+  print "a is equals to 0!";
 }

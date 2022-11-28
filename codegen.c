@@ -207,6 +207,31 @@ static void close_scope(Compiler* compiler) {
   compiler->scope_depth--;
 }
 
+static int emit_jump(uint8_t instruction) {
+  emit_byte(instruction);
+  emit_byte(0xff);
+  emit_byte(0xff);
+  return current_chunk()->count - 2;
+}
+
+static void patch_jump(int start) {
+  int jump = current_chunk()->count - start - 2;
+  if (jump > UINT16_MAX) {
+    printf("Too much code to jump over\n");
+  }
+
+  printf("Patch jump : %d\n", jump);
+
+  current_chunk()->code.ops[start] = (jump >> 8) & 0xff;
+  current_chunk()->code.ops[start + 1] = jump & 0xff;
+
+  // OpCode* a = current_chunk()->code.ops;
+  // #define READ_SHORT() (a += 2, (uint16_t)((a[-2] << 8 | a[-1])))
+  // a += start;
+  // uint16_t b = READ_SHORT();
+  // printf("read_short :%d\n", b);
+}
+
 static void gen(Ast* ast) {
   if (ast == NULL)
     return;
@@ -225,6 +250,21 @@ static void gen(Ast* ast) {
       IfStmt* if_stmt = (IfStmt*)ast->as;
       gen(if_stmt->condition_expr);
 
+      int then_jump = emit_jump(OP_JUMP_IF_FALSE);
+      emit_byte(OP_POP);
+
+      gen(if_stmt->then_stmt);
+
+      int else_jump = emit_jump(OP_JUMP);
+      patch_jump(then_jump);
+      emit_byte(OP_POP);
+
+      if (if_stmt->else_stmt != AST_NONE)
+        gen(if_stmt->else_stmt);
+      patch_jump(else_jump);
+      break;
+
+      /**
       emit_byte(OP_JUMP_IF_FALSE);
       // Placeholder, this placeholder is two bytes, uint16_t
       // This is so that it can jump (65536 - 1) times.
@@ -242,6 +282,35 @@ static void gen(Ast* ast) {
       emit_byte(OP_POP);
 
       gen(if_stmt->then_stmt);
+
+      emit_byte(OP_JUMP);
+      emit_byte((OpCode)0xff);
+      emit_byte((OpCode)0xff);
+
+      int else_jump = current_chunk()->code.count - 2;
+      // Patch the jump
+      int jump = current_chunk()->count - jump_if_false_index - 2;
+      if (jump > UINT16_MAX)
+        printf("Too much code to jump over\n");
+
+      current_chunk()->code.ops[jump_if_false_index] = (jump >> 8) & 0xff;
+      current_chunk()->code.ops[jump_if_false_index + 1] = jump & 0xff;
+
+      emit_byte(OP_POP);
+
+      if (if_stmt->else_stmt != AST_NONE) {
+        gen(if_stmt->else_stmt);
+      }
+
+      // Patch the jump
+      jump = current_chunk()->count - jump_if_false_index - 2;
+      if (jump > UINT16_MAX)
+        printf("Too much code to jump over\n");
+      current_chunk()->code.ops[else_jump] = (jump >> 8) & 0xff;
+      current_chunk()->code.ops[else_jump] = jump & 0xff;
+
+      break;
+
       // patch the jump index
       // minus one because this is zero indexed
       // tried setting it to 100 to test if
@@ -259,9 +328,11 @@ static void gen(Ast* ast) {
 
       emit_byte(OP_POP);
 
+      // TODO : the else branch is skipped for now
       // Generate the else branch
-      gen(if_stmt->else_stmt);
+      // gen(if_stmt->else_stmt);
       break;
+      **/
     }
     case AST_WHILE: {
       WhileStmt* while_stmt = (WhileStmt*)ast->as;
