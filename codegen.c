@@ -102,45 +102,8 @@ static int resolve_local(Compiler* c, Token* name) {
     }
   }
 
-  // for (int i = current_chunk()->constants.count - 1; i >= 0; i--) {
-  //   Local* local = &current_chunk()->constants.values[i];
-  //   if (identifier_equal(name, &local->name)) {
-  //     return i;
-  //   }
-  // }
-
-  // printf("current chunk constants count : %d\n",
-  //        current_chunk()->constants.count);
-  // TODO : Do this in the slowest possible way
-  // TODO : the -2 also doesn't really make sense here as well
-  // Note that -1 works for a single { let a = 10; print a; }
-  // for (int i = 0; i < current_chunk()->constants.count - 1; i++) {
-  //   printf("incrementing through : %d\n", i);
-  //   Local* local = &current_chunk()->constants.values[i];
-  //   if (identifier_equal(name, &local->name)) {
-  //     printf("resolve_local found\n");
-  //     return i;
-  //   }
-  // }
-
-  // for (int i = local_array->count - 1; i >= 0; i--) {
-  //   Local* local = &local_array->locals[i];
-  //   if (identifier_equal(name, &local->name)) {
-  //     return i;
-  //   }
-  // }
   return -1;
 }
-
-// static int resolve_local_scope_depth(Compiler* c, Token* name) {
-//   for (int i = local_array->count - 1; i >= 0; i--) {
-//     Local* local = &local_array->locals[i];
-//     if (identifier_equal(name, &local->name)) {
-//       return local->depth;
-//     }
-//   }
-//   return -1;
-// }
 
 static void init_compiler(Compiler* compiler,
                           FunctionType func_type,
