@@ -123,7 +123,7 @@ typedef struct {
 
 typedef struct {
   Ast* callee;
-  TokenArray* arguments;
+  AstArray* arguments;
 } CallExpr;
 
 bool is_stmt(Ast* ast);
@@ -156,7 +156,7 @@ VariableExpr* make_variable_expr(Token name);
 GroupExpr* make_group_expr(Ast* expr);
 AssignmentExpr* make_assignment_expr(Token name, Ast* expr);
 StringExpr* make_string_expr(const char* start, int length);
-CallExpr* make_call_expr(Ast* callee, TokenArray* arguments);
+CallExpr* make_call_expr(Ast* callee, AstArray* arguments);
 
 // Convert expressions into values
 Value ast_to_value(Ast* ast);

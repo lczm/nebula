@@ -185,7 +185,7 @@ StringExpr* make_string_expr(const char* start, int length) {
   return string_expr;
 }
 
-CallExpr* make_call_expr(Ast* callee, TokenArray* arguments) {
+CallExpr* make_call_expr(Ast* callee, AstArray* arguments) {
   CallExpr* call_expr = (CallExpr*)malloc(sizeof(CallExpr) * 1);
   call_expr->callee = callee;
   call_expr->arguments = arguments;

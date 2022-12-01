@@ -628,8 +628,8 @@ static Ast* call() {
     move();
     // printf("Reached call() in parser\n");
 
-    TokenArray* arguments = (TokenArray*)malloc(sizeof(TokenArray) * 1);
-    init_token_array(arguments);
+    AstArray* arguments = (AstArray*)malloc(sizeof(AstArray) * 1);
+    init_ast_array(arguments);
     // Sanity check
     int argument_count = 0;
 
@@ -637,14 +637,12 @@ static Ast* call() {
     CallExpr* call_expr = make_call_expr(ast, arguments);
 
     while (!match(TOKEN_RIGHT_PAREN)) {
-      Token argument_identifier = get_current();
-      push_token_array(arguments, argument_identifier);
+      Ast* expr = expression();
+      push_ast_array(arguments, expr);
       argument_count++;
 
       if (match(TOKEN_COMMA))
         move();
-
-      move();
     }
 
     // Move past right_paren

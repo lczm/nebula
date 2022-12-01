@@ -164,9 +164,9 @@ void disassemble_individual_ast(Ast* ast) {
       printf("CallExpr callee: ");
       disassemble_individual_ast(call_expr->callee);
       printf("CallExpr arguments (Count: %d) :\n", call_expr->arguments->count);
-      for (int i = 0; i < call_expr->arguments->count; i++) {
-        PRINT_TOKEN_STRING(call_expr->arguments->tokens[i]);
-      }
+      // for (int i = 0; i < call_expr->arguments->count; i++) {
+      //   PRINT_TOKEN_STRING(call_expr->arguments->tokens[i]);
+      // }
       break;
     }
     case AST_RETURN: {

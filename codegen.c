@@ -107,7 +107,7 @@ static void init_compiler(Compiler* compiler,
   init_local_array(&compiler->local_array);
   reserve_local_array(&compiler->local_array, UINT8_MAX + 1);  // 256
 
-  compiler->enclosing = current_compiler;
+  compiler->enclosing = (struct Compiler*)current_compiler;
   compiler->func = NULL;
   compiler->local_depth = 0;
   compiler->scope_depth = 0;
@@ -150,7 +150,108 @@ static ObjFunc* end_compiler(Compiler* compiler) {
   emit_byte(OP_RETURN);
 
   ObjFunc* func = current_compiler->func;
-  current_compiler = current_compiler->enclosing;
+  for (int i = 0; i < current_compiler->func->chunk.code.count; i++) {
+    // printf("OP %d : %d\n", i, main_func->chunk.code.ops[i]);
+    switch (current_compiler->func->chunk.code.ops[i]) {
+      case OP_POP:
+        printf("[%d] [%-20s]\n", i, "OP_POP");
+        break;
+      case OP_ADD:
+        printf("[%d] [%-20s]\n", i, "OP_ADD");
+        break;
+      case OP_TRUE:
+        printf("[%d] [%-20s]\n", i, "OP_TRUE");
+        break;
+      case OP_FALSE:
+        printf("[%d] [%-20s]\n", i, "OP_FALSE");
+        break;
+      case OP_SUBTRACT:
+        printf("[%d] [%-20s]\n", i, "OP_SUBTRACT");
+        break;
+      case OP_MULTIPLY:
+        printf("[%d] [%-20s]\n", i, "OP_MULTIPLY");
+        break;
+      case OP_DIVIDE:
+        printf("[%d] [%-20s]\n", i, "OP_DIVIDE");
+        break;
+      case OP_NEGATE:
+        printf("[%d] [%-20s]\n", i, "OP_NEGATE");
+        break;
+      case OP_GREATER:
+        printf("[%d] [%-20s]\n", i, "OP_GREATER");
+        break;
+      case OP_LESS:
+        printf("[%d] [%-20s]\n", i, "OP_LESS");
+        break;
+      case OP_NOT:
+        printf("[%d] [%-20s]\n", i, "OP_NOT");
+        break;
+      case OP_EQUAL:
+        printf("[%d] [%-20s]\n", i, "OP_EQUAL");
+        break;
+      case OP_CONSTANT: {
+        i++;
+
+        printf("[%d-%d] [%-20s] at %d: %f\n", i - 1, i, "OP_CONSTANT", i,
+               AS_NUMBER(
+                   current_compiler->func->chunk.constants
+                       .values[current_compiler->func->chunk.code.ops[i] - 1]));
+        break;
+      }
+      case OP_RETURN:
+        printf("[%d] [%-20s]\n", i, "OP_RETURN");
+        break;
+      case OP_PRINT:
+        printf("[%d] [%-20s]\n", i, "OP_PRINT");
+        break;
+      case OP_SET_GLOBAL:
+        printf("[%d-%d] [%-20s]\n", i, i + 1, "OP_SET_GLOBAL");
+        // TODO : these values should be printed out and not
+        // just skipped over
+        i++;  // name index
+        // i++; // value index
+        break;
+      case OP_SET_LOCAL:
+        printf("[%d-%d] [%-20s]\n", i, i + 1, "OP_SET_LOCAL");
+        i++;
+        break;
+      case OP_GET_GLOBAL:
+        i++;  //
+        printf("[%d-%d] [%-20s] at constants_array: \n", i - 1, i,
+               "OP_GET_GLOBAL");
+        // current_compiler->func->chunk.constants.values[i]);
+        break;
+      case OP_GET_LOCAL:
+        i++;  //
+        printf("[%d-%d] [%-20s] at constants_array: %d\n", i - 1, i,
+               "OP_GET_LOCAL", current_compiler->func->chunk.code.ops[i]);
+        // op_arr->ops[i]);
+        break;
+      case OP_JUMP:
+        printf("[%d] [%-20s]\n", i, "OP_JUMP");
+        break;
+      case OP_JUMP_IF_FALSE: {
+        // i+=2; // get the index of the jump, if false
+        // uint16_t number =
+        //     (uint16_t)((op_arr->ops[i + 1] << 8) | (op_arr->ops[i + 2]));
+        // i += 2;
+        // printf("[%d-%d] [%-20s] jump if false to : %d\n", i - 2, i,
+        //        "OP_JUMP_IF_FALSE", number);
+        printf("OP_JUMP_IF_FALSE\n");
+        break;
+      }
+      case OP_CALL:
+        printf("[%d] [%-20s]\n", i, "OP_CALL");
+        break;
+      case OP_NIL:
+        printf("[%d] [%-20s]\n", i, "OP_NIL");
+        break;
+      case OP_LOOP:
+        printf("OP_LOOP\n");
+        break;
+    }
+  }
+  current_compiler = (Compiler*)current_compiler->enclosing;
   return func;
 }
 
@@ -282,14 +383,12 @@ static void gen(Ast* ast) {
     }
     case AST_BLOCK: {
       BlockStmt* block_stmt = (BlockStmt*)ast->as;
-      // begin_scope(current_compiler);
-      current_compiler->scope_depth++;
+      begin_scope(current_compiler);
       // For every statement inside the block, do the codegen
       for (int i = 0; i < block_stmt->ast_array.count; i++) {
         gen(block_stmt->ast_array.ast[i]);
       }
-      // close_scope(current_compiler);
-      current_compiler->scope_depth--;
+      close_scope(current_compiler);
       while (current_compiler->local_array.count > 0 &&
              current_compiler->local_array
                      .locals[current_compiler->local_array.count - 1]
@@ -306,7 +405,36 @@ static void gen(Ast* ast) {
       Compiler compiler;
       init_compiler(&compiler, TYPE_FUNCTION, func_stmt->name);
 
-      // TODO : Generate parameters as constants here
+      // This begin_scope has no close_scope, as it will close with
+      // end_compiler
+      begin_scope(current_compiler);
+
+      // Generate parameters as local variables here
+      bool exists = false;
+      for (int i = 0; i < func_stmt->parameters->count; i++) {
+        for (int j = current_compiler->local_array.count - 1; j >= 0; j--) {
+          Local* local = &current_compiler->local_array.locals[i];
+          if (local->depth != -1 &&
+              local->depth < current_compiler->scope_depth) {
+            break;
+          }
+
+          if (identifier_equal(&local->name,
+                               &func_stmt->parameters->tokens[i])) {
+            printf(
+                "There is already a variable with this name in this "
+                "scope.\n");
+            exists = true;
+          }
+        }
+
+        if (!exists) {
+          Local* local = &current_compiler->local_array
+                              .locals[current_compiler->local_array.count++];
+          local->name = func_stmt->parameters->tokens[i];
+          local->depth = current_compiler->scope_depth;
+        }
+      }
 
       // Emit byte-code for the block statement
       gen(func_stmt->stmt);
@@ -315,12 +443,8 @@ static void gen(Ast* ast) {
       func->arity = func_stmt->arity;
 
       Value func_value = OBJ_VAL(func);
-
       // Make the constant function value
       emit_constant(func_value);
-      // int constant_index = make_constant(func_value);
-      // emit_byte(OP_CONSTANT);
-      // emit_byte(constant_index);
 
       // TODO : Temporary! Set the function to be a global variable
       emit_byte(OP_SET_GLOBAL);
@@ -328,19 +452,6 @@ static void gen(Ast* ast) {
       Value func_name_value = OBJ_VAL(func_name);
       make_constant(func_name_value);
       // emit_byte(func_name);
-
-      // printf("Set function to global variables with OP_SET_GLOBAL\n");
-
-      // emitBytes(OP_CONSTANT, makeConstant(OBJ_VAL(function)));
-
-      // ObjString* function_name =
-      //     make_obj_string(func_stmt->name.start, func_stmt->name.length);
-      // ObjFunc* func = make_obj_func(func_stmt->arity, function_name);
-
-      // Wrap the function into a value and push it onto the value stack
-      // as a constant
-      // Value func_value = OBJ_VAL(func);
-      // emit_constant(func_value);
       break;
     }
     case AST_VARIABLE_STMT: {
@@ -368,7 +479,8 @@ static void gen(Ast* ast) {
             PRINT_TOKEN_STRING(local->name);
             PRINT_TOKEN_STRING(name);
             printf(
-                "There already exists a variable of this name in this scope\n");
+                "There already exists a variable of this name in this "
+                "scope\n");
             return;
           }
         }
@@ -404,7 +516,8 @@ static void gen(Ast* ast) {
       }
 
       // else if (variable_stmt->initialized) {
-      // only if the variable has been initialized before then it should be set
+      // only if the variable has been initialized before then it should be
+      // set
       // again \
         // i.e. \
         // let a = 10; (does not emit OP_SET_LOCAL) \
@@ -606,6 +719,12 @@ static void gen(Ast* ast) {
     }
     case AST_CALL: {
       CallExpr* call_expr = (CallExpr*)ast->as;
+
+      // printf("AST_CALL argument_count: %d\n", call_expr->arguments->count);
+      for (int i = 0; i < call_expr->arguments->count; i++) {
+        gen(call_expr->arguments->ast[i]);
+      }
+
       emit_byte(OP_CALL);
 
       VariableExpr* variable_expr = (VariableExpr*)call_expr->callee->as;
@@ -615,8 +734,13 @@ static void gen(Ast* ast) {
       // printf("FROM AST_CALL\n");
       Value token_string_value = OBJ_VAL(token_string);
       emit_constant(token_string_value);
-
       // emit_byte(call_expr->arguments->count);
+
+      for (int i = 0; i < current_chunk()->constants.count; i++) {
+        Value constant = current_chunk()->constants.values[i];
+        print_value(constant);
+      }
+
       break;
     }
     case AST_RETURN: {
@@ -659,105 +783,7 @@ ObjFunc* codegen(OpArray* op_arr,
     gen(ast_arr->ast[i]);
   }
 
-  ObjFunc* main_func = end_compiler(&current_compiler);
-
-#ifdef TEST_DEBUGGING
-  for (int i = 0; i < main_func->chunk.code.count; i++) {
-    // printf("OP %d : %d\n", i, main_func->chunk.code.ops[i]);
-    switch (main_func->chunk.code.ops[i]) {
-      case OP_POP:
-        printf("[%d] [%-20s]\n", i, "OP_POP");
-        break;
-      case OP_ADD:
-        printf("[%d] [%-20s]\n", i, "OP_ADD");
-        break;
-      case OP_TRUE:
-        printf("[%d] [%-20s]\n", i, "OP_TRUE");
-        break;
-      case OP_FALSE:
-        printf("[%d] [%-20s]\n", i, "OP_FALSE");
-        break;
-      case OP_SUBTRACT:
-        printf("[%d] [%-20s]\n", i, "OP_SUBTRACT");
-        break;
-      case OP_MULTIPLY:
-        printf("[%d] [%-20s]\n", i, "OP_MULTIPLY");
-        break;
-      case OP_DIVIDE:
-        printf("[%d] [%-20s]\n", i, "OP_DIVIDE");
-        break;
-      case OP_NEGATE:
-        printf("[%d] [%-20s]\n", i, "OP_NEGATE");
-        break;
-      case OP_GREATER:
-        printf("[%d] [%-20s]\n", i, "OP_GREATER");
-        break;
-      case OP_LESS:
-        printf("[%d] [%-20s]\n", i, "OP_LESS");
-        break;
-      case OP_NOT:
-        printf("[%d] [%-20s]\n", i, "OP_NOT");
-        break;
-      case OP_EQUAL:
-        printf("[%d] [%-20s]\n", i, "OP_EQUAL");
-        break;
-      case OP_CONSTANT: {
-        i++;
-
-        printf("[%d-%d] [%-20s] at %d: %f\n", i - 1, i, "OP_CONSTANT", i,
-               AS_NUMBER(main_func->chunk.constants
-                             .values[main_func->chunk.code.ops[i] - 1]));
-        // AS_NUMBER(value_arr->values[op_arr->ops[i]]));
-        break;
-      }
-      case OP_RETURN:
-        printf("[%d] [%-20s]\n", i, "OP_RETURN");
-        break;
-      case OP_PRINT:
-        printf("[%d] [%-20s]\n", i, "OP_PRINT");
-        break;
-      case OP_SET_GLOBAL:
-        printf("[%d-%d] [%-20s]\n", i, i + 1, "OP_SET_GLOBAL");
-        // TODO : these values should be printed out and not
-        // just skipped over
-        i++;  // name index
-        // i++; // value index
-        break;
-      case OP_SET_LOCAL:
-        printf("[%d-%d] [%-20s]\n", i, i + 1, "OP_SET_LOCAL");
-        i++;
-        break;
-      case OP_GET_GLOBAL:
-        i++;  //
-        printf("[%d-%d] [%-20s] at constants_array: %d\n", i - 1, i,
-               "OP_GET_GLOBAL", op_arr->ops[i]);
-        break;
-      case OP_GET_LOCAL:
-        i++;  //
-        printf("[%d-%d] [%-20s] at constants_array: %d\n", i - 1, i,
-               "OP_GET_LOCAL", op_arr->ops[i]);
-        break;
-      case OP_JUMP:
-        printf("[%d] [%-20s]\n", i, "OP_JUMP");
-        break;
-      case OP_JUMP_IF_FALSE: {
-        // i+=2; // get the index of the jump, if false
-        uint16_t number =
-            (uint16_t)((op_arr->ops[i + 1] << 8) | (op_arr->ops[i + 2]));
-        i += 2;
-        printf("[%d-%d] [%-20s] jump if false to : %d\n", i - 2, i,
-               "OP_JUMP_IF_FALSE", number);
-        break;
-      }
-      case OP_CALL:
-        printf("[%d] [%-20s]\n", i, "OP_CALL");
-        break;
-      case OP_NIL:
-        printf("[%d] [%-20s]\n", i, "OP_NIL");
-        break;
-    }
-  }
-#endif
+  ObjFunc* main_func = end_compiler(current_compiler);
 
   return main_func;
 }

@@ -153,18 +153,20 @@ static bool is_falsey(Value value) {
 }
 
 static bool call(ObjFunc* func, int argument_count) {
+  // if (argument_count != func->arity) {
+  //   printf("Arity count and function argument_count differs\n");
+  //   return false;
+  // }
+
   CallFrame* frame = &vm->frames[vm->frame_count++];
   frame->func = func;
   frame->ip = func->chunk.code.ops;
   // frame->slots = vm->stack_top - argument_count - 1;
   // frame->slots = &vm->vm_stack.values[vm->stack_top - argument_count - 1];
   // frame->slots = &vm->vm_stack.values[vm->stack_top];
-  frame->slots = vm->stack_top;
-
-  // Value value = func->chunk.constants.values[0];
-  // printf("From call START\n");
-  // print_value(value);
-  // printf("From call END\n");
+  // frame->slots = vm->stack_top;
+  // frame->slots = vm->stack_top - argument_count - 1;
+  frame->slots = vm->stack_top - func->arity - 1;
   return true;
 }
 
@@ -231,18 +233,6 @@ void run(bool arguments[const],
   //   *frame->ip = *frame->ip + 1;
   // }
   // printf("LISTING OUT ALL CHUNK OP_CODE2 -- END\n");
-
-  // OpCode* t = frame->func->chunk.code.ops;
-
-  // for (int i = 0; i < frame->func->chunk.count; i++) {
-  //   OpCode a = *t++;
-  //   OpCode b = READ_BYTE();
-  //   printf("%d\n", a);
-  // }
-
-  // printf("%d\n", a);
-  // printf("%d\n", b);
-  // printf("%d\n", c);
 
   OpCode instruction;
   for (;;) {
@@ -453,39 +443,14 @@ void run(bool arguments[const],
         break;
       }
       case OP_SET_LOCAL: {
-        // OpCode index = op_array->ops[vm->ip];
-        // vm->ip++;
-        // Value value = peek(0);
-        // vm->vm_stack.values[index] = value;
-
-        // OpCode index = frame->func->chunk.code.ops[*frame->ip];
-        // *frame->ip = *frame->ip + 1;
-        // OpCode index = frame->func->chunk.code.ops[*frame->ip++];
         OpCode index = READ_BYTE();
-
         Value value = peek(0);
-        // frame->slots->values[index] = value;
         frame->slots[index] = value;
-
-        // uint8_t slot = READ_BYTE();
-        // frame->slots->values[slot] = peek(0);
         break;
       }
       case OP_GET_GLOBAL: {
-        // OpCode name_constant_index = op_array->ops[vm->ip];
-        // vm->ip++;
-
-        // Obj* obj = AS_OBJ(value_arr->values[name_constant_index]);
-        // ObjString* obj_string = (ObjString*)obj;
-
-        // OpCode name_constant_index = frame->func->chunk.code.ops[*frame->ip];
-        // *frame->ip = *frame->ip + 1;
-        // OpCode name_constant_index =
-        // frame->func->chunk.code.ops[*frame->ip++];
         OpCode name_constant_index = READ_BYTE();
 
-        // Obj* obj =
-        //     AS_OBJ(frame->func->chunk.constants.values[name_constant_index]);
         Obj* obj =
             AS_OBJ(frame->func->chunk.constants.values[name_constant_index]);
         ObjString* obj_string = (ObjString*)obj;
@@ -505,6 +470,8 @@ void run(bool arguments[const],
         OpCode index = READ_BYTE();
 
         // printf("OP_GET_LOCAL index is :%d\n", index);
+
+        Value value = frame->slots[index];
         push(frame->slots[index]);
         break;
       }
@@ -538,6 +505,9 @@ void run(bool arguments[const],
         READ_BYTE();
         // OP_CONSTANT INDEX
         OpCode index2 = READ_BYTE();
+        // Argument count, from codegen, not the parser
+        // int argument_count = READ_BYTE();
+        // printf("Argument count: %d\n", argument_count);
 
         Value func_name_obj = frame->func->chunk.constants.values[index2 - 1];
         ObjString* func_name = AS_OBJ_STRING(func_name_obj);
