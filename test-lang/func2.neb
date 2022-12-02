@@ -6,4 +6,9 @@ func f(a, b, c) {
   print a + b + c;
 }
 
+func f2(a, b, c, d) {
+  print "Hello";
+}
+
 f(10, 20, 30);
+f2(10, 20, 30, 40);

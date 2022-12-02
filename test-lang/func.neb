@@ -10,8 +10,38 @@ func c() {
   print "hello this is from c()";
 }
 
+func d(s) {
+  print s;
+}
+
+func e() {
+  print "hello this is from e()";
+}
+
+func f(a, b, c, d) {
+  print a + b + c + d;
+}
+
+func g(a, b, c, d) {
+  print a + b + c + d;
+}
+
+func h(a, b, c) {
+  print a + b + c;
+}
+
+func h2(a, b, c, d) {
+  print a + b + c + d;
+}
+
 print "FROM MAIN";
 
 a();
 b();
 c();
+d("hello this is from d()");
+e();
+f(10, 20, 30, 40);
+g(10, 20, 30, 40);
+h(10, 20, 30);
+h2(10, 20, 30, 40);

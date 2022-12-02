@@ -153,6 +153,7 @@ static bool is_falsey(Value value) {
 }
 
 static bool call(ObjFunc* func, int argument_count) {
+  // TODO : Need a way to get argument_count to check with function arity
   // if (argument_count != func->arity) {
   //   printf("Arity count and function argument_count differs\n");
   //   return false;
@@ -161,11 +162,6 @@ static bool call(ObjFunc* func, int argument_count) {
   CallFrame* frame = &vm->frames[vm->frame_count++];
   frame->func = func;
   frame->ip = func->chunk.code.ops;
-  // frame->slots = vm->stack_top - argument_count - 1;
-  // frame->slots = &vm->vm_stack.values[vm->stack_top - argument_count - 1];
-  // frame->slots = &vm->vm_stack.values[vm->stack_top];
-  // frame->slots = vm->stack_top;
-  // frame->slots = vm->stack_top - argument_count - 1;
   frame->slots = vm->stack_top - func->arity - 1;
   return true;
 }
