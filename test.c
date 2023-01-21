@@ -70,8 +70,7 @@ Vm* run_source_return_vm(const char* source) {
   init_value_array(&value_array);
   init_local_array(&local_array);
   reserve_local_array(&local_array, UINT8_MAX + 1);
-  ObjFunc* main_func =
-      codegen(&op_array, &value_array, &ast_array, &local_array);
+  ObjFunc* main_func = codegen(&ast_array);
 
   push_value_array(&value_array, OBJ_VAL(main_func));
 
@@ -89,7 +88,7 @@ Vm* run_source_return_vm(const char* source) {
     arguments[i] = false;
   }
 
-  run(arguments, vm, &op_array, &value_array, main_func);
+  run(arguments, vm, main_func);
 
   // free_vm(&vm);
   // free_op_array(&op_array);

@@ -163,7 +163,11 @@ void remove_hashmap(HashMap* hashmap, ObjString* key) {
 
 // TODO: Being able to free this will probably free up a lot of the
 // memory leakage issues
-void free_hashmap(HashMap* hashmap) {}
+void free_hashmap(HashMap* hashmap) {
+  hashmap->count = 0;
+  hashmap->capacity = 0;
+  free(hashmap->entries);
+}
 
 Value get_hashmap(HashMap* hashmap, ObjString* key) {
   if (hashmap->count == 0)

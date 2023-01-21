@@ -173,3 +173,4 @@ void free_int_array(IntArray* arr) {
   arr->capacity = 0;
   free(arr->ints);
 }
+

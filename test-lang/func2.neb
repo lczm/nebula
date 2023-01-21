@@ -1,14 +1,10 @@
 func f(a, b, c) {
-  print a;
-  print b;
-  print c;
-
   print a + b + c;
 }
 
-func f2(a, b, c, d) {
-  print "Hello";
+func ff(a, b, c, d) {
+  print a + b + c + d;
 }
 
 f(10, 20, 30);
-f2(10, 20, 30, 40);
+ff(10, 20, 30, 40);

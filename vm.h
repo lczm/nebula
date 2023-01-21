@@ -26,8 +26,4 @@ void init_vm(Vm* vm);
 void free_vm(Vm* vm);
 
 // TODO : Return and report run errors from here.
-void run(bool arguments[const],
-         Vm* vm,
-         OpArray* op_arr,
-         ValueArray* value_arr,
-         ObjFunc* main_func);
+void run(bool arguments[const], Vm* vm, ObjFunc* main_func);

@@ -215,6 +215,7 @@ Value ast_to_value(Ast* ast) {
       return NIL_VAL;
     }
   }
+  return NIL_VAL;
 }
 
 Ast* wrap_ast(void* raw_ast, AstType raw_type) {

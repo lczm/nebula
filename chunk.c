@@ -37,3 +37,4 @@ void free_chunk(Chunk* chunk) {
   free_value_array(&chunk->constants);
   init_chunk(chunk);
 }
+

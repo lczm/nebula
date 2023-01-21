@@ -91,19 +91,6 @@ static Value pop() {
   Value value = *vm->stack_top;
   // vm->stack_top++;
   return value;
-
-  if (vm->stack_top > 0) {
-    vm->stack_top--;
-    Value value = *vm->stack_top;
-    vm->stack_top++;
-    // Value value = vm->vm_stack.values[vm->stack_top - 1];
-    // print_value(value);
-    // vm->stack_top--;
-    return value;
-  } else {
-    printf("returning nil value as there is nothing to pop()\n");
-    return NIL_VAL;
-  }
 }
 
 static Value peek(int index) {
@@ -115,26 +102,26 @@ static Value peek(int index) {
 }
 
 // Both of these debugging functions are unused now
-static void debug_vm_stack_top() {
-  printf("vm->stack_top: %d\n", vm->stack_top);
-  for (int i = 0; i < vm->stack_top + 1; i++) {
-    print_value(vm->vm_stack.values[i]);
-  }
-}
-
-static void debug_vm_stack() {
-  printf("vm->vm_stack.count: %d\n", vm->vm_stack.count);
-  for (int i = 0; i < vm->vm_stack.count; i++) {
-    print_value(vm->vm_stack.values[i]);
-  }
-}
-
-static void debug_value_array(ValueArray* value_array) {
-  printf("value_array->count: %d\n", value_array->count);
-  for (int i = 0; i < value_array->count; i++) {
-    print_value(value_array->values[i]);
-  }
-}
+// static void debug_vm_stack_top() {
+//   printf("vm->stack_top: %d\n", vm->stack_top);
+//   for (int i = 0; i < vm->stack_top + 1; i++) {
+//     print_value(vm->vm_stack.values[i]);
+//   }
+// }
+//
+// static void debug_vm_stack() {
+//   printf("vm->vm_stack.count: %d\n", vm->vm_stack.count);
+//   for (int i = 0; i < vm->vm_stack.count; i++) {
+//     print_value(vm->vm_stack.values[i]);
+//   }
+// }
+//
+// static void debug_value_array(ValueArray* value_array) {
+//   printf("value_array->count: %d\n", value_array->count);
+//   for (int i = 0; i < value_array->count; i++) {
+//     print_value(value_array->values[i]);
+//   }
+// }
 
 // static uint16_t read_short() {
 //   // move the vm instruction pointer up by two
@@ -154,10 +141,11 @@ static bool is_falsey(Value value) {
 
 static bool call(ObjFunc* func, int argument_count) {
   // TODO : Need a way to get argument_count to check with function arity
-  // if (argument_count != func->arity) {
-  //   printf("Arity count and function argument_count differs\n");
-  //   return false;
-  // }
+  // TODO : This does not work as expected
+  if (argument_count != func->arity) {
+    printf("Arity count and function argument_count differs\n");
+    return false;
+  }
 
   CallFrame* frame = &vm->frames[vm->frame_count++];
   frame->func = func;
@@ -180,11 +168,7 @@ static bool call_value(Value callee, int argument_count) {
   return false;
 }
 
-void run(bool arguments[const],
-         Vm* vm,
-         OpArray* op_arr,
-         ValueArray* value_arr,
-         ObjFunc* main_func) {
+void run(bool arguments[const], Vm* vm, ObjFunc* main_func) {
   // Set these to the static variables for convenience
   // op_array = op_arr;
   // value_array = value_arr;
@@ -464,10 +448,6 @@ void run(bool arguments[const],
         // And push it onto the value stack, from
         // wherever the old local is.
         OpCode index = READ_BYTE();
-
-        // printf("OP_GET_LOCAL index is :%d\n", index);
-
-        Value value = frame->slots[index];
         push(frame->slots[index]);
         break;
       }

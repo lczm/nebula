@@ -90,7 +90,7 @@ static bool identifier_equal(Token* a, Token* b) {
 
 // Given the token name, and which compiler,
 // look through the local arrays, to see if it exists
-static int resolve_local(Compiler* c, Token* name) {
+static int resolve_local(Token* name) {
   for (int i = current_compiler->local_array.count - 1; i >= 0; i--) {
     Local* local = &current_compiler->local_array.locals[i];
     if (identifier_equal(name, &local->name)) {
@@ -139,7 +139,7 @@ static void init_compiler(Compiler* compiler,
   }
 }
 
-static ObjFunc* end_compiler(Compiler* compiler) {
+static ObjFunc* end_compiler() {
   // This is for the case when the function does not have a return at all, then
   // it will "return" out of the function from here.
   // If in the case the function has a return, this will still push, but be
@@ -439,7 +439,7 @@ static void gen(Ast* ast) {
       // Emit byte-code for the block statement
       gen(func_stmt->stmt);
 
-      ObjFunc* func = end_compiler(current_compiler);
+      ObjFunc* func = end_compiler();
       func->arity = func_stmt->arity;
 
       Value func_value = OBJ_VAL(func);
@@ -508,7 +508,7 @@ static void gen(Ast* ast) {
       if (variable_stmt->initializer_expr->type != AST_NONE)
         gen(variable_stmt->initializer_expr);
 
-      int variable_scope = resolve_local(current_compiler, &name);
+      int variable_scope = resolve_local(&name);
       // printf("Reached here for :%s\n", name.start);
       // Not a local variable
       if (variable_scope == -1) {
@@ -641,7 +641,7 @@ static void gen(Ast* ast) {
       Token name = variable_expr->name;
 
       // Check if this variable is a local or global variable
-      int variable_scope = resolve_local(current_compiler, &name);
+      int variable_scope = resolve_local(&name);
       if (variable_scope == -1) {
         emit_byte(OP_GET_GLOBAL);
       } else {
@@ -694,8 +694,7 @@ static void gen(Ast* ast) {
       AssignmentExpr* assignment_expr = (AssignmentExpr*)ast->as;
       gen(assignment_expr->expr);
 
-      int variable_scope =
-          resolve_local(current_compiler, &assignment_expr->name);
+      int variable_scope = resolve_local(&assignment_expr->name);
       if (variable_scope == -1) {
         emit_byte(OP_SET_GLOBAL);
 
@@ -767,10 +766,11 @@ static void gen(Ast* ast) {
   }
 }
 
-ObjFunc* codegen(OpArray* op_arr,
-                 ValueArray* constants_arr,
-                 AstArray* ast_arr,
-                 LocalArray* local_arr) {
+// ObjFunc* codegen(OpArray* op_arr,
+//                  ValueArray* constants_arr,
+//                  AstArray* ast_arr,
+//                  LocalArray* local_arr) {
+ObjFunc* codegen(AstArray* ast_arr) {
   // Create the compiler instance that tracks scope and depth
   Compiler compiler;
   Token null_token;
@@ -783,7 +783,7 @@ ObjFunc* codegen(OpArray* op_arr,
     gen(ast_arr->ast[i]);
   }
 
-  ObjFunc* main_func = end_compiler(current_compiler);
+  ObjFunc* main_func = end_compiler();
 
   return main_func;
 }
@@ -872,6 +872,8 @@ void disassemble_opcode_values(OpArray* op_arr, ValueArray* value_arr) {
                "OP_JUMP_IF_FALSE", number);
         break;
       }
+      case OP_LOOP:
+        break;
       case OP_CALL:
         printf("[%d] [%-20s]\n", i, "OP_CALL");
         break;

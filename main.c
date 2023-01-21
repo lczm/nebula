@@ -95,8 +95,9 @@ static void run_source(bool arguments[const], const char* source) {
   // Outputs OP code to op_array, stores locals in local_array
   // Codegen then outputs the "main" function
   // TODO : This main function isn't checked for whether it's "main"
-  ObjFunc* main_func =
-      codegen(&op_array, &value_array, &ast_array, &local_array);
+  // ObjFunc* main_func =
+  //     codegen(&op_array, &value_array, &ast_array, &local_array);
+  ObjFunc* main_func = codegen(&ast_array);
 
   // Push the main_func onto the value array
   push_value_array(&value_array, OBJ_VAL(main_func));
@@ -109,7 +110,7 @@ static void run_source(bool arguments[const], const char* source) {
 
   Vm vm;
   init_vm(&vm);
-  run(arguments, &vm, &op_array, &value_array, main_func);
+  run(arguments, &vm, main_func);
 
   free_vm(&vm);
   free_op_array(&op_array);

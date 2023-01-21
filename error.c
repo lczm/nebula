@@ -23,7 +23,9 @@ Error* create_error(int line,
 // Only if the error object owns the error_message
 // this free will be called, but otherwise it's just for
 // consistency.
-void free_error(Error* error) {}
+void free_error(Error* error) {
+  free(error);
+}
 
 void print_error(Error* error) {
   if (error->type == SyntaxError) {

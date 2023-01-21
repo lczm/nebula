@@ -1,5 +1,5 @@
 CC = gcc
-CCFLAGS = -g -Wall -Wextra -Wpedantic -Wfloat-equal -O0
+CCFLAGS = -g -Wall -Wextra -Wpedantic -Wfloat-equal -Wno-unused-function -O0
 
 SOURCE_DIR := .
 BUILD_DIR := ./build
