@@ -45,28 +45,6 @@ static void print_value(Value value) {
 }
 
 static void push(Value value) {
-  // If there is still space
-  // note to use count and not capacity
-  // if (vm->stack_top < vm->vm_stack.count) {
-  //   vm->vm_stack.values[vm->stack_top] = value;
-  // } else {
-  //   push_value_array(&vm->vm_stack, value);
-  // }
-
-  // if (vm->stack_top < vm->vm_stack.count) {
-  //   *vm->stack_top = value;
-  //   vm->stack_top++;
-  //   // vm->vm_stack.values[vm->stack_top] = value;
-  // } else {
-  //   push_value_array(&vm->vm_stack, value);
-  // }
-
-  // printf("---\n");
-  // for (int i = 0; i < vm->vm_stack.count; i++) {
-  //   print_value(vm->vm_stack.values[i]);
-  // }
-  // printf("---\n");
-
   *vm->stack_top = value;
   vm->stack_top++;
 }
@@ -76,17 +54,6 @@ static Value pop() {
   // vm->stack_top--;
   // TODO: Debug flag for this to check if its in range
 
-  // it has to be more than 0 to be able to return anything
-  // if (vm->stack_top > 0) {
-  //   Value value = vm->vm_stack.values[vm->stack_top - 1];
-  //   // print_value(value);
-  //   vm->stack_top--;
-  //   return value;
-  // } else {
-  //   printf("returning nil value as there is nothing to pop()\n");
-  //   return NIL_VAL;
-  // }
-
   vm->stack_top--;
   Value value = *vm->stack_top;
   // vm->stack_top++;
@@ -94,41 +61,9 @@ static Value pop() {
 }
 
 static Value peek(int index) {
-  // Value value = vm->vm_stack.values[vm->stack_top - 1 - index];
-  // Value value = vm->stack_top[-1 - index];
   Value value = vm->stack_top[-1 - index];
-  // Value value = vm->vm_stack.values[vm->stack_top - 1 - index];
   return value;
 }
-
-// Both of these debugging functions are unused now
-// static void debug_vm_stack_top() {
-//   printf("vm->stack_top: %d\n", vm->stack_top);
-//   for (int i = 0; i < vm->stack_top + 1; i++) {
-//     print_value(vm->vm_stack.values[i]);
-//   }
-// }
-//
-// static void debug_vm_stack() {
-//   printf("vm->vm_stack.count: %d\n", vm->vm_stack.count);
-//   for (int i = 0; i < vm->vm_stack.count; i++) {
-//     print_value(vm->vm_stack.values[i]);
-//   }
-// }
-//
-// static void debug_value_array(ValueArray* value_array) {
-//   printf("value_array->count: %d\n", value_array->count);
-//   for (int i = 0; i < value_array->count; i++) {
-//     print_value(value_array->values[i]);
-//   }
-// }
-
-// static uint16_t read_short() {
-//   // move the vm instruction pointer up by two
-//   vm->ip += 2;
-//   return (uint16_t)((op_array->ops[vm->ip - 2] << 8) |
-//                     (op_array->ops[vm->ip - 1]));
-// }
 
 static bool is_falsey(Value value) {
   if (IS_NIL(value))
@@ -169,9 +104,6 @@ static bool call_value(Value callee, int argument_count) {
 }
 
 void run(bool arguments[const], Vm* vm, ObjFunc* main_func) {
-  // Set these to the static variables for convenience
-  // op_array = op_arr;
-  // value_array = value_arr;
 #define READ_BYTE() (*frame->ip++)
 #define READ_SHORT() \
   (frame->ip += 2, (uint16_t)((frame->ip[-2] << 8 | frame->ip[-1])))
@@ -180,39 +112,7 @@ void run(bool arguments[const], Vm* vm, ObjFunc* main_func) {
 
   call(main_func, 0);
 
-  // Temporary : TODO! This can probably be placed a lot better
-  // CallFrame* frame = &vm->frames[vm->frame_count++];
-  // frame->func = main_func;
-  // frame->ip = main_func->chunk.code;
-  // frame->slots = vm->stack_top;
-
-  // printf("value_arr count: %d\n", value_arr->count);
-  // debug_value_array(value_arr);
-
-  // printf("vm->frame_count: %d\n", vm->frame_count);
-
-  // CallFrame* frame = &vm->frames[vm->frame_count - 1];
   CallFrame* frame = &vm->frames[vm->frame_count - 1];
-
-  // printf("LISTING OUT ALL CHUNK CONSTANTS VALUE -- START\n");
-  // for (int i = 0; i < frame->func->chunk.constants.count; i++) {
-  //   print_value(frame->func->chunk.constants.values[i]);
-  // }
-  // printf("LISTING OUT ALL CHUNK CONSTANTS VALUE -- END\n");
-
-  // printf("LISTING OUT ALL CHUNK OP_CODE -- START\n");
-  // for (int i = 0; i < frame->func->chunk.code.count; i++) {
-  //   printf("OP %d : %d\n", i, frame->func->chunk.code.ops[i]);
-  // }
-  // printf("LISTING OUT ALL CHUNK OP_CODE -- END\n");
-
-  // printf("LISTING OUT ALL CHUNK OP_CODE2 -- START\n");
-  // for (int i = 0; i < frame->func->chunk.code.count; i++) {
-  //   printf("OP %d : %d\n", i, frame->func->chunk.code.ops[*frame->ip]);
-  //   // *frame->ip++;
-  //   *frame->ip = *frame->ip + 1;
-  // }
-  // printf("LISTING OUT ALL CHUNK OP_CODE2 -- END\n");
 
   OpCode instruction;
   for (;;) {
@@ -243,12 +143,7 @@ void run(bool arguments[const], Vm* vm, ObjFunc* main_func) {
 
         Value constant =
             frame->func->chunk.constants.values[constant_index - 1];
-        // *frame->ip++;
 
-        // Value constant = READ_CONSTANT();
-        // printf("@@@ ---FROM OP_CONSTANT--- START\n");
-        // print_value(constant);
-        // printf("@@@ ---FROM OP_CONSTANT--- END\n");
         push(constant);
         break;
       }

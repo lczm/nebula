@@ -1,3 +1,4 @@
+#include <float.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -74,9 +75,9 @@ Vm* run_source_return_vm(const char* source) {
 
   push_value_array(&value_array, OBJ_VAL(main_func));
 
-#ifdef TEST_DEBUGGING
-  disassemble_opcode_values(&op_array, &ast_constants_array);
-#endif
+  // #ifdef TEST_DEBUGGING
+  //   disassemble_opcode_values(&op_array, &ast_constants_array);
+  // #endif
 
   // Vm vm;
   Vm* vm = ALLOCATE(Vm, 1);
@@ -128,14 +129,14 @@ static void reset_count() {
 static void test_ast_wrap() {
   printf("test_ast_wrap()\n");
 
-  Ast* number_ast = wrap_ast(make_number_expr(5), AST_NUMBER);
+  Ast* number_ast = wrap_ast(make_number_expr(5.0f), AST_NUMBER);
   if (number_ast->type != AST_NUMBER)
     FAIL();
-  if (((NumberExpr*)number_ast->as)->value != 5)
+  if (((NumberExpr*)number_ast->as)->value != 5.0f)
     FAIL();
 
-  NumberExpr* number_1 = make_number_expr(6);
-  NumberExpr* number_2 = make_number_expr(10);
+  NumberExpr* number_1 = make_number_expr(6.0f);
+  NumberExpr* number_2 = make_number_expr(10.0f);
   Ast* binary_ast = wrap_ast(
       make_binary_expr(wrap_ast(number_1, AST_NUMBER),
                        wrap_ast(number_2, AST_NUMBER), make_token(TOKEN_PLUS)),
@@ -147,9 +148,9 @@ static void test_ast_wrap() {
     FAIL();
   if (binary_expr->right_expr->type != AST_NUMBER)
     FAIL();
-  if ((((NumberExpr*)binary_expr->left_expr->as)->value) != 6)
+  if ((((NumberExpr*)binary_expr->left_expr->as)->value) != 6.0f)
     FAIL();
-  if ((((NumberExpr*)binary_expr->right_expr->as)->value) != 10)
+  if ((((NumberExpr*)binary_expr->right_expr->as)->value) != 10.0f)
     FAIL();
 
   PASS();
@@ -233,7 +234,6 @@ static void test_op_array() {
   }
 
   // Push variables in
-  OpCode op_code = OP_ADD;
   push_op_array(&op_array, OP_ADD);
   if (op_array.capacity != 1 || op_array.count != 1) {
     FAIL();
@@ -322,9 +322,9 @@ static void test_value_array() {
     if (!IS_NUMBER(value)) {
       FAIL();
     }
-    if (AS_NUMBER(value) != (double)i) {
+    // If more than epsilon, it's not "equal"
+    if (AS_NUMBER(value) - i > DBL_EPSILON)
       FAIL();
-    }
   }
 
   free_value_array(&value_array);
@@ -336,9 +336,6 @@ static void test_ast_array() {
 
   AstArray ast_array;
   init_ast_array(&ast_array);
-
-  NumberExpr* number_expr = make_number_expr(5);
-  Ast* ast_number = wrap_ast(make_number_expr(5), AST_NUMBER);
 
   PASS();
 }
@@ -354,7 +351,7 @@ static void test_hashmap() {
   if (hashmap.capacity != 0)
     FAIL();
 
-  Value set_number_value = NUMBER_VAL(10);
+  Value set_number_value = NUMBER_VAL(10.0f);
   ObjString* number_key = make_obj_string("test_number", strlen("test_number"));
   push_hashmap(&hashmap, number_key, set_number_value);
 
@@ -366,7 +363,7 @@ static void test_hashmap() {
   Value get_number_value = get_hashmap(&hashmap, number_key);
   if (!IS_NUMBER(get_number_value))
     FAIL();
-  if (AS_NUMBER(get_number_value) != 10)
+  if (AS_NUMBER(get_number_value) != 10.0f)
     FAIL();
 
   Value set_boolean_value = BOOLEAN_VAL(true);
@@ -408,7 +405,7 @@ static void test_single_character_lexer() {
   init_token_array(&token_array);
   // space out the ones that can have double character tokens
   char source[] = "(){},.-+;/* ! = < >";
-  int types[] = {
+  TokenType types[] = {
       TOKEN_LEFT_PAREN, TOKEN_RIGHT_PAREN, TOKEN_LEFT_BRACE, TOKEN_RIGHT_BRACE,
       TOKEN_COMMA,      TOKEN_DOT,         TOKEN_MINUS,      TOKEN_PLUS,
       TOKEN_SEMICOLON,  TOKEN_SLASH,       TOKEN_STAR,       TOKEN_BANG,
@@ -435,7 +432,7 @@ static void test_double_character_lexer() {
   init_token_array(&token_array_length_two);
 
   char source[] = "!= == >= <=";
-  int length_two_types[] = {
+  TokenType length_two_types[] = {
       TOKEN_BANG_EQUAL,
       TOKEN_EQUAL_EQUAL,
       TOKEN_GREATER_EQUAL,
@@ -461,9 +458,9 @@ static void test_keyword_character_lexer() {
   init_token_array(&token_array_keywords);
 
   char source[] = "else for func if else nil return let while true false";
-  int keyword_types[] = {TOKEN_ELSE,  TOKEN_FOR,  TOKEN_FUNC,   TOKEN_IF,
-                         TOKEN_ELSE,  TOKEN_NIL,  TOKEN_RETURN, TOKEN_LET,
-                         TOKEN_WHILE, TOKEN_TRUE, TOKEN_FALSE};
+  TokenType keyword_types[] = {TOKEN_ELSE,  TOKEN_FOR,  TOKEN_FUNC,   TOKEN_IF,
+                               TOKEN_ELSE,  TOKEN_NIL,  TOKEN_RETURN, TOKEN_LET,
+                               TOKEN_WHILE, TOKEN_TRUE, TOKEN_FALSE};
   lex_source(&token_array_keywords, source);
 
   for (int i = 0; i < token_array_keywords.count; i++) {
@@ -514,21 +511,21 @@ static void test_parse_binary_expressions() {
       !IS_NUMBER(value_g) || !IS_NUMBER(value_h))
     FAIL();
 
-  if (AS_NUMBER(value_a) != 11.0)
+  if (AS_NUMBER(value_a) - (11.0f) > DBL_EPSILON)
     FAIL();
-  if (AS_NUMBER(value_b) != 9.0)
+  if (AS_NUMBER(value_b) - (9.0f) > DBL_EPSILON)
     FAIL();
-  if (AS_NUMBER(value_c) != 33.0)
+  if (AS_NUMBER(value_c) - (33.0f) > DBL_EPSILON)
     FAIL();
-  if (AS_NUMBER(value_d) != 4.0)
+  if (AS_NUMBER(value_d) - (4.0f) > DBL_EPSILON)
     FAIL();
-  if (AS_NUMBER(value_e) != 8.0)
+  if (AS_NUMBER(value_e) - (8.0f) > DBL_EPSILON)
     FAIL();
-  if (AS_NUMBER(value_f) != 15.0)
+  if (AS_NUMBER(value_f) - (15.0f) > DBL_EPSILON)
     FAIL();
-  if (AS_NUMBER(value_g) != -90.0)
+  if (AS_NUMBER(value_g) - (-90.0f) > DBL_EPSILON)
     FAIL();
-  if (AS_NUMBER(value_h) != 10.0)
+  if (AS_NUMBER(value_h) - (10.0f) > DBL_EPSILON)
     FAIL();
 
   PASS();
@@ -564,7 +561,7 @@ static void test_parse_unary_expressions() {
   if (!IS_BOOLEAN(value_d))
     FAIL();
 
-  if (AS_NUMBER(value_a) != -3.0)
+  if (AS_NUMBER(value_a) - (-3.0) > DBL_EPSILON)
     FAIL();
   if (AS_BOOLEAN(value_b) != false)
     FAIL();
@@ -709,10 +706,11 @@ static void test_vm_order_of_operations() {
   if (!IS_NUMBER(value_a1) || !IS_NUMBER(value_b1) || !IS_NUMBER(value_c1))
     FAIL();
 
-  if (AS_NUMBER(value_c1) != AS_NUMBER(value_a1) + AS_NUMBER(value_b1))
+  if (AS_NUMBER(value_c1) - (AS_NUMBER(value_a1) + AS_NUMBER(value_b1)) >
+      DBL_EPSILON)
     FAIL();
 
-  if (AS_NUMBER(value_c1) != 30.0)
+  if (AS_NUMBER(value_c1) - 30.0f > DBL_EPSILON)
     FAIL();
 
   char test_string2[] =
@@ -738,16 +736,16 @@ static void test_vm_order_of_operations() {
       !IS_NUMBER(value_d2))
     FAIL();
 
-  if (AS_NUMBER(value_a2) != 8.0)
+  if (AS_NUMBER(value_a2) - 8.0f > DBL_EPSILON)
     FAIL();
 
-  if (AS_NUMBER(value_b2) != 5.0)
+  if (AS_NUMBER(value_b2) - 5.0f > DBL_EPSILON)
     FAIL();
 
-  if (AS_NUMBER(value_c2) != -47.0)
+  if (AS_NUMBER(value_c2) - (-47.0f) > DBL_EPSILON)
     FAIL();
 
-  if (AS_NUMBER(value_d2) != 53)
+  if (AS_NUMBER(value_d2) - 53.0f > DBL_EPSILON)
     FAIL();
 
   PASS();
@@ -948,7 +946,7 @@ static void test_vm_parser_error_messages() {
       "let a = 1;"
       "let b = ";
 
-  Vm* vm = run_source_return_vm(test_string_endless_loop);
+  run_source_return_vm(test_string_endless_loop);
 
   if (global_error_array->count != 1)
     FAIL();
@@ -958,7 +956,9 @@ static void test_vm_parser_error_messages() {
   PASS();
 }
 
-int main(int argc, const char* argv[]) {
+// TODO : Test arguments using argc and argv
+// int main(int argc, const char* argv[]);
+int main() {
   clock_t start = clock();
 
   printf("[-----Starting tests-----]\n");

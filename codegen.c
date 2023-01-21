@@ -150,6 +150,8 @@ static ObjFunc* end_compiler() {
   emit_byte(OP_RETURN);
 
   ObjFunc* func = current_compiler->func;
+
+#ifdef TEST_DEBUGGING
   for (int i = 0; i < current_compiler->func->chunk.code.count; i++) {
     // printf("OP %d : %d\n", i, main_func->chunk.code.ops[i]);
     switch (current_compiler->func->chunk.code.ops[i]) {
@@ -251,6 +253,8 @@ static ObjFunc* end_compiler() {
         break;
     }
   }
+#endif
+
   current_compiler = (Compiler*)current_compiler->enclosing;
   return func;
 }
