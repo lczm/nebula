@@ -1,5 +1,13 @@
-func a() {
-  print 1 + 2;
+func sum(a, b) {
+  return a + b;
 }
 
-a();
+func multiply(a, b) {
+  return a * b;
+}
+
+let data = sum(5, 10);
+let data2 = multiply(5, 10);
+
+print data;
+print data2;
