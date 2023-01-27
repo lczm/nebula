@@ -100,13 +100,14 @@ static void run_source(bool arguments[const], const char* source) {
   ObjFunc* main_func = codegen(&ast_array);
 
   // Push the main_func onto the value array
-  push_value_array(&value_array, OBJ_VAL(main_func));
+  // push_value_array(&value_array, OBJ_VAL(main_func));
 
+  // TODO : Check if need to delete
   // Temporary, to get out of the VM loop
   // push_op_array(&op_array, OP_RETURN);
 
-  if (arguments[DUMP_CODEGEN])
-    disassemble_opcode_values(&op_array, &value_array);
+  // if (arguments[DUMP_CODEGEN])
+  //   disassemble_opcode_values(&op_array, &value_array);
 
   Vm vm;
   init_vm(&vm);

@@ -14,6 +14,7 @@ static Vm* vm;
 
 void init_vm(Vm* v) {
   vm = v;
+  v->frame_count = 0;
   init_hashmap(&v->variables);
   init_value_array(&v->vm_stack);
   reserve_value_array(&vm->vm_stack, MAX_STACK);
@@ -77,10 +78,10 @@ static bool is_falsey(Value value) {
 static bool call(ObjFunc* func, int argument_count) {
   // TODO : Need a way to get argument_count to check with function arity
   // TODO : This does not work as expected
-  if (argument_count != func->arity) {
-    printf("Arity count and function argument_count differs\n");
-    return false;
-  }
+  // if (argument_count != func->arity) {
+  //   printf("Arity count and function argument_count differs\n");
+  //   return false;
+  // }
 
   CallFrame* frame = &vm->frames[vm->frame_count++];
   frame->func = func;
@@ -371,6 +372,7 @@ void run(bool arguments[const], Vm* vm, ObjFunc* main_func) {
         break;
       }
       case OP_CALL: {
+        // TODO : naming a function 'f' will somehow cause an error
         // printf("OP_CALL\n");
         // OP_CONSTANT, just move it over the OP_CONSTANT
         READ_BYTE();

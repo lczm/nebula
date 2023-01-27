@@ -151,7 +151,7 @@ static ObjFunc* end_compiler() {
 
   ObjFunc* func = current_compiler->func;
 
-#ifdef TEST_DEBUGGING
+  // #ifdef TEST_DEBUGGING
   for (int i = 0; i < current_compiler->func->chunk.code.count; i++) {
     // printf("OP %d : %d\n", i, main_func->chunk.code.ops[i]);
     switch (current_compiler->func->chunk.code.ops[i]) {
@@ -253,7 +253,7 @@ static ObjFunc* end_compiler() {
         break;
     }
   }
-#endif
+  // #endif
 
   current_compiler = (Compiler*)current_compiler->enclosing;
   return func;
@@ -739,10 +739,11 @@ static void gen(Ast* ast) {
       emit_constant(token_string_value);
       // emit_byte(call_expr->arguments->count);
 
-      for (int i = 0; i < current_chunk()->constants.count; i++) {
-        Value constant = current_chunk()->constants.values[i];
-        print_value(constant);
-      }
+      // for (int i = 0; i < current_chunk()->constants.count; i++) {
+      //   Value constant = current_chunk()->constants.values[i];
+      //   printf("codegen printing value\n");
+      //   print_value(constant);
+      // }
 
       break;
     }
