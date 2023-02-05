@@ -194,10 +194,19 @@ static ObjFunc* end_compiler() {
       case OP_CONSTANT: {
         i++;
 
-        printf("[%d-%d] [%-20s] at %d: %f\n", i - 1, i, "OP_CONSTANT", i,
-               AS_NUMBER(
-                   current_compiler->func->chunk.constants
-                       .values[current_compiler->func->chunk.code.ops[i] - 1]));
+        Value value =
+            current_compiler->func->chunk.constants
+                .values[current_compiler->func->chunk.code.ops[i] - 1];
+
+        if (IS_NUMBER(value)) {
+          printf("[%d-%d] [%-20s] at %d: %f\n", i - 1, i, "OP_CONSTANT", i,
+                 AS_NUMBER(value));
+        } else if (IS_STRING(value)) {
+          ObjString* string = AS_OBJ_STRING(value);
+          printf("[%d-%d] [%-20s] at %d: %s\n", i - 1, i, "OP_CONSTANT", i,
+                 string->chars);
+        }
+
         break;
       }
       case OP_RETURN:

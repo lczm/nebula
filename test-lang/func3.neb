@@ -6,8 +6,4 @@ func sum(a, b) {
   return a + b;
 }
 
-let data = sum(5, 10);
-let data2 = multiply(5, 10);
-
-print data;
-print data2;
+print sum(5, 10) + multiply(5, 10);
