@@ -1,0 +1,5 @@
+let data = 10;
+let data2 = 20;
+
+print data;
+print data2;

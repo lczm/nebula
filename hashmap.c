@@ -39,7 +39,10 @@ static Entry* find_entry(Entry* entries, int capacity, ObjString* key) {
     // Otherwise, check that the key already exists, and it is the same key
     // Note that we cannot do entry->key == key->chars as a check here
     // because string equality is not the same.
-    if (strncmp(entry->key->chars, key->chars, entry->key->length) == 0) {
+    // Note to compare with key->length and not entry->key->length
+    // e.g. if entry->key is "data", and key is "data2"
+    // comparing data and data2 with a length of 4 will be true, when it's not
+    if (strncmp(key->chars, entry->key->chars, key->length) == 0) {
       return entry;
     }
 
@@ -62,7 +65,6 @@ static void add_all_hashmap(HashMap* from, HashMap* to) {
 
 // This function gets called when the load factor gets hit
 static void adjust_capacity(HashMap* hashmap) {
-  // printf("adjust_capacity called\n");
   int resized_capacity = resize_capacity(hashmap->capacity);
   Entry* entries = ALLOCATE(Entry, resized_capacity);
 
@@ -81,6 +83,7 @@ static void adjust_capacity(HashMap* hashmap) {
       continue;
 
     Entry* destination = find_entry(entries, resized_capacity, entry->key);
+    print_obj_string(destination->key);
     destination->key = entry->key;
     destination->value = entry->value;
 
@@ -118,9 +121,7 @@ void push_hashmap(HashMap* hashmap, ObjString* key, Value value) {
   // Check if there is a need to adjust_capacity based off
   // the load factor
   if (hashmap->count + 1 > hashmap->capacity * LOAD_FACTOR) {
-    // printf("Before adjusting capacity: %d\n", hashmap->capacity);
     adjust_capacity(hashmap);
-    // printf("After adjusting capacity: %d\n", hashmap->capacity);
   }
 
   // Previous implementation that does not consider
@@ -133,7 +134,10 @@ void push_hashmap(HashMap* hashmap, ObjString* key, Value value) {
   // Only if the hashmap entry is null
   // then the count should be incremented
   // the entry is new if there was no previous keys
-  bool new_key = entry->key == NULL;
+  bool new_key = false;
+  if (entry->key == NULL)
+    new_key = true;
+
   if (new_key && IS_NIL(entry->value))
     hashmap->count++;
   // if (entry->key == NULL)
