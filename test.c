@@ -16,9 +16,9 @@
 #include "value.h"
 #include "vm.h"
 
-#define TEST_DEBUGGING
+// #define TEST_DEBUGGING
 // Comment out the undef if need to debug tests
-#undef TEST_DEBUGGING
+// #undef TEST_DEBUGGING
 
 static int pass_count = 0;
 static int fail_count = 0;
@@ -43,7 +43,7 @@ Vm* run_source_return_vm(const char* source) {
   TokenArray token_array;
   init_token_array(&token_array);
   lex_source(&token_array, source);
-#ifdef TEST_DEBUGGING
+#ifdef DEBUGGING
   disassemble_token_array(&token_array);
 #endif
 
@@ -59,7 +59,7 @@ Vm* run_source_return_vm(const char* source) {
   init_ast_array(&ast_array);
   parse_tokens(&token_array, &ast_array, &error_array);
 
-#ifdef TEST_DEBUGGING
+#ifdef DEBUGGING
   disassemble_ast(&ast_array);
 #endif
 
