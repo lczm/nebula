@@ -42,7 +42,9 @@ static Entry* find_entry(Entry* entries, int capacity, ObjString* key) {
     // Note to compare with key->length and not entry->key->length
     // e.g. if entry->key is "data", and key is "data2"
     // comparing data and data2 with a length of 4 will be true, when it's not
-    if (strncmp(key->chars, entry->key->chars, key->length) == 0) {
+    if (strncmp(entry->key->chars, key->chars,
+                MAX(entry->key->length, key->length)) == 0) {
+      // if (strncmp(key->chars, entry->key->chars, key->length) == 0) {
       return entry;
     }
 
@@ -83,7 +85,6 @@ static void adjust_capacity(HashMap* hashmap) {
       continue;
 
     Entry* destination = find_entry(entries, resized_capacity, entry->key);
-    print_obj_string(destination->key);
     destination->key = entry->key;
     destination->value = entry->value;
 

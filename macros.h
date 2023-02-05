@@ -19,3 +19,6 @@
     s[token.length] = '\0';                \
     printf("%s\n", s);                     \
   } while (0)
+
+#define MAX(x, y) (((x) > (y)) ? (x) : (y))
+#define MIN(x, y) (((x) < (y)) ? (x) : (y))

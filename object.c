@@ -69,7 +69,8 @@ ObjString* make_obj_string_from_token(Token token) {
 }
 
 void print_obj_string(ObjString* obj_string) {
-  printf("%s\n", obj_string->chars);
+  if (obj_string != NULL)
+    printf("%s\n", obj_string->chars);
 }
 
 // Token is a string, Value is a ObjString

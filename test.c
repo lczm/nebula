@@ -1007,25 +1007,25 @@ int main() {
   test_keyword_character_lexer();
   // parser tests
   test_parse_binary_expressions();
-  // test_parse_unary_expressions();
+  test_parse_unary_expressions();
   // codegen to ast tests
-  // test_codegen_numbers();
-  // test_codegen_binary_numbers();
+  test_codegen_numbers();
+  test_codegen_binary_numbers();
   // obj tests
-  // test_obj_string();
+  test_obj_string();
   // vm tests
-  // test_vm_global_environment();
-  // test_vm_string_concatenation();
-  // test_vm_order_of_operations();
-  // test_vm_augmented_assignments();
-  // test_vm_comparison_operators();
-  // test_vm_if_conditions();
-  // test_vm_while_loops();
-  // test_vm_for_loops();
+  test_vm_global_environment();
+  test_vm_string_concatenation();
+  test_vm_order_of_operations();
+  test_vm_augmented_assignments();
+  test_vm_comparison_operators();
+  test_vm_if_conditions();
+  test_vm_while_loops();
+  test_vm_for_loops();
   // vm + hashmap test
-  // test_vm_hashmap_collision_resolution();
+  test_vm_hashmap_collision_resolution();
   // error messages
-  // test_vm_parser_error_messages();
+  test_vm_parser_error_messages();
 
   printf("[-----Tests results-----]\n");
   printf("Pass : %d\n", pass_count);
