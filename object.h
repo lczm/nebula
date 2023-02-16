@@ -16,6 +16,7 @@ typedef enum {
 typedef enum {
   OBJ_STRING,
   OBJ_FUNC,
+  OBJ_NATIVE_FUNC,
 } ObjType;
 
 // No need to type define this again, as value as done
@@ -37,11 +38,19 @@ typedef struct {
   ObjString* name;
 } ObjFunc;
 
+typedef Value (*NativeFunc)(int arg_count, Value* args);
+typedef struct {
+  Obj obj;
+  NativeFunc func;
+} ObjNative;
+
 #define IS_STRING(value) (is_obj_type(value, OBJ_STRING))
 #define IS_FUNC(value) (is_obj_type(value, OBJ_FUNC))
+#define IS_NATIVE_FUNC(value) (is_obj_type(value, OBJ_NATIVE_FUNC))
 
 #define AS_OBJ_STRING(value) (ObjString*)AS_OBJ(value)
 #define AS_OBJ_FUNC(value) (ObjFunc*)AS_OBJ(value)
+#define AS_OBJ_NATIVE_FUNC(value) (((ObjNative*)AS_OBJ(value))->func)
 
 bool is_obj_type(Value value, ObjType type);
 
@@ -58,4 +67,7 @@ bool obj_string_equals(ObjString* obj1, ObjString* obj2);
 ObjString* concatenate_obj_string(ObjString* obj1, ObjString* obj2);
 
 ObjFunc* make_obj_func(int arity, ObjString* name);
-void print_function(ObjFunc* func);
+void print_func(ObjFunc* func);
+
+ObjNative* make_obj_native_func(NativeFunc func);
+void print_native_func(ObjNative* native_func);

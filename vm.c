@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
+#include <time.h>
 
 #include "debugging.h"
 #include "macros.h"
@@ -12,6 +13,49 @@
 
 static Vm* vm;
 
+static void push(Value value) {
+  *vm->stack_top = value;
+  vm->stack_top++;
+}
+
+static Value pop() {
+  // Decrement stack_top
+  // vm->stack_top--;
+  // TODO: Debug flag for this to check if its in range
+
+  vm->stack_top--;
+  Value value = *vm->stack_top;
+  // vm->stack_top++;
+  return value;
+}
+
+static Value peek(int index) {
+  Value value = vm->stack_top[-1 - index];
+  return value;
+}
+
+static void define_native_func(const char* name, NativeFunc native_func) {
+  ObjString* func_name = make_obj_string_sl(name);
+  ObjNative* obj_native_func = make_obj_native_func(native_func);
+
+  Value value_func_name = OBJ_VAL(func_name);
+  Value value_native_func = OBJ_VAL(obj_native_func);
+
+  // The push and pop here is for garbage collection
+  push(value_func_name);
+  push(value_native_func);
+
+  push_hashmap(&vm->variables, AS_OBJ_STRING(vm->vm_stack.values[0]),
+               vm->vm_stack.values[1]);
+
+  pop();
+  pop();
+}
+
+static Value clock_native(int argument_count, Value* args) {
+  return NUMBER_VAL((double)clock() / CLOCKS_PER_SEC);
+}
+
 void init_vm(Vm* v) {
   vm = v;
   v->frame_count = 0;
@@ -19,6 +63,8 @@ void init_vm(Vm* v) {
   init_value_array(&v->vm_stack);
   reserve_value_array(&vm->vm_stack, MAX_STACK);
   v->stack_top = &v->vm_stack.values[0];
+
+  define_native_func("clock", clock_native);
 }
 
 void free_vm(Vm* v) {
@@ -43,27 +89,6 @@ static void print_value(Value value) {
   } else {
     printf("this value is not anything\n");
   }
-}
-
-static void push(Value value) {
-  *vm->stack_top = value;
-  vm->stack_top++;
-}
-
-static Value pop() {
-  // Decrement stack_top
-  // vm->stack_top--;
-  // TODO: Debug flag for this to check if its in range
-
-  vm->stack_top--;
-  Value value = *vm->stack_top;
-  // vm->stack_top++;
-  return value;
-}
-
-static Value peek(int index) {
-  Value value = vm->stack_top[-1 - index];
-  return value;
 }
 
 static void inspect_stack(int up_to, const char* from) {
@@ -103,6 +128,14 @@ static bool call_value(Value callee, int argument_count) {
     switch (OBJ_TYPE(callee)) {
       case OBJ_FUNC: {
         return call(AS_OBJ_FUNC(callee), argument_count);
+      }
+      case OBJ_NATIVE_FUNC: {
+        NativeFunc native_func = AS_OBJ_NATIVE_FUNC(callee);
+        Value result =
+            native_func(argument_count, vm->stack_top - argument_count);
+        vm->stack_top -= argument_count + 1;
+        push(result);
+        return true;
       }
       default: {
         break;
@@ -423,7 +456,14 @@ void run(bool arguments[const], Vm* vm, ObjFunc* main_func) {
 
         // inspect_stack(8, "OP_CALL");
 
-        if (!call_value(func_obj, 0)) {
+        int argument_count = 0;
+        if (IS_FUNC(func_obj)) {
+          ObjFunc* func = AS_OBJ_FUNC(func_obj);
+          argument_count = func->arity;
+        }
+
+        if (!call_value(func_obj, argument_count)) {
+          // if (!call_value(func_obj, func->arity)) {
           printf("Error out here\n");
           break;
         }
