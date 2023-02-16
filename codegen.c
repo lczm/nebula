@@ -788,8 +788,7 @@ static void gen(Ast* ast) {
     case AST_RETURN: {
       ReturnStmt* return_stmt = (ReturnStmt*)ast->as;
 
-      // TODO : Need to check the for when the user
-      // tries to return from the top level function body
+      // Check for when the user tries to return from top level function body
       if (current_compiler->func_type == TYPE_SCRIPT) {
         printf("Cannot return from top level function body\n");
         return;
