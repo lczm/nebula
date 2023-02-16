@@ -28,14 +28,17 @@ typedef enum {
   OP_SET_LOCAL,  // 17
   OP_GET_LOCAL,  // 18
 
+  // To define function when declared
+  OP_DEFINE_GLOBAL,  // 19
+
   // Jumps
-  OP_JUMP,           // 19
-  OP_JUMP_IF_FALSE,  // 20
-  OP_LOOP,           // 21
+  OP_JUMP,           // 20
+  OP_JUMP_IF_FALSE,  // 21
+  OP_LOOP,           // 22
 
   // Functions
-  OP_CALL,  // 22
+  OP_CALL,  // 23
 
   // NIL
-  OP_NIL,  // 23
+  OP_NIL,  // 24
 } OpCode;

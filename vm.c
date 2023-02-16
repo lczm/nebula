@@ -161,6 +161,13 @@ void run(bool arguments[const], Vm* vm, ObjFunc* main_func) {
       case OP_ADD: {
         // TODO : This can be optimized, does not need so many local
         // variables
+
+        // printf("Inspecting the stack START\n");
+        // for (int i = 0; i < 8; i++) {
+        //   print_value(vm->vm_stack.values[i]);
+        // }
+        // printf("Inspecting the stack END\n");
+
         Value value1 = pop();
         Value value2 = pop();
         if (IS_NUMBER(value1) && IS_NUMBER(value2)) {
@@ -255,16 +262,27 @@ void run(bool arguments[const], Vm* vm, ObjFunc* main_func) {
         break;
       }
       case OP_RETURN: {
+        // printf("-- FROM RETURN 1 Inspecting the stack START\n");
+        // for (int i = 0; i < 8; i++) {
+        //   print_value(vm->vm_stack.values[i]);
+        // }
+        // printf("-- FROM RETURN 1 Inspecting the stack END\n");
+
         Value result = pop();
+
         vm->frame_count--;
         if (vm->frame_count == 0) {
           pop();
-          // printf("Done interpreting all code\n");
+          printf("Done interpreting all code\n");
           return;
         }
 
         // TODO : This is the issue
+        // stack_top is currently inherently 0
+        // which makes it override all constant values from the start
         vm->stack_top = frame->slots;
+        // vm->stack_top++;
+
         // vm->stack_top = frame->stack_top;
         push(result);
         frame = &vm->frames[vm->frame_count - 1];
@@ -334,7 +352,6 @@ void run(bool arguments[const], Vm* vm, ObjFunc* main_func) {
         // ObjString* obj_string = READ_STRING();
 
         Value value = get_hashmap(&vm->variables, obj_string);
-        // print_value(value);
 
         push(value);
         break;
@@ -345,6 +362,30 @@ void run(bool arguments[const], Vm* vm, ObjFunc* main_func) {
         // wherever the old local is.
         OpCode index = READ_BYTE();
         push(frame->slots[index]);
+        break;
+      }
+      case OP_DEFINE_GLOBAL: {
+        OpCode op_constant = READ_BYTE();
+        OpCode constant_index = READ_BYTE();
+        Value constant =
+            frame->func->chunk.constants.values[constant_index - 1];
+        Obj* obj = AS_OBJ(constant);
+        ObjString* obj_string = (ObjString*)obj;
+
+        // Will return the function
+        Value p = peek(0);
+
+        // printf("-- FROM DEFINE_GLOBAL 1 Inspecting the stack START\n");
+        // for (int i = 0; i < 8; i++) {
+        //   print_value(vm->vm_stack.values[i]);
+        // }
+        // printf("-- FROM DEFINE_GLOBAL 1 Inspecting the stack END\n");
+
+        push_hashmap(&vm->variables, obj_string, p);
+
+        // pop the function off the stack
+        pop();
+
         break;
       }
       case OP_JUMP: {
@@ -385,6 +426,12 @@ void run(bool arguments[const], Vm* vm, ObjFunc* main_func) {
         Value func_name_obj = frame->func->chunk.constants.values[index2 - 1];
         ObjString* func_name = AS_OBJ_STRING(func_name_obj);
         Value func_obj = get_hashmap(&vm->variables, func_name);
+
+        // printf("-- FROM CALL 1 Inspecting the stack START\n");
+        // for (int i = 0; i < 8; i++) {
+        //   print_value(vm->vm_stack.values[i]);
+        // }
+        // printf("-- FROM CALL 1 Inspecting the stack END\n");
 
         if (!call_value(func_obj, 0)) {
           printf("Error out here\n");

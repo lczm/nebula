@@ -1,9 +1,8 @@
-func multiply(a, b) {
-  return a * b;
-}
-
 func sum(a, b) {
   return a + b;
 }
 
-print sum(5, 10) + multiply(5, 10);
+print 3 + sum(5, 10);
+print 4 + sum(20, 10);
+print sum(10, 50) + 5;
+print sum(10, 50) - 5;

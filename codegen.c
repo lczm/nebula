@@ -227,16 +227,30 @@ static ObjFunc* end_compiler() {
         i++;
         break;
       case OP_GET_GLOBAL:
-        i++;  //
-        printf("[%d-%d] [%-20s] at constants_array: \n", i - 1, i,
-               "OP_GET_GLOBAL");
-        // current_compiler->func->chunk.constants.values[i]);
+        i++;
+        Value value = current_compiler->func->chunk.constants
+                          .values[current_compiler->func->chunk.code.ops[i]];
+
+        if (IS_NUMBER(value)) {
+          printf("[%d-%d] [%-20s] at %d: %f\n", i - 1, i, "OP_GET_GLOBAL", i,
+                 AS_NUMBER(value));
+        } else if (IS_STRING(value)) {
+          ObjString* string = AS_OBJ_STRING(value);
+          printf("[%d-%d] [%-20s] at %d: %s\n", i - 1, i, "OP_GET_GLOBAL", i,
+                 string->chars);
+        }
+
+        // printf("[%d-%d] [%-20s] at constants_array: \n", i - 1, i,
+        //        "OP_GET_GLOBAL");
         break;
       case OP_GET_LOCAL:
         i++;  //
         printf("[%d-%d] [%-20s] at constants_array: %d\n", i - 1, i,
                "OP_GET_LOCAL", current_compiler->func->chunk.code.ops[i]);
         // op_arr->ops[i]);
+        break;
+      case OP_DEFINE_GLOBAL:
+        printf("[%d] [%-20s]\n", i, "OP_DEFINE_GLOBAL");
         break;
       case OP_JUMP:
         printf("[%d] [%-20s]\n", i, "OP_JUMP");
@@ -451,20 +465,34 @@ static void gen(Ast* ast) {
 
       // Emit byte-code for the block statement
       gen(func_stmt->stmt);
-
       ObjFunc* func = end_compiler();
-      func->arity = func_stmt->arity;
 
+      func->arity = func_stmt->arity;
       Value func_value = OBJ_VAL(func);
-      // Make the constant function value
       emit_constant(func_value);
 
-      // TODO : Temporary! Set the function to be a global variable
-      emit_byte(OP_SET_GLOBAL);
-      ObjString* func_name = make_obj_string_from_token(func_stmt->name);
-      Value func_name_value = OBJ_VAL(func_name);
-      make_constant(func_name_value);
-      // emit_byte(func_name);
+      emit_byte(OP_DEFINE_GLOBAL);
+
+      Value v = OBJ_VAL(func->name);
+      // emit_constant(v);
+
+      ObjString* name = func->name;
+      Value string_value = OBJ_VAL(name);
+      emit_constant(string_value);
+
+      // ObjString* string =
+      //     make_obj_string(string_expr->start, string_expr->length);
+      // Value string_value = OBJ_VAL(string);
+
+      // // Make the constant function value
+      // emit_constant(func_value);
+
+      // // TODO : Temporary! Set the function to be a global variable
+      // emit_byte(OP_SET_GLOBAL);
+
+      // ObjString* func_name = make_obj_string_from_token(func_stmt->name);
+      // Value func_name_value = OBJ_VAL(func_name);
+      // make_constant(func_name_value);
       break;
     }
     case AST_VARIABLE_STMT: {
@@ -732,19 +760,20 @@ static void gen(Ast* ast) {
     case AST_CALL: {
       CallExpr* call_expr = (CallExpr*)ast->as;
 
+      VariableExpr* variable_expr = (VariableExpr*)call_expr->callee->as;
+      ObjString* token_string = make_obj_string_from_token(variable_expr->name);
+      Value token_string_value = OBJ_VAL(token_string);
+
+      // Get the function here
+      emit_byte(OP_GET_GLOBAL);
+      make_constant(token_string_value);
+
       // printf("AST_CALL argument_count: %d\n", call_expr->arguments->count);
       for (int i = 0; i < call_expr->arguments->count; i++) {
         gen(call_expr->arguments->ast[i]);
       }
 
       emit_byte(OP_CALL);
-
-      VariableExpr* variable_expr = (VariableExpr*)call_expr->callee->as;
-      ObjString* token_string = make_obj_string_from_token(variable_expr->name);
-      // printf("FROM AST_CALL\n");
-      // print_obj_string(token_string);
-      // printf("FROM AST_CALL\n");
-      Value token_string_value = OBJ_VAL(token_string);
       emit_constant(token_string_value);
       // emit_byte(call_expr->arguments->count);
 
