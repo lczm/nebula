@@ -273,7 +273,7 @@ void run(bool arguments[const], Vm* vm, ObjFunc* main_func) {
         vm->frame_count--;
         if (vm->frame_count == 0) {
           pop();
-          printf("Done interpreting all code\n");
+          // printf("Done interpreting all code\n");
           return;
         }
 
