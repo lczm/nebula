@@ -3,8 +3,8 @@ func fib(n) {
     return n;
   }
 
-  return fib(n - 2) + fib(n + 1);
+  return fib(n - 2) + fib(n - 1);
 }
 
-let a = fib(2);
+let a = fib(10);
 print a;
