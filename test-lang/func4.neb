@@ -1,0 +1,6 @@
+func sum(x, y, z) {
+  return x + y + z;
+}
+
+print sum(10, 20, 30);
+print sum(10, 20);

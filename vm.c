@@ -150,10 +150,10 @@ static bool is_falsey(Value value) {
 static bool call(ObjFunc* func, int argument_count) {
   // TODO : Need a way to get argument_count to check with function arity
   // TODO : This does not work as expected
-  // if (argument_count != func->arity) {
-  //   printf("Arity count and function argument_count differs\n");
-  //   return false;
-  // }
+  if (argument_count != func->arity) {
+    printf("Arity count and function argument_count differs\n");
+    return false;
+  }
 
   CallFrame* frame = &vm->frames[vm->frame_count++];
   frame->func = func;
