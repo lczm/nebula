@@ -92,22 +92,7 @@ static void run_source(bool arguments[const], const char* source) {
   init_local_array(&local_array);
   reserve_local_array(&local_array, UINT8_MAX + 1);  // 256
 
-  // Outputs OP code to op_array, stores locals in local_array
-  // Codegen then outputs the "main" function
-  // TODO : This main function isn't checked for whether it's "main"
-  // ObjFunc* main_func =
-  //     codegen(&op_array, &value_array, &ast_array, &local_array);
   ObjFunc* main_func = codegen(&ast_array);
-
-  // Push the main_func onto the value array
-  // push_value_array(&value_array, OBJ_VAL(main_func));
-
-  // TODO : Check if need to delete
-  // Temporary, to get out of the VM loop
-  // push_op_array(&op_array, OP_RETURN);
-
-  // if (arguments[DUMP_CODEGEN])
-  //   disassemble_opcode_values(&op_array, &value_array);
 
   Vm vm;
   init_vm(&vm);

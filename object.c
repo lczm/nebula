@@ -144,13 +144,11 @@ ObjFunc* make_obj_func(int arity, ObjString* name) {
 }
 
 void print_func(ObjFunc* func) {
-  // TODO : Verify whether this function name is cut off
-  // or if contains the rest of the source
   printf("<func %s>", func->name->chars);
 }
 
 ObjNative* make_obj_native_func(NativeFunc func) {
-  ObjNative* native_func = ALLOCATE(NativeFunc, 1);
+  ObjNative* native_func = ALLOCATE(ObjNative, 1);
   native_func->func = func;
   native_func->obj.type = OBJ_NATIVE_FUNC;
   return native_func;

@@ -88,7 +88,6 @@ void lex_source(TokenArray* token_array, const char* source) {
       current++;
     }
 
-    // TODO : Ignore strings for now
     if (s[current] == '"') {
       current++;
       while (s[current] != '"') {
@@ -121,7 +120,6 @@ void lex_source(TokenArray* token_array, const char* source) {
       }
       // The if clauses can become quite troublesome
       // especially if considering cases like 'if else'
-      // TODO : if else should collpas einto something simpler
       if (check_keyword("if", 2)) {
         Token token_if = make_token(TOKEN_IF);
         push_token_array(token_array, token_if);
@@ -437,7 +435,6 @@ void disassemble_token_array(TokenArray* token_array) {
         printf("[%-20s]: %s\n", "TOKEN_EOF", "EOF");
         break;
       case TOKEN_NUMBER: {
-        // TODO : use strtod to conver to double
         // printf("[%-20s]: %f\n", "TOKEN_NUMBER", strtod();
         const char* start = token_array->tokens[i].start;
         // Cast to char*, otherwise it will be regarded as a const char*

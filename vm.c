@@ -325,9 +325,6 @@ void run(bool arguments[const], Vm* vm, ObjFunc* main_func) {
           return;
         }
 
-        // TODO : This is the issue
-        // stack_top is currently inherently 0
-        // which makes it override all constant values from the start
         vm->stack_top = frame->slots;
 
         push(result);
@@ -425,7 +422,6 @@ void run(bool arguments[const], Vm* vm, ObjFunc* main_func) {
         break;
       }
       case OP_CALL: {
-        // TODO : naming a function 'f' will somehow cause an error
         // printf("OP_CALL\n");
         // OP_CONSTANT, just move it over the OP_CONSTANT
         READ_BYTE();

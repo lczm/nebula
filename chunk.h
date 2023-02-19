@@ -7,8 +7,6 @@
 typedef struct {
   int count;
   int capacity;
-  // uint8_t* code;
-  // int* lines;
   OpArray code;
   IntArray lines;
   ValueArray constants;

@@ -31,10 +31,9 @@ void write_chunk(Chunk* chunk, uint8_t byte, int line) {
 }
 
 void free_chunk(Chunk* chunk) {
-  // TODO : These need to be freed properly
-  // reallocate(chunk->code, sizeof(uint8_t) * chunk->capacity, 0);
-  // reallocate(chunk->lines, sizeof(int) * chunk->capacity, 0);
   free_value_array(&chunk->constants);
+  free_int_array(&chunk->lines);
+  free_op_array(&chunk->code);
   init_chunk(chunk);
 }
 

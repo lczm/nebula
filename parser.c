@@ -355,11 +355,6 @@ static Ast* statement() {
 
     Ast* assignment_stmt = NULL;
     if (match(TOKEN_LET)) {
-      // TODO : This is only a declaration because it has a let token
-      // at the start. When the case for existing variables to be used
-      // for the for loop, then it will need to be a statement()
-      // use declaration() instead of var_declaration() here
-      // because declaration() eats up the token_let
       assignment_stmt = declaration();
     }
 
@@ -526,9 +521,6 @@ static Ast* equality() {
 
   // This will return a binary expression as well
   if (match_either(TOKEN_EQUAL_EQUAL, TOKEN_BANG_EQUAL)) {
-    // TODO : Change the name of this variable to not be operator
-    // as when using operator, clang-format can assume that this is c++ and
-    // not indent the spaces correctly
     Token token_operator = get_current();
     move();
     Ast* right = comparison();
@@ -729,8 +721,6 @@ static Ast* block() {
   BlockStmt* block_stmt = make_block_stmt();
 
   while (get_current().type != TOKEN_RIGHT_BRACE) {
-    // TODO: Find out why this was pushing statement() instead of
-    // declaration()
     push_ast_array(&block_stmt->ast_array, declaration());
   }
   // Move past the right brace

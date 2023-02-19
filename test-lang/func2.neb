@@ -6,5 +6,10 @@ func ff(a, b, c, d) {
   print a + b + c + d;
 }
 
+func f(a, b) {
+  print a + b;
+}
+
 fff(10, 20, 30);
 ff(10, 20, 30, 40);
+f(20, 30);

@@ -196,10 +196,7 @@ static ObjFunc* end_compiler() {
         break;
       case OP_SET_GLOBAL:
         printf("[%d-%d] [%-20s]\n", i, i + 1, "OP_SET_GLOBAL");
-        // TODO : these values should be printed out and not
-        // just skipped over
         i++;  // name index
-        // i++; // value index
         break;
       case OP_SET_LOCAL:
         printf("[%d-%d] [%-20s]\n", i, i + 1, "OP_SET_LOCAL");
@@ -532,7 +529,6 @@ static void gen(Ast* ast) {
       BinaryExpr* binary_expr = (BinaryExpr*)ast->as;
       gen(binary_expr->left_expr);
       gen(binary_expr->right_expr);
-      // TODO : Handle the rest of the switch cases
       switch (binary_expr->op.type) {
         case TOKEN_PLUS:
         case TOKEN_PLUS_EQUAL:
@@ -798,10 +794,7 @@ void disassemble_opcode_values(OpArray* op_arr, ValueArray* value_arr) {
         break;
       case OP_SET_GLOBAL:
         printf("[%d-%d] [%-20s]\n", i, i + 1, "OP_SET_GLOBAL");
-        // TODO : these values should be printed out and not
-        // just skipped over
         i++;  // name index
-        // i++; // value index
         break;
       case OP_SET_LOCAL:
         printf("[%d-%d] [%-20s]\n", i, i + 1, "OP_SET_LOCAL");
