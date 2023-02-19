@@ -34,6 +34,7 @@ static Value peek(int index) {
   return value;
 }
 
+// Define native functions
 static void define_native_func(const char* name, NativeFunc native_func) {
   ObjString* func_name = make_obj_string_sl(name);
   ObjNative* obj_native_func = make_obj_native_func(native_func);
@@ -52,8 +53,44 @@ static void define_native_func(const char* name, NativeFunc native_func) {
   pop();
 }
 
+// VM native functions
 static Value clock_native(int argument_count, Value* args) {
   return NUMBER_VAL((double)clock() / CLOCKS_PER_SEC);
+}
+
+static Value die(int argument_count, Value* args) {
+  exit(0);
+}
+
+static Value assert(int argument_count, Value* args) {
+  if (argument_count != 2)
+    return BOOLEAN_VAL(false);
+
+  Value first = args[0];
+  Value second = args[1];
+
+  if (IS_NUMBER(first) && IS_NUMBER(second)) {
+    double first_number = AS_NUMBER(first);
+    double second_number = AS_NUMBER(second);
+
+    printf("assert: %f != %f\n", first_number, second_number);
+    exit(1);
+  }
+
+  if (IS_BOOLEAN(first) && IS_BOOLEAN(second)) {
+    bool first_bool = AS_BOOLEAN(first);
+    bool second_bool = AS_BOOLEAN(second);
+
+    if (first_bool != second_bool) {
+      char* first_string = first_bool ? "true" : "false";
+      char* second_string = second_bool ? "true" : "false";
+
+      printf("assert: %s != %s\n", first_string, second_string);
+      exit(1);
+    }
+  }
+
+  return BOOLEAN_VAL(false);
 }
 
 void init_vm(Vm* v) {
@@ -65,6 +102,8 @@ void init_vm(Vm* v) {
   v->stack_top = &v->vm_stack.values[0];
 
   define_native_func("clock", clock_native);
+  define_native_func("assert", assert);
+  define_native_func("die", die);
 }
 
 void free_vm(Vm* v) {
@@ -454,13 +493,9 @@ void run(bool arguments[const], Vm* vm, ObjFunc* main_func) {
         ObjString* func_name = AS_OBJ_STRING(func_name_obj);
         Value func_obj = get_hashmap(&vm->variables, func_name);
 
-        // inspect_stack(8, "OP_CALL");
+        int argument_count = READ_BYTE();
 
-        int argument_count = 0;
-        if (IS_FUNC(func_obj)) {
-          ObjFunc* func = AS_OBJ_FUNC(func_obj);
-          argument_count = func->arity;
-        }
+        // inspect_stack(8, "OP_CALL");
 
         if (!call_value(func_obj, argument_count)) {
           // if (!call_value(func_obj, func->arity)) {

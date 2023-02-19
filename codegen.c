@@ -476,6 +476,7 @@ static void gen(Ast* ast) {
       Value v = OBJ_VAL(func->name);
       // emit_constant(v);
 
+      // emit function name
       ObjString* name = func->name;
       Value string_value = OBJ_VAL(name);
       emit_constant(string_value);
@@ -775,7 +776,9 @@ static void gen(Ast* ast) {
 
       emit_byte(OP_CALL);
       emit_constant(token_string_value);
-      // emit_byte(call_expr->arguments->count);
+
+      // emit argument count
+      emit_byte(call_expr->arguments->count);
 
       // for (int i = 0; i < current_chunk()->constants.count; i++) {
       //   Value constant = current_chunk()->constants.values[i];
@@ -816,6 +819,10 @@ ObjFunc* codegen(AstArray* ast_arr) {
   // Create the compiler instance that tracks scope and depth
   Compiler compiler;
   Token null_token;
+  null_token.type = TOKEN_NIL;
+  null_token.start = "Top-level";
+  null_token.length = strlen("Top-Level");
+  null_token.line = 0;
   init_compiler(&compiler, TYPE_SCRIPT, null_token);
 
   // Track which compiler is being used

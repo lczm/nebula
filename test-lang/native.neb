@@ -5,3 +5,10 @@ print 20;
 print 30;
 
 print clock() - start;
+
+let a = 10;
+let b = 20;
+
+assert(a, b);
+
+print "Hi";
