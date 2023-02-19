@@ -636,7 +636,7 @@ static void test_vm_global_environment() {
   Vm* vm = run_source_return_vm(test_string);
 
   HashMap* variables = &vm->variables;
-  if (variables->count != 1)
+  if (variables->count - vm->native_function_count != 1)
     FAIL();
 
   char variable_string_test1[] = "test1";
@@ -666,7 +666,7 @@ static void test_vm_string_concatenation() {
 
   Vm* vm = run_source_return_vm(test_string1);
   HashMap* variables = &vm->variables;
-  if (variables->count != 3)
+  if (variables->count - vm->native_function_count != 3)
     FAIL();
 
   ObjString* obj_string_a = make_obj_string_sl("a");
@@ -718,7 +718,7 @@ static void test_vm_order_of_operations() {
 
   Vm* vm = run_source_return_vm(test_string1);
   HashMap* variables = &vm->variables;
-  if (variables->count != 3)
+  if (variables->count - vm->native_function_count != 3)
     FAIL();
 
   ObjString* obj_string_a1 = make_obj_string("a1", strlen("a1"));
@@ -745,7 +745,7 @@ static void test_vm_order_of_operations() {
       "let d2 = 3 + (10 * 5);";
   vm = run_source_return_vm(test_string2);
   variables = &vm->variables;
-  if (variables->count != 4)
+  if (variables->count - vm->native_function_count != 4)
     FAIL();
 
   ObjString* obj_string_a2 = make_obj_string("a2", strlen("a2"));
@@ -856,7 +856,7 @@ static void test_vm_if_conditions() {
 
   Vm* vm = run_source_return_vm(test_string1);
   HashMap* variables = &vm->variables;
-  if (variables->count != 2)
+  if (variables->count - vm->native_function_count != 2)
     FAIL();
 
   ObjString* obj_string_a = make_obj_string("a", strlen("a"));

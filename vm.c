@@ -101,9 +101,11 @@ void init_vm(Vm* v) {
   reserve_value_array(&vm->vm_stack, MAX_STACK);
   v->stack_top = &v->vm_stack.values[0];
 
+  // Just update the native_function_count when adding more
   define_native_func("clock", clock_native);
   define_native_func("assert", assert);
   define_native_func("die", die);
+  v->native_function_count = 3;
 }
 
 void free_vm(Vm* v) {

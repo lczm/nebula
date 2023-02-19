@@ -10,7 +10,6 @@
 #define MAX_STACK (MAX_FRAMES * UINT8_MAX)
 
 typedef struct {
-  // int ip;
   HashMap variables;
 
   // total amount of frames in use at any moment
@@ -20,6 +19,9 @@ typedef struct {
   // int stack_top;
   Value* stack_top;
   ValueArray vm_stack;
+
+  // native function count
+  int native_function_count;
 } Vm;
 
 void init_vm(Vm* vm);
