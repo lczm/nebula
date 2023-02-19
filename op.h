@@ -2,7 +2,6 @@
 
 #include <stdint.h>
 
-#include "array.h"
 #include "value.h"
 
 typedef enum {

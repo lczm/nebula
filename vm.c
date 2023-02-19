@@ -197,29 +197,9 @@ void run(bool arguments[const], Vm* vm, ObjFunc* main_func) {
 
   OpCode instruction;
   for (;;) {
-    // instruction = op_array->ops[vm->ip];
-    // vm->ip++;
-    // instruction = frame->func->chunk.code.ops[*frame->ip++];
     instruction = READ_BYTE();
-    // *frame->ip = *frame->ip + 1;
     switch (instruction) {
       case OP_CONSTANT: {
-        // Get the constant_index, and take the number from the
-        // ast_value_arr
-        // OpCode constant_index = op_array->ops[vm->ip];
-        // vm->ip++;
-
-        // Value value = value_arr->values[constant_index];
-        // push(value);
-
-        // OpCode instruction2 = READ_BYTE();
-        // printf("instruction index: %d\n", instruction2);
-        // return;
-
-        // OpCode constant_index = frame->func->chunk.code.ops[*frame->ip];
-        // *frame->ip = *frame->ip + 1;
-
-        // OpCode constant_index = frame->func->chunk.code.ops[*frame->ip++];
         OpCode constant_index = READ_BYTE();
 
         Value constant =
@@ -351,53 +331,21 @@ void run(bool arguments[const], Vm* vm, ObjFunc* main_func) {
         // stack_top is currently inherently 0
         // which makes it override all constant values from the start
         vm->stack_top = frame->slots;
-        // vm->stack_top++;
 
-        // vm->stack_top = frame->stack_top;
         push(result);
         frame = &vm->frames[vm->frame_count - 1];
         break;
-
-        // if (arguments[VM_OUTPUT])
-        //   printf("op_return %f\n", AS_NUMBER(pop()));
-        // return;
       }
       case OP_PRINT: {
-        // Value value = pop();
-        if (arguments[VM_OUTPUT]) {
-          // printf("@@@\n");
-          // debug_vm_stack();
-          // printf("vm_stack_top:%d\n", vm->stack_top);
-          // printf("@@@\n");
-          // print_value(peek(0));
-        }
-
-        // debug_vm_stack_top();
-
         print_value(pop());
         break;
       }
       case OP_SET_GLOBAL: {
         // Get the variable_name from the constants_array
-        // OpCode name_constant_index = op_array->ops[vm->ip];
-        // Increment it as it has 'eaten' this op
-        // vm->ip++;
-
-        // Obj* obj = AS_OBJ(value_arr->values[name_constant_index]);
-        // The variable_name representation is an ObjString*
-        // ObjString* obj_string = (ObjString*)obj;
-
-        // OpCode name_constant_index = frame->func->chunk.code.ops[*frame->ip];
-        // *frame->ip = *frame->ip + 1;
-        // OpCode name_constant_index =
-        // frame->func->chunk.code.ops[*frame->ip++];
         OpCode name_constant_index = READ_BYTE();
-
         Obj* obj =
             AS_OBJ(frame->func->chunk.constants.values[name_constant_index]);
         ObjString* obj_string = (ObjString*)obj;
-
-        // ObjString* obj_string = READ_STRING();
 
         // Get the value from the top of the stack
         Value value = peek(0);

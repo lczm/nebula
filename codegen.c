@@ -28,14 +28,6 @@ static Chunk* current_chunk() {
 }
 
 static void emit_byte(OpCode op) {
-  // switch (op) {
-  //   case OP_POP:
-  //     printf("[%d] [%-20s]\n", 0, "@@@ OP_POP");
-  //     break;
-  // }
-  // push_op_array(op_array, op);
-  // printf("Current op_array after pushing : %d\n", op_array->count);
-
   write_chunk(current_chunk(), op, 0);
 }
 
@@ -58,25 +50,12 @@ static void emit_constant(Value value) {
   // Add to value_array
   // push_value_array(constants_array, value);
   push_value_array(&current_chunk()->constants, value);
-
-  // printf("push to constants from value_array, count is :%d | value is: \n",
-  //        current_chunk()->constants.count);
-  // print_value(value);
-
-  // Minus 1 of the current count as it is 0-indexed
-  // emit_byte((OpCode)(constants_array->count - 1));
   emit_byte((OpCode)(current_chunk()->constants.count));
-  // printf("emit_constant number: %d\n", current_chunk()->constants.count - 1);
 }
 
 static int make_constant(Value value) {
-  // push_value_array(constants_array, value);
   push_value_array(&current_chunk()->constants, value);
-  // int constant_index = constants_array->count - 1;
   int constant_index = current_chunk()->constants.count - 1;
-  // if (constant_index == 1) {
-  //   printf("### emitting pop from here\n");
-  // }
   emit_byte((OpCode)constant_index);
   return constant_index;
 }
@@ -467,33 +446,17 @@ static void gen(Ast* ast) {
       gen(func_stmt->stmt);
       ObjFunc* func = end_compiler();
 
+      // emit the function as a constant
       func->arity = func_stmt->arity;
       Value func_value = OBJ_VAL(func);
       emit_constant(func_value);
 
       emit_byte(OP_DEFINE_GLOBAL);
 
-      Value v = OBJ_VAL(func->name);
-      // emit_constant(v);
-
       // emit function name
       ObjString* name = func->name;
       Value string_value = OBJ_VAL(name);
       emit_constant(string_value);
-
-      // ObjString* string =
-      //     make_obj_string(string_expr->start, string_expr->length);
-      // Value string_value = OBJ_VAL(string);
-
-      // // Make the constant function value
-      // emit_constant(func_value);
-
-      // // TODO : Temporary! Set the function to be a global variable
-      // emit_byte(OP_SET_GLOBAL);
-
-      // ObjString* func_name = make_obj_string_from_token(func_stmt->name);
-      // Value func_name_value = OBJ_VAL(func_name);
-      // make_constant(func_name_value);
       break;
     }
     case AST_VARIABLE_STMT: {
@@ -507,11 +470,7 @@ static void gen(Ast* ast) {
         // in the same local scope
 
         for (int i = current_compiler->local_array.count - 1; i >= 0; i--) {
-          // for (int i = current_chunk()->constants.count - 1; i >= 0; i--) {
-          // for (int i = local_array->count - 1; i >= 0; i--) {
-          // Local* local = &current_chunk()->constants.values[i];
           Local* local = &current_compiler->local_array.locals[i];
-          // Local* local = &local_array->locals[i];
           if (local->depth != -1 &&
               local->depth < current_compiler->scope_depth) {
             break;
@@ -528,69 +487,34 @@ static void gen(Ast* ast) {
         }
 
         if (current_compiler->local_array.count == UINT8_MAX + 1) {
-          // if (current_chunk()->constants.count == UINT8_MAX + 1) {
-          // if (local_array->count == UINT8_MAX + 1) {
           printf("Tried to add more than 256 locals while codegen\n");
           return;
         }
 
         // Using the token, add to the local array
-        // Local* local = &local_array->locals[local_array->count++];
         printf("local_array count: %d\n", current_compiler->local_array.count);
         Local* local = &current_compiler->local_array
                             .locals[current_compiler->local_array.count++];
-        // Local* local =
-        //     &current_chunk()
-        //          ->constants.values[current_chunk()->constants.count++];
         local->name = name;
         local->depth = current_compiler->scope_depth;
-        // printf("Creating local | scope_depth : %d\n", local->depth);
       }
 
       if (variable_stmt->initializer_expr->type != AST_NONE)
         gen(variable_stmt->initializer_expr);
 
       int variable_scope = resolve_local(&name);
-      // printf("Reached here for :%s\n", name.start);
       // Not a local variable
       if (variable_scope == -1) {
         emit_byte(OP_SET_GLOBAL);
       }
 
-      // else if (variable_stmt->initialized) {
-      // only if the variable has been initialized before then it should be
-      // set
-      // again \
-        // i.e. \
-        // let a = 10; (does not emit OP_SET_LOCAL) \
-        // a = 20;
-      // printf("emitting op_set_local\n");
-
-      // TODO : This can be a warning?
-      // TODO : Does it ever get to this?
-      // printf("Warning: variable has already been initialized\n");
-      // emit_byte(OP_SET_LOCAL);
-      // emit_byte(variable_scope);
-      // }
-
       if (variable_stmt->initializer_expr->type != AST_NONE &&
           variable_stmt->initialized == false) {
         variable_stmt->initialized = true;
-        // printf("setting initialized to be true for\n");
-        // PRINT_TOKEN_STRING(variable_stmt->name);
       }
 
       ObjString* variable_name = make_obj_string(variable_stmt->name.start,
                                                  variable_stmt->name.length);
-
-      // printf("printing variable name\n");
-      // print_obj_string(variable_name);
-      // printf("hash: %d\n", variable_name->hash);
-      // printf("printing variable name\n");
-
-      // TODO : Figure out what this is actually for
-      // works for test-lang/numbers.neb
-      // but will break for test-lang/locals.neb
 
       // Only make constant for when its in the global scope
       if (current_compiler->scope_depth == 0) {
@@ -684,21 +608,16 @@ static void gen(Ast* ast) {
 
       // Check if this variable is a local or global variable
       int variable_scope = resolve_local(&name);
-      if (variable_scope == -1) {
+      if (variable_scope == -1)
         emit_byte(OP_GET_GLOBAL);
-      } else {
-        // printf("emitting OP_GET_LOCAL from AST_VARIABLE_EXPR\n");
+      else
         emit_byte(OP_GET_LOCAL);
-        // emit_byte((OpCode)0);
-      }
 
       // Find the constant
       // For global scope
       if (variable_scope == -1) {
         bool found_variable = false;
         for (int i = 0; i < current_chunk()->constants.count; i++) {
-          // for (int i = 0; i < constants_array->count; i++) {
-          // Value value = constants_array->values[i];
           Value value = current_chunk()->constants.values[i];
           // If it is an object and is an ObjString*
           if (IS_OBJ(value) && OBJ_TYPE(value) == OBJ_STRING) {
@@ -780,12 +699,6 @@ static void gen(Ast* ast) {
       // emit argument count
       emit_byte(call_expr->arguments->count);
 
-      // for (int i = 0; i < current_chunk()->constants.count; i++) {
-      //   Value constant = current_chunk()->constants.values[i];
-      //   printf("codegen printing value\n");
-      //   print_value(constant);
-      // }
-
       break;
     }
     case AST_RETURN: {
@@ -811,10 +724,6 @@ static void gen(Ast* ast) {
   }
 }
 
-// ObjFunc* codegen(OpArray* op_arr,
-//                  ValueArray* constants_arr,
-//                  AstArray* ast_arr,
-//                  LocalArray* local_arr) {
 ObjFunc* codegen(AstArray* ast_arr) {
   // Create the compiler instance that tracks scope and depth
   Compiler compiler;
@@ -833,7 +742,6 @@ ObjFunc* codegen(AstArray* ast_arr) {
   }
 
   ObjFunc* main_func = end_compiler();
-
   return main_func;
 }
 
