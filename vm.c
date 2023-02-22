@@ -1,5 +1,6 @@
 #include "vm.h"
 
+#include <float.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -12,6 +13,24 @@
 #include "op.h"
 
 static Vm* vm;
+
+static void print_value(Value value) {
+  if (IS_NUMBER(value)) {
+    printf("%f\n", AS_NUMBER(value));
+  } else if (IS_BOOLEAN(value) && AS_BOOLEAN(value) == true) {
+    printf("true\n");
+  } else if (IS_BOOLEAN(value) && AS_BOOLEAN(value) == false) {
+    printf("false\n");
+  } else if (IS_OBJ(value) && AS_OBJ(value)->type == OBJ_FUNC) {
+    ObjFunc* func = (ObjFunc*)AS_OBJ(value);
+    printf("func arity: %d\n", func->arity);
+    print_obj_string(func->name);
+  } else if (IS_OBJ(value) && AS_OBJ(value)->type == OBJ_STRING) {
+    print_obj_string((ObjString*)AS_OBJ(value));
+  } else {
+    printf("this value is not anything\n");
+  }
+}
 
 static void push(Value value) {
   *vm->stack_top = value;
@@ -69,12 +88,18 @@ static Value assert(int argument_count, Value* args) {
   Value first = args[0];
   Value second = args[1];
 
+  // print_value(first);
+  // print_value(second);
+
   if (IS_NUMBER(first) && IS_NUMBER(second)) {
     double first_number = AS_NUMBER(first);
     double second_number = AS_NUMBER(second);
 
-    printf("assert: %f != %f\n", first_number, second_number);
-    exit(1);
+    // If not equal
+    if ((first_number - second_number) > DBL_EPSILON) {
+      printf("assert: %f != %f\n", first_number, second_number);
+      exit(1);
+    }
   }
 
   if (IS_BOOLEAN(first) && IS_BOOLEAN(second)) {
@@ -112,24 +137,6 @@ void free_vm(Vm* v) {
   v->stack_top = 0;
   free_hashmap(&v->variables);
   free_value_array(&v->vm_stack);
-}
-
-static void print_value(Value value) {
-  if (IS_NUMBER(value)) {
-    printf("%f\n", AS_NUMBER(value));
-  } else if (IS_BOOLEAN(value) && AS_BOOLEAN(value) == true) {
-    printf("true\n");
-  } else if (IS_BOOLEAN(value) && AS_BOOLEAN(value) == false) {
-    printf("false\n");
-  } else if (IS_OBJ(value) && AS_OBJ(value)->type == OBJ_FUNC) {
-    ObjFunc* func = (ObjFunc*)AS_OBJ(value);
-    printf("func arity: %d\n", func->arity);
-    print_obj_string(func->name);
-  } else if (IS_OBJ(value) && AS_OBJ(value)->type == OBJ_STRING) {
-    print_obj_string((ObjString*)AS_OBJ(value));
-  } else {
-    printf("this value is not anything\n");
-  }
 }
 
 static void inspect_stack(int up_to, const char* from) {
