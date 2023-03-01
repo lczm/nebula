@@ -24,6 +24,7 @@ static void print_value(Value value) {
   } else if (IS_OBJ(value) && AS_OBJ(value)->type == OBJ_FUNC) {
     ObjFunc* func = (ObjFunc*)AS_OBJ(value);
     printf("func arity: %d\n", func->arity);
+    // printf("<func>
     print_obj_string(func->name);
   } else if (IS_OBJ(value) && AS_OBJ(value)->type == OBJ_STRING) {
     print_obj_string((ObjString*)AS_OBJ(value));
@@ -118,6 +119,13 @@ static Value assert(int argument_count, Value* args) {
   return BOOLEAN_VAL(false);
 }
 
+static Value print_v(int argument_count, Value* args) {
+  for (int i = 0; i < argument_count; i++) {
+    print_value(*(args + i));
+  }
+  return NIL_VAL;
+}
+
 void init_vm(Vm* v) {
   vm = v;
   v->frame_count = 0;
@@ -130,7 +138,8 @@ void init_vm(Vm* v) {
   define_native_func("clock", clock_native);
   define_native_func("assert", assert);
   define_native_func("die", die);
-  v->native_function_count = 3;
+  define_native_func("print_v", print_v);
+  v->native_function_count = 4;
 }
 
 void free_vm(Vm* v) {

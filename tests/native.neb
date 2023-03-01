@@ -1,0 +1,10 @@
+let a = 10;
+let b = 20;
+
+func sum(a, b) {
+  return a + b;
+}
+
+print_v(a);
+print_v(b);
+print_v(sum);
